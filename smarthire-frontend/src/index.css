@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Theme tokens — switching data-theme on <html> swaps the whole app  */
+/* ------------------------------------------------------------------ */
+:root[data-theme='student'] {
+  --primary: #2563EB;
+  --accent: #0EA5E9;
+  --bg: #F8FAFF;
+  --surface: #FFFFFF;
+  --text: #1A2130;
+  --muted: #64748B;
+  --border: #E2E8F0;
+}
+
+:root[data-theme='recruiter'] {
+  --primary: #4F46E5;
+  --accent: #7C3AED;
+  --bg: #FAFAF9;
+  --surface: #FFFFFF;
+  --text: #1C1917;
+  --muted: #78716C;
+  --border: #E7E5E4;
+}
+
+:root[data-theme='admin'] {
+  --primary: #00D4AA;
+  --accent: #3B82F6;
+  --bg: #0D1117;
+  --surface: #161B22;
+  --surface2: #1C2333;
+  --text: #E6EDF3;
+  --muted: #7D8590;
+  --border: #21262D;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  @apply font-sans text-sm antialiased;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background 0.15s ease;
+}
+
+h1, h2, h3, h4 {
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* ---------------- Shared component primitives ---------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3.5px solid var(--primary);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-btn px-4 py-2 text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover { filter: brightness(0.92); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--border); }
+
+.btn-danger {
+  background: transparent;
+  color: #EF4444;
+  border: 1px solid #FECACA;
+}
+.btn-danger:hover { background: #FEE2E2; }
+
+.input {
+  @apply w-full rounded-input px-3 py-2 text-sm outline-none transition-shadow duration-150;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.label {
+  @apply block text-xs font-medium mb-1.5;
+  color: var(--muted);
+}
+
+.muted { color: var(--muted); }
+
+::selection {
+  background: var(--primary);
+  color: white;
+}
