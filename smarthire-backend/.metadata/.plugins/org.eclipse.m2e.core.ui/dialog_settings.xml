@@ -2,6 +2,8 @@
 <section name="Workbench">
 	<section name="MavenProjectImportWizardPage">
 		<list key="rootDirectory">
+			<item value="C:\Users\jitha\Downloads\SmartHire\SmartHire\smarthire-backend"/>
+			<item value="C:\Users\jitha\Downloads\SmartHire\SmartHire\smarthire-backend\src"/>
 			<item value="C:\Users\Saurav Paul\SmartHire\smarthire_backend"/>
 		</list>
 		<list key="projectNameTemplate">

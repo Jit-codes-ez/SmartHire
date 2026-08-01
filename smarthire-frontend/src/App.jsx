@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 
+import FrontPage from './pages/FrontPage.jsx'
+
 import StudentLogin from './pages/student/Login.jsx'
 import StudentDashboard from './pages/student/Dashboard.jsx'
 import BrowseJobs from './pages/student/BrowseJobs.jsx'
@@ -32,9 +34,9 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Navigate to="/Home" replace />} />
+      <Route path="/Home" element={<FrontPage />} />
       <Route path="/login" element={<StudentLogin />} />
-
       {/* Student portal — Light Blue theme */}
       <Route path="/student/dashboard" element={<StudentDashboard />} />
       <Route path="/student/jobs" element={<BrowseJobs />} />
