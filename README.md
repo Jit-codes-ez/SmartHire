@@ -1,18 +1,6 @@
-
 <p align="center">
   <img src="Assets/banner2.png" alt="SmartHire Logo" width="500">
 </p>
-
-<h1 align="center">SmartHire</h1>
-
-<p align="center">
-  AI-Assisted Campus Recruitment Portal
-</p>
-
-<p align="center">
-  Connecting Students • Recruiters • Colleges with AI
-</p>
-
 ---
 # 🚀 SmartHire
 
