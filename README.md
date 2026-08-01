@@ -1,6 +1,7 @@
 <p align="center">
   <img src="Assets/banner2.png" alt="SmartHire Logo" width="500">
 </p>
+
 ---
 # 🚀 SmartHire
 
