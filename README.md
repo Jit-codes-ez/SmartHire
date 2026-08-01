@@ -1,3 +1,19 @@
+
+<p align="center">
+  <img src="Assets/Logo.png" alt="SmartHire Logo" width="180">
+</p>
+
+<h1 align="center">SmartHire</h1>
+
+<p align="center">
+  AI-Assisted Campus Recruitment Portal
+</p>
+
+<p align="center">
+  Connecting Students • Recruiters • Colleges with AI
+</p>
+
+---
 # 🚀 SmartHire
 
 AI-Assisted Campus Recruitment Portal built using **React**, **Spring Boot**, and **MySQL**.
