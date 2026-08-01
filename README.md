@@ -2,10 +2,17 @@
   <img src="Assets/banner2.png" alt="SmartHire Logo" width="500">
 </p>
 
----
-# 🚀 SmartHire
+<h1 align="center">SmartHire</h1>
 
-AI-Assisted Campus Recruitment Portal built using **React**, **Spring Boot**, and **MySQL**.
+<p align="center">
+  AI-Assisted Campus Recruitment Portal
+</p>
+
+<p align="center">
+  AI-Assisted Campus Recruitment Portal built using <b>React, Spring Boot, and MySQL</b>
+</p>
+
+---
 
 ## 📖 About
 
