@@ -65,7 +65,7 @@ SmartHire is a web application that streamlines the campus recruitment process. 
 
 ## 👨‍💻 Author
 
-**Jit Hazra, Saini Paul, Sreejani & Susmita**
+**Jit Hazra, Saini Paul, Shreejani Manna & Susmita Kundu**
 
 ---
 
