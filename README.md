@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="Assets/Logo.png" alt="SmartHire Logo" width="180">
+  <img src="Assets/LogoName.png" alt="SmartHire Logo" width="180">
 </p>
 
 <h1 align="center">SmartHire</h1>
