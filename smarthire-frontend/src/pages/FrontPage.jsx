@@ -7,21 +7,13 @@ import {
   ArrowRight,
   Search,
   CheckCircle2,
+  FileText,
+  Sparkles,
+  RotateCcw,
 } from "lucide-react";
 
-import smartHireLogo from "../assets/navbar_logo.png";
 import ScoreBadge, { AnimatedScoreBadge } from '../components/ScoreBadge.jsx'
-
-// Matches the routes defined in App.jsx
-const ROUTES = {
-  studentLogin: "/login",
-  studentDashboard: "/student/dashboard",
-  browseJobs: "/student/jobs",
-  myApplications: "/student/applications",
-  recruiterDashboard: "/recruiter/dashboard",
-  postDrive: "/recruiter/drives/new",
-  adminDashboard: "/admin/dashboard",
-};
+import { ROUTES } from '../components/SiteHeader.jsx'
 
 const STATUS = {
   Applied: { text: "#1E40AF", bg: "#DBEAFE" },
@@ -43,14 +35,21 @@ function StatusPill({ label }) {
   );
 }
 
-function RoleCard({ accent, icon: Icon, role, tagline, body, cta, to }) {
+function RoleCard({ accent, icon: Icon, role, tagline, body, cta, to, delay = 0 }) {
   return (
     <div
-      className="bg-white rounded-lg p-6 flex flex-col"
-      style={{ border: "1px solid #E2E8F0", borderLeft: `3.5px solid ${accent}` }}
+      className="sh-role-card bg-white rounded-lg p-6 flex flex-col"
+      style={{
+        border: "1px solid #E2E8F0",
+        borderLeft: `3.5px solid ${accent}`,
+        animationDelay: `${delay}s`,
+        boxShadow: `0 10px 24px ${accent}00`,
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.boxShadow = `0 14px 28px ${accent}26`)}
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = `0 10px 24px ${accent}00`)}
     >
       <div
-        className="w-9 h-9 rounded flex items-center justify-center mb-4"
+        className="sh-role-icon w-9 h-9 rounded flex items-center justify-center mb-4"
         style={{ background: `${accent}15` }}
       >
         <Icon size={18} strokeWidth={1.9} style={{ color: accent }} />
@@ -66,7 +65,7 @@ function RoleCard({ accent, icon: Icon, role, tagline, body, cta, to }) {
       </p>
       <Link
         to={to}
-        className="text-sm font-medium rounded-md px-4 py-2.5 flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
+        className="sh-role-cta text-sm font-medium rounded-md px-4 py-2.5 flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
         style={{ background: accent, color: "#FFFFFF" }}
       >
         {cta} <ArrowRight size={14} />
@@ -74,7 +73,8 @@ function RoleCard({ accent, icon: Icon, role, tagline, body, cta, to }) {
     </div>
   );
 }
-// TypingHeadline component: types out the text letter by letter, with a blinking cursor.
+
+// TypingHeadline: types out the text letter by letter, with a blinking cursor.
 function TypingHeadline({ text, speed = 45, className, style }) {
   const [display, setDisplay] = useState("");
 
@@ -116,8 +116,95 @@ function TypingHeadline({ text, speed = 45, className, style }) {
   );
 }
 
+
+// Pipeline diagram: shows the steps a student application goes through, with icons and labels.
+const PIPELINE = [
+  { icon: FileText, label: "Resume Submitted", detail: "Student uploads once" },
+  { icon: Sparkles, label: "Parsed", detail: "Skills, education, experience extracted" },
+  { icon: LayoutDashboard, label: "Scored", detail: "Ranked against the job description" },
+  { icon: CheckCircle2, label: "Shortlisted", detail: "Recruiter reviews ranked list" },
+  { icon: Briefcase, label: "Interview", detail: "Scheduled directly in-app" },
+  { icon: GraduationCap, label: "Placed", detail: "Offer recorded, batch updated" },
+];
+function PipelineDiagram() {
+  return (
+    <div className="sh-rise" style={{ animationDelay: "1.2s" }}>
+      <style>{`
+        @keyframes sh-step-fade {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .sh-step { animation: sh-step-fade 0.4s ease-out both; }
+        .sh-pipeline-step {
+          border-radius: 8px;
+          margin: 0 -0.75rem;
+          padding: 0.5rem 0.75rem;
+          border-left: 3.5px solid transparent;
+          transform: scale(1);
+          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+          position: relative;
+        }
+        .sh-pipeline-step:hover {
+          transform: scale(1.04);
+          border-left-color: #2563EB;
+          background: #FFFFFF;
+          box-shadow: 0 6px 16px rgba(37,99,235,0.12);
+          z-index: 2;
+        }
+        .sh-pipeline-icon {
+          transition: transform 0.18s ease;
+        }
+        .sh-pipeline-step:hover .sh-pipeline-icon {
+          transform: scale(1.12);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .sh-step { animation: none; }
+          .sh-pipeline-step, .sh-pipeline-icon { transition: none; }
+          .sh-pipeline-step:hover { transform: none; }
+        }
+      `}</style>
+
+      <div className="rounded-lg p-6 bg-white" style={{ border: "1px solid #E2E8F0" }}>
+        <div className="text-xs font-semibold uppercase tracking-wide mb-6" style={{ color: "#64748B" }}>
+          How an application moves through SmartHire
+        </div>
+
+        <div className="flex flex-col">
+          {PIPELINE.map((step, i) => (
+            <div
+              key={step.label}
+              className="sh-step sh-pipeline-step flex gap-4"
+              style={{ animationDelay: `${1.3 + i * 0.1}s` }}
+            >
+              <div className="flex flex-col items-center">
+                <div
+                  className="sh-pipeline-icon w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: "#EFF6FF", border: "1px solid #DBEAFE" }}
+                >
+                  <step.icon size={16} style={{ color: "#2563EB" }} strokeWidth={1.9} />
+                </div>
+                {i < PIPELINE.length - 1 && (
+                  <div style={{ width: "1px", flex: 1, background: "#E2E8F0", minHeight: "20px" }} />
+                )}
+              </div>
+              <div className="pb-6">
+                <div className="text-sm font-semibold" style={{ color: "#1A2130" }}>
+                  {step.label}
+                </div>
+                <div className="text-xs" style={{ color: "#64748B" }}>
+                  {step.detail}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// FrontPage: the landing page, with hero, roles, features, and search bar.
 export default function FrontPage() {
-  const [year, setYear] = useState(2026);
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
@@ -127,7 +214,6 @@ export default function FrontPage() {
     link.href =
       "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap";
     document.head.appendChild(link);
-    setYear(new Date().getFullYear());
   }, []);
 
   const handleSearch = (e) => {
@@ -146,185 +232,133 @@ export default function FrontPage() {
         lineHeight: 1.6,
       }}
     >
-      {/* Navbar */}
-      <header className="sticky top-0 z-10 bg-white" style={{ borderBottom: "px solid #E2E8F0" }}>
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-      <img src={smartHireLogo} alt="SmartHire" className="h-20 w-auto" />
-        </Link>
+      {/* Hero — content-first, with an orchestrated entrance */}
+      <section
+        className="max-w-6xl mx-auto px-6 pt-16 pb-14 grid md:grid-cols-2 gap-12 items-center relative"
+        style={{
+          backgroundImage: "radial-gradient(#E2E8F0 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+          backgroundPosition: "-12px -12px",
+        }}
+      >
+        <style>{`
+          @keyframes sh-rise {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .sh-rise { animation: sh-rise 0.5s ease-out both; }
+          @media (prefers-reduced-motion: reduce) {
+            .sh-rise { animation: none; }
+          }
+        `}</style>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: "#64748B" }}>
-            <a href="#how" className="hover:text-[#1A2130]">How it works</a>
-            <a href="#roles" className="hover:text-[#1A2130]">Who it's for</a>
-            <a href="#features" className="hover:text-[#1A2130]">Features</a>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link to={ROUTES.studentLogin} className="text-sm font-medium px-4 py-2 rounded-md" style={{ color: "#1A2130" }}>
-              Log in
-            </Link>
+        <div>
+          <TypingHeadline
+            text="AI-powered campus recruitment, simplified."
+            className="font-bold mb-4"
+            style={{ fontSize: "32px", lineHeight: 1.2, letterSpacing: "-0.01em" }}
+          />
+          <p
+            className="sh-rise text-sm mb-7 max-w-md"
+            style={{ color: "#64748B", animationDelay: "0.9s" }}
+          >
+            SmartHire scores every resume against every job on a drive, so students track one
+            clear status and recruiters open a ranked shortlist instead of a stack.
+          </p>
+          <div className="sh-rise flex flex-wrap gap-3" style={{ animationDelay: "1.1s" }}>
             <Link
               to={ROUTES.browseJobs}
-              className="text-sm font-medium px-4 py-2 rounded-md text-white"
+              className="text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5 transition-transform duration-150 hover:-translate-y-0.5"
               style={{ background: "#2563EB" }}
             >
-              Get started
+              Browse open drives <ArrowRight size={14} />
+            </Link>
+            <Link
+              to={ROUTES.postDrive}
+              className="text-sm font-medium px-5 py-2.5 rounded-md transition-transform duration-150 hover:-translate-y-0.5"
+              style={{ color: "#1A2130", border: "1px solid #E2E8F0" }}
+            >
+              Post a drive
             </Link>
           </div>
         </div>
-      </header>
 
-      {/* Hero — content-first, with an orchestrated entrance */}
-<section
-  className="max-w-6xl mx-auto px-6 pt-16 pb-14 grid md:grid-cols-2 gap-12 items-center relative"
-  style={{
-    backgroundImage: "radial-gradient(#E2E8F0 1px, transparent 1px)",
-    backgroundSize: "24px 24px",
-    backgroundPosition: "-12px -12px",
-  }}
->
+        {/* Data as hero — a generic scoring demo, clearly labeled as an example */}
+        <PipelineDiagram />
+      </section>
+
+      {/* Roles */}
+<section id="roles" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
   <style>{`
-    @keyframes sh-rise {
-      from { opacity: 0; transform: translateY(14px); }
+    @keyframes sh-role-fade {
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .sh-rise { animation: sh-rise 0.5s ease-out both; }
+    .sh-role-card {
+      animation: sh-role-fade 0.45s ease-out both;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .sh-role-card:hover {
+      transform: translateY(-6px) scale(1.02);
+    }
+    .sh-role-icon {
+      transition: transform 0.18s ease;
+    }
+    .sh-role-card:hover .sh-role-icon {
+      transform: scale(1.12) rotate(-4deg);
+    }
+    .sh-role-cta {
+      transition: gap 0.15s ease;
+    }
+    .sh-role-card:hover .sh-role-cta {
+      gap: 10px;
+    }
     @media (prefers-reduced-motion: reduce) {
-      .sh-rise { animation: none; }
+      .sh-role-card { animation: none; }
+      .sh-role-card, .sh-role-icon, .sh-role-cta { transition: none; }
+      .sh-role-card:hover { transform: none; }
     }
   `}</style>
 
-  <div>
-    <TypingHeadline
-      text="AI-powered campus recruitment, simplified."
-      className="font-bold mb-4"
-      style={{ fontSize: "32px", lineHeight: 1.2, letterSpacing: "-0.01em" }}
+  <h2 className="font-bold mb-2" style={{ fontSize: "24px", letterSpacing: "-0.01em" }}>
+    One portal, three vantage points.
+  </h2>
+  <p className="text-sm mb-8" style={{ color: "#64748B" }}>
+    Same components, same spacing — the colour tells you where you are.
+  </p>
+  <div className="grid md:grid-cols-3 gap-5">
+    <RoleCard
+      accent="#2563EB"
+      icon={GraduationCap}
+      role="Student"
+      tagline="Light blue theme"
+      body="Build one profile, apply to every open drive, and track status without chasing an email thread."
+      cta="Browse jobs"
+      to={ROUTES.browseJobs}
+      delay={0}
     />
-    <p
-      className="sh-rise text-sm mb-7 max-w-md"
-      style={{ color: "#64748B", animationDelay: "0.9s" }}
-    >
-      SmartHire scores every resume against every job on a drive, so students track one
-      clear status and recruiters open a ranked shortlist instead of a stack.
-    </p>
-    <div className="sh-rise flex flex-wrap gap-3" style={{ animationDelay: "1.1s" }}>
-      <Link
-        to={ROUTES.browseJobs}
-        className="text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5 transition-transform duration-150 hover:-translate-y-0.5"
-        style={{ background: "#2563EB" }}
-      >
-        Browse open drives <ArrowRight size={14} />
-      </Link>
-      <Link
-        to={ROUTES.postDrive}
-        className="text-sm font-medium px-5 py-2.5 rounded-md transition-transform duration-150 hover:-translate-y-0.5"
-        style={{ color: "#1A2130", border: "1px solid #E2E8F0" }}
-      >
-        Post a drive
-      </Link>
-    </div>
+    <RoleCard
+      accent="#4F46E5"
+      icon={Briefcase}
+      role="Recruiter"
+      tagline="Warm indigo theme"
+      body="Post a drive, get a ranked shortlist by fit score, and schedule interviews without a spreadsheet."
+      cta="Post a drive"
+      to={ROUTES.postDrive}
+      delay={0.1}
+    />
+    <RoleCard
+      accent="#00D4AA"
+      icon={LayoutDashboard}
+      role="Admin"
+      tagline="Dark teal theme"
+      body="Approve recruiters, watch placement rate by branch, and export reports for the whole batch."
+      cta="Open console"
+      to={ROUTES.adminDashboard}
+      delay={0.2}
+    />
   </div>
-
-  {/* Data as hero: score counts up on load */}
-  <Link
-    to={ROUTES.browseJobs}
-    className="sh-rise bg-white rounded-lg p-6 block transition-transform duration-200 hover:-translate-y-1"
-    style={{ border: "1px solid #E2E8F0", borderLeft: "3.5px solid #2563EB", animationDelay: "1.3s" }}
-  >
-    <div className="flex items-start justify-between mb-3">
-      <div>
-        <div className="text-base font-semibold">Software Engineer — TCS</div>
-        <div className="text-xs mt-0.5" style={{ color: "#64748B" }}>
-          Tata Consultancy Services
-        </div>
-      </div>
-      <span
-        className="text-xs font-semibold px-2.5 py-1 rounded-full"
-        style={{ color: "#065F46", background: "#D1FAE5" }}
-      >
-        OPEN
-      </span>
-    </div>
-    <div className="text-sm mb-4" style={{ color: "#1A2130" }}>
-      Required: Java, Spring Boot, SQL, REST APIs
-    </div>
-    <div className="text-xs mb-5" style={{ color: "#64748B" }}>
-      CGPA Cutoff: 7.5 · Deadline: 20 Aug 2025 · Openings: 25 · Kolkata / Remote
-    </div>
-
-    <div style={{ borderTop: "1px solid #E2E8F0" }} className="pt-4">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium" style={{ color: "#64748B" }}>
-          Rohan Sharma — MCA
-        </span>
-        <AnimatedScoreBadge target={82} />
-      </div>
-      <div className="flex items-center gap-2 flex-wrap">
-        <StatusPill label="Shortlisted" />
-        <span className="text-xs" style={{ color: "#64748B" }}>
-          Rank #1 of 48 applicants
-        </span>
-      </div>
-    </div>
-  </Link>
 </section>
-
-      {/* How it works — status timeline as the visual moment */}
-      <section id="how" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
-        <h2 className="font-bold mb-2" style={{ fontSize: "24px", letterSpacing: "-0.01em" }}>
-          One status, always visible.
-        </h2>
-        <p className="text-sm mb-8" style={{ color: "#64748B" }}>
-          Every application moves through the same clear pipeline.
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          {["Applied", "Under Review", "Shortlisted", "Interview", "Selected"].map((s, i, arr) => (
-            <React.Fragment key={s}>
-              <StatusPill label={s} />
-              {i < arr.length - 1 && <ArrowRight size={14} style={{ color: "#94A3B8" }} />}
-            </React.Fragment>
-          ))}
-        </div>
-      </section>
-
-      {/* Roles — the signature: same card, coloured left border, real routes */}
-      <section id="roles" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
-        <h2 className="font-bold mb-2" style={{ fontSize: "24px", letterSpacing: "-0.01em" }}>
-          One portal, three vantage points.
-        </h2>
-        <p className="text-sm mb-8" style={{ color: "#64748B" }}>
-          Same components, same spacing — the colour tells you where you are.
-        </p>
-        <div className="grid md:grid-cols-3 gap-5">
-          <RoleCard
-            accent="#2563EB"
-            icon={GraduationCap}
-            role="Student"
-            tagline="Light blue theme"
-            body="Build one profile, apply to every open drive, and track status without chasing an email thread."
-            cta="Browse jobs"
-            to={ROUTES.browseJobs}
-          />
-          <RoleCard
-            accent="#4F46E5"
-            icon={Briefcase}
-            role="Recruiter"
-            tagline="Warm indigo theme"
-            body="Post a drive, get a ranked shortlist by fit score, and schedule interviews without a spreadsheet."
-            cta="Post a drive"
-            to={ROUTES.postDrive}
-          />
-          <RoleCard
-            accent="#00D4AA"
-            icon={LayoutDashboard}
-            role="Admin"
-            tagline="Dark teal theme"
-            body="Approve recruiters, watch placement rate by branch, and export reports for the whole batch."
-            cta="Open console"
-            to={ROUTES.adminDashboard}
-          />
-        </div>
-      </section>
 
       {/* Features */}
       <section id="features" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
@@ -355,56 +389,38 @@ export default function FrontPage() {
         </div>
       </section>
 
-      {/* Search bar — routes into BrowseJobs.jsx with a query param */}
-      <section className="max-w-6xl mx-auto px-6 pb-16">
-        <form
-          onSubmit={handleSearch}
-          className="bg-white rounded-lg p-2 flex items-center gap-2 max-w-xl"
-          style={{ border: "1px solid #E2E8F0" }}
-        >
-          <Search size={16} style={{ color: "#64748B" }} className="ml-2" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search open drives by role or company..."
-            className="flex-1 text-sm px-2 py-2 outline-none"
-            style={{ border: "none", borderRadius: "4px", color: "#1A2130" }}
-          />
-          <button
-            type="submit"
-            className="text-sm font-medium px-4 py-2 rounded-md text-white"
-            style={{ background: "#2563EB" }}
-          >
-            Search
-          </button>
-        </form>
-      </section>
-
-      {/* Footer */}
-      <footer style={{ borderTop: "1px solid #E2E8F0" }}>
-        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: "#2563EB" }}>
-                <GraduationCap size={13} color="#FFFFFF" strokeWidth={2} />
-              </div>
-              <span className="text-sm font-bold">SmartHire</span>
-            </div>
-            <p className="text-xs" style={{ color: "#64748B" }}>
-              AI-powered campus recruitment, simplified.
-            </p>
-          </div>
-          <div className="flex items-center gap-6 text-xs font-medium" style={{ color: "#64748B" }}>
-            <a href="#" className="hover:text-[#1A2130]">Privacy</a>
-            <a href="#" className="hover:text-[#1A2130]">Contact</a>
-            <a href="#" className="hover:text-[#1A2130]">Help Center</a>
-          </div>
-        </div>
-        <div className="text-center text-xs pb-6" style={{ color: "#94A3B8" }}>
-          © {year} SmartHire. All rights reserved.
-        </div>
-      </footer>
+      {/* Closing CTA */}
+<section className="max-w-6xl mx-auto px-6 py-16" style={{ borderTop: "1px solid #E2E8F0" }}>
+  <div
+    className="rounded-lg p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+    style={{ background: "#1A2130" }}
+  >
+    <div>
+      <h2 className="font-bold text-white mb-2" style={{ fontSize: "22px", letterSpacing: "-0.01em" }}>
+        Ready for placement season?
+      </h2>
+      <p className="text-sm" style={{ color: "#94A3B8" }}>
+        Set up your drive in minutes, or build your student profile once and apply everywhere.
+      </p>
+    </div>
+    <div className="flex flex-wrap gap-3 shrink-0">
+      <Link
+        to={ROUTES.browseJobs}
+        className="text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5"
+        style={{ background: "#2563EB" }}
+      >
+        I'm a student <ArrowRight size={14} />
+      </Link>
+      <Link
+        to={ROUTES.postDrive}
+        className="text-sm font-medium px-5 py-2.5 rounded-md"
+        style={{ color: "#FFFFFF", border: "1px solid #334155" }}
+      >
+        I'm a recruiter
+      </Link>
+    </div>
+  </div>
+</section>
     </div>
   );
 }

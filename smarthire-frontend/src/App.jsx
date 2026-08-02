@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 
+import SiteHeader from './components/SiteHeader.jsx'
+import SiteFooter from './components/SiteFooter.jsx'
+
 import FrontPage from './pages/FrontPage.jsx'
 
 import StudentLogin from './pages/student/Login.jsx'
@@ -33,28 +36,35 @@ export default function App() {
   }, [location.pathname])
 
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/Home" replace />} />
-      <Route path="/Home" element={<FrontPage />} />
-      <Route path="/login" element={<StudentLogin />} />
-      {/* Student portal — Light Blue theme */}
-      <Route path="/student/dashboard" element={<StudentDashboard />} />
-      <Route path="/student/jobs" element={<BrowseJobs />} />
-      <Route path="/student/jobs/:id" element={<JobDetail />} />
-      <Route path="/student/applications" element={<MyApplications />} />
+    <>
+      <SiteHeader />
 
-      {/* Recruiter portal — Warm Indigo theme */}
-      <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
-      <Route path="/recruiter/drives" element={<MyDrives />} />
-      <Route path="/recruiter/drives/:id/applicants" element={<Applicants />} />
-      <Route path="/recruiter/drives/new" element={<PostDrive />} />
+      <Routes>
+        <Route path="/" element={<Navigate to="/Home" replace />} />
+        <Route path="/Home" element={<FrontPage />} />
+        <Route path="/login" element={<StudentLogin />} />
 
-      {/* Admin portal — Dark Teal theme */}
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
-      <Route path="/admin/students" element={<AdminStudents />} />
-      <Route path="/admin/recruiters" element={<AdminRecruiters />} />
+        {/* Student portal — Light Blue theme */}
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/student/jobs" element={<BrowseJobs />} />
+        <Route path="/student/jobs/:id" element={<JobDetail />} />
+        <Route path="/student/applications" element={<MyApplications />} />
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        {/* Recruiter portal — Warm Indigo theme */}
+        <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
+        <Route path="/recruiter/drives" element={<MyDrives />} />
+        <Route path="/recruiter/drives/:id/applicants" element={<Applicants />} />
+        <Route path="/recruiter/drives/new" element={<PostDrive />} />
+
+        {/* Admin portal — Dark Teal theme */}
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/students" element={<AdminStudents />} />
+        <Route path="/admin/recruiters" element={<AdminRecruiters />} />
+
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+
+      <SiteFooter />
+    </>
   )
 }
