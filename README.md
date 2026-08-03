@@ -2,8 +2,6 @@
   <img src="smarthire-frontend/src/assets/SmartHireLogo.png" alt="SmartHire Logo" width="500">
 </p>
 
-<h1 align="center">SmartHire</h1>
-
 <p align="center">
   AI-Assisted Campus Recruitment Portal built using <b>React, Spring Boot, and MySQL</b>
 </p>
