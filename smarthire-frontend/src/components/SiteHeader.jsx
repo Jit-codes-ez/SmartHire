@@ -31,15 +31,8 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link to={ROUTES.studentLogin} className="text-sm font-medium px-4 py-2 rounded-md" style={{ color: "#1A2130" }}>
+          <Link to={ROUTES.studentLogin} className="text-sm font-medium px-10 py-2 rounded-md text-white" style={{ background: "#2563EB" }}>
             Log in
-          </Link>
-          <Link
-            to={ROUTES.browseJobs}
-            className="text-sm font-medium px-4 py-2 rounded-md text-white"
-            style={{ background: "#2563EB" }}
-          >
-            Get started
           </Link>
         </div>
       </div>

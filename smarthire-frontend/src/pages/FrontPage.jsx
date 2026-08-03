@@ -15,26 +15,6 @@ import {
 import ScoreBadge, { AnimatedScoreBadge } from '../components/ScoreBadge.jsx'
 import { ROUTES } from '../components/SiteHeader.jsx'
 
-const STATUS = {
-  Applied: { text: "#1E40AF", bg: "#DBEAFE" },
-  "Under Review": { text: "#92400E", bg: "#FEF3C7" },
-  Shortlisted: { text: "#065F46", bg: "#D1FAE5" },
-  Interview: { text: "#1D4ED8", bg: "#EFF6FF" },
-  Selected: { text: "#14532D", bg: "#BBF7D0" },
-};
-
-function StatusPill({ label }) {
-  const c = STATUS[label] || STATUS.Applied;
-  return (
-    <span
-      className="text-xs font-medium px-2.5 py-1 rounded-full"
-      style={{ color: c.text, background: c.bg }}
-    >
-      {label}
-    </span>
-  );
-}
-
 function RoleCard({ accent, icon: Icon, role, tagline, body, cta, to, delay = 0 }) {
   return (
     <div
@@ -234,7 +214,7 @@ export default function FrontPage() {
     >
       {/* Hero — content-first, with an orchestrated entrance */}
       <section
-        className="max-w-6xl mx-auto px-6 pt-16 pb-14 grid md:grid-cols-2 gap-12 items-center relative"
+        id= "how" className="max-w-6xl mx-auto px-6 pt-16 pb-14 grid md:grid-cols-2 gap-12 items-center relative"
         style={{
           backgroundImage: "radial-gradient(#E2E8F0 1px, transparent 1px)",
           backgroundSize: "24px 24px",
@@ -272,13 +252,6 @@ export default function FrontPage() {
               style={{ background: "#2563EB" }}
             >
               Browse open drives <ArrowRight size={14} />
-            </Link>
-            <Link
-              to={ROUTES.postDrive}
-              className="text-sm font-medium px-5 py-2.5 rounded-md transition-transform duration-150 hover:-translate-y-0.5"
-              style={{ color: "#1A2130", border: "1px solid #E2E8F0" }}
-            >
-              Post a drive
             </Link>
           </div>
         </div>
@@ -326,36 +299,26 @@ export default function FrontPage() {
   <p className="text-sm mb-8" style={{ color: "#64748B" }}>
     Same components, same spacing — the colour tells you where you are.
   </p>
-  <div className="grid md:grid-cols-3 gap-5">
+  <div className="grid md:grid-cols-2 gap-5">
     <RoleCard
       accent="#2563EB"
       icon={GraduationCap}
       role="Student"
-      tagline="Light blue theme"
+      tagline="Turn your talent into Opportunity"
       body="Build one profile, apply to every open drive, and track status without chasing an email thread."
-      cta="Browse jobs"
-      to={ROUTES.browseJobs}
+      cta="Register as Student"
+      to={ROUTES.StudentRegistration} // Page required
       delay={0}
     />
     <RoleCard
       accent="#4F46E5"
       icon={Briefcase}
       role="Recruiter"
-      tagline="Warm indigo theme"
+      tagline="Discover skilled candidates with ease"
       body="Post a drive, get a ranked shortlist by fit score, and schedule interviews without a spreadsheet."
-      cta="Post a drive"
-      to={ROUTES.postDrive}
+      cta="Register as Recruiter"
+      to={ROUTES.RecruiterRegistration} //Page Required
       delay={0.1}
-    />
-    <RoleCard
-      accent="#00D4AA"
-      icon={LayoutDashboard}
-      role="Admin"
-      tagline="Dark teal theme"
-      body="Approve recruiters, watch placement rate by branch, and export reports for the whole batch."
-      cta="Open console"
-      to={ROUTES.adminDashboard}
-      delay={0.2}
     />
   </div>
 </section>
@@ -376,7 +339,9 @@ export default function FrontPage() {
           ].map((f) => (
             <div
               key={f.title}
-              className="bg-white rounded-lg p-5"
+              className="bg-white rounded-lg p-5 border border-[#E2E8F0] border-l-[3.5px] border-l-[#94A3B8]
+                   transition-all duration-200 ease-out
+                   hover:-translate-y-0.5 hover:shadow-lg hover:border-l-[#2563EB] cursor-default"
               style={{ border: "1px solid #E2E8F0", borderLeft: "3.5px solid #94A3B8" }}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -396,24 +361,42 @@ export default function FrontPage() {
     style={{ background: "#1A2130" }}
   >
     <div>
-      <h2 className="font-bold text-white mb-2" style={{ fontSize: "22px", letterSpacing: "-0.01em" }}>
+      {/* <h2
+        className="font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-[#94A3B8]"
+        style={{ fontSize: "22px", letterSpacing: "-0.01em" }}
+      >
         Ready for placement season?
       </h2>
       <p className="text-sm" style={{ color: "#94A3B8" }}>
         Set up your drive in minutes, or build your student profile once and apply everywhere.
-      </p>
+      </p> */}
+      <TypingHeadline
+            text="Ready for placement season?"
+            className="font-bold mb-4"
+            style={{ fontSize: "20px", lineHeight: 1.2, letterSpacing: "-0.01em", color: "white"}}
+      />
+      <TypingHeadline
+            text="Set up your drive in minutes, or build your student profile once and apply everywhere."
+            className="mb-4"
+            style={{ fontSize: "15px", lineHeight: 1.2, letterSpacing: "-0.01em", color: "white"}}
+      />
     </div>
     <div className="flex flex-wrap gap-3 shrink-0">
       <Link
-        to={ROUTES.browseJobs}
-        className="text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5"
+        to={ROUTES.StudentRegistration}
+        className="group text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5
+                   transition-all duration-200 ease-out
+                   hover:-translate-y-0.5"
         style={{ background: "#2563EB" }}
       >
-        I'm a student <ArrowRight size={14} />
+        I'm a student
+        <ArrowRight size={14} className="transition-transform duration-200 ease-out group-hover:translate-x-1" />
       </Link>
       <Link
-        to={ROUTES.postDrive}
-        className="text-sm font-medium px-5 py-2.5 rounded-md"
+        to={ROUTES.RecruiterRegistration}
+        className="text-sm font-medium px-5 py-2.5 rounded-md
+                   transition-all duration-200 ease-out
+                   hover:-translate-y-0.5 hover:bg-white/5 hover:border-[#94A3B8]"
         style={{ color: "#FFFFFF", border: "1px solid #334155" }}
       >
         I'm a recruiter
