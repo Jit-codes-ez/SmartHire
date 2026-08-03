@@ -12,9 +12,21 @@ import {
   RotateCcw,
 } from "lucide-react";
 
+
 import ScoreBadge, { AnimatedScoreBadge } from '../components/ScoreBadge.jsx'
-import { ROUTES } from '../components/SiteHeader.jsx'
 import Reveal from '../components/Reveal.jsx'
+
+export const ROUTES = {
+  studentLogin: "/login",
+  studentDashboard: "/student/dashboard",
+  browseJobs: "/student/jobs",
+  myApplications: "/student/applications",
+  recruiterDashboard: "/recruiter/dashboard",
+  postDrive: "/recruiter/drives/new",
+  adminDashboard: "/admin/dashboard",
+  studentRegistration: "/student/register",
+  recruiterRegistration: "/recruiter/register",
+};
 
 function RoleCard({ accent, icon: Icon, role, tagline, body, cta, to, delay = 0 }) {
   return (
@@ -308,7 +320,7 @@ export default function FrontPage() {
       tagline="Turn your talent into Opportunity"
       body="Build one profile, apply to every open drive, and track status without chasing an email thread."
       cta="Register as Student"
-      to={ROUTES.StudentRegistration} // Page required
+      to={ROUTES.studentRegistration}
       delay={0}
     />
     <RoleCard
@@ -318,7 +330,7 @@ export default function FrontPage() {
       tagline="Discover skilled candidates with ease"
       body="Post a drive, get a ranked shortlist by fit score, and schedule interviews without a spreadsheet."
       cta="Register as Recruiter"
-      to={ROUTES.RecruiterRegistration} //Page Required
+      to={ROUTES.recruiterRegistration}
       delay={0.1}
     />
   </div>
@@ -375,7 +387,7 @@ export default function FrontPage() {
     </div>
     <div className="flex flex-wrap gap-3 shrink-0">
       <Link
-        to={ROUTES.StudentRegistration}
+        to={ROUTES.studentRegistration}
         className="group text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5
                    transition-all duration-200 ease-out
                    hover:-translate-y-0.5"
@@ -385,7 +397,7 @@ export default function FrontPage() {
         <ArrowRight size={14} className="transition-transform duration-200 ease-out group-hover:translate-x-1" />
       </Link>
       <Link
-        to={ROUTES.RecruiterRegistration}
+        to={ROUTES.recruiterRegistration}
         className="text-sm font-medium px-5 py-2.5 rounded-md
                    transition-all duration-200 ease-out
                    hover:-translate-y-0.5 hover:bg-white/5 hover:border-[#94A3B8]"

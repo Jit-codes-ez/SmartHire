@@ -22,7 +22,6 @@ export default function SiteFooter() {
         </div>
         <div className="flex items-center gap-6 text-xs font-medium" style={{ color: "#64748B" }}>
           <a href="#" className="hover:text-[#1A2130]">Privacy</a>
-          <a href="#" className="hover:text-[#1A2130]">Contact</a>
           <a href="#" className="hover:text-[#1A2130]">Help Center</a>
         </div>
       </div>
