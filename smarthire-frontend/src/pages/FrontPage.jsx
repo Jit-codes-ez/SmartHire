@@ -14,6 +14,7 @@ import {
 
 import ScoreBadge, { AnimatedScoreBadge } from '../components/ScoreBadge.jsx'
 import { ROUTES } from '../components/SiteHeader.jsx'
+import Reveal from '../components/Reveal.jsx'
 
 function RoleCard({ accent, icon: Icon, role, tagline, body, cta, to, delay = 0 }) {
   return (
@@ -261,7 +262,7 @@ export default function FrontPage() {
       </section>
 
       {/* Roles */}
-<section id="roles" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
+<Reveal as="section" id="roles" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
   <style>{`
     @keyframes sh-role-fade {
       from { opacity: 0; transform: translateY(10px); }
@@ -321,64 +322,55 @@ export default function FrontPage() {
       delay={0.1}
     />
   </div>
-</section>
+</Reveal>
 
       {/* Features */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
-        <h2 className="font-bold mb-8" style={{ fontSize: "24px", letterSpacing: "-0.01em" }}>
-          Built for placement season.
-        </h2>
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-          {[
-            { title: "Resume parsing", body: "Skills, education, and experience extracted on upload." },
-            { title: "AI resume scoring", body: "Every resume ranked against the job it's applied to." },
-            { title: "Interview scheduling", body: "Recruiters set slots; students book without email." },
-            { title: "Role-based dashboards", body: "Students, recruiters, and admins each see their own view." },
-            { title: "Placement analytics", body: "Branch-wise placement rate, updated live." },
-            { title: "Email notifications", body: "Status changes reach students automatically." },
-          ].map((f) => (
-            <div
-              key={f.title}
-              className="bg-white rounded-lg p-5 border border-[#E2E8F0] border-l-[3.5px] border-l-[#94A3B8]
-                   transition-all duration-200 ease-out
-                   hover:-translate-y-0.5 hover:shadow-lg hover:border-l-[#2563EB] cursor-default"
-              style={{ border: "1px solid #E2E8F0", borderLeft: "3.5px solid #94A3B8" }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <CheckCircle2 size={15} style={{ color: "#10B981" }} />
-                <span className="text-sm font-semibold">{f.title}</span>
-              </div>
-              <p className="text-sm" style={{ color: "#64748B" }}>{f.body}</p>
-            </div>
-          ))}
+<Reveal as="section" id="features" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
+  <h2 className="font-bold mb-8" style={{ fontSize: "24px", letterSpacing: "-0.01em" }}>
+    Built for placement season.
+  </h2>
+  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
+    {[
+      { title: "Resume parsing", body: "Skills, education, and experience extracted on upload." },
+      { title: "AI resume scoring", body: "Every resume ranked against the job it's applied to." },
+      { title: "Interview scheduling", body: "Recruiters set slots; students book without email." },
+      { title: "Role-based dashboards", body: "Students, recruiters, and admins each see their own view." },
+      { title: "Placement analytics", body: "Branch-wise placement rate, updated live." },
+      { title: "Email notifications", body: "Status changes reach students automatically." },
+    ].map((f) => (
+      <div
+        key={f.title}
+        className="bg-white rounded-lg p-5 border border-[#E2E8F0] border-l-[3.5px] border-l-[#94A3B8]
+             transition-all duration-200 ease-out
+             hover:-translate-y-0.5 hover:shadow-lg hover:border-l-[#2563EB] cursor-default"
+        style={{ border: "1px solid #E2E8F0", borderLeft: "3.5px solid #94A3B8" }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <CheckCircle2 size={15} style={{ color: "#10B981" }} />
+          <span className="text-sm font-semibold">{f.title}</span>
         </div>
-      </section>
+        <p className="text-sm" style={{ color: "#64748B" }}>{f.body}</p>
+      </div>
+    ))}
+  </div>
+</Reveal>
 
       {/* Closing CTA */}
-<section className="max-w-6xl mx-auto px-6 py-16" style={{ borderTop: "1px solid #E2E8F0" }}>
+<Reveal as="section" className="max-w-6xl mx-auto px-6 py-16" style={{ borderTop: "1px solid #E2E8F0" }}>
   <div
     className="rounded-lg p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
     style={{ background: "#1A2130" }}
   >
     <div>
-      {/* <h2
-        className="font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-[#94A3B8]"
-        style={{ fontSize: "22px", letterSpacing: "-0.01em" }}
-      >
-        Ready for placement season?
-      </h2>
-      <p className="text-sm" style={{ color: "#94A3B8" }}>
-        Set up your drive in minutes, or build your student profile once and apply everywhere.
-      </p> */}
       <TypingHeadline
-            text="Ready for placement season?"
-            className="font-bold mb-4"
-            style={{ fontSize: "20px", lineHeight: 1.2, letterSpacing: "-0.01em", color: "white"}}
+        text="Ready for placement season?"
+        className="font-bold mb-4"
+        style={{ fontSize: "20px", lineHeight: 1.2, letterSpacing: "-0.01em", color: "white" }}
       />
       <TypingHeadline
-            text="Set up your drive in minutes, or build your student profile once and apply everywhere."
-            className="mb-4"
-            style={{ fontSize: "15px", lineHeight: 1.2, letterSpacing: "-0.01em", color: "white"}}
+        text="Set up your drive in minutes, or build your student profile once and apply everywhere."
+        className="mb-4"
+        style={{ fontSize: "15px", lineHeight: 1.2, letterSpacing: "-0.01em", color: "white" }}
       />
     </div>
     <div className="flex flex-wrap gap-3 shrink-0">
@@ -400,10 +392,10 @@ export default function FrontPage() {
         style={{ color: "#FFFFFF", border: "1px solid #334155" }}
       >
         I'm a recruiter
-      </Link>
+        </Link>
     </div>
   </div>
-</section>
+</Reveal>
     </div>
   );
 }

@@ -7,6 +7,9 @@
 /* ------------------------------------------------------------------ */
 /* Theme tokens — switching data-theme on <html> swaps the whole app  */
 /* ------------------------------------------------------------------ */
+
+
+
 :root[data-theme='student'] {
   --primary: #2563EB;
   --accent: #0EA5E9;
@@ -111,4 +114,23 @@ h1, h2, h3, h4 {
 ::selection {
   background: var(--primary);
   color: white;
+}
+
+/* Scroll-reveal — shared by every page via the <Reveal> component */
+.sh-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.sh-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sh-reveal,
+  .sh-reveal-visible {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
 }
