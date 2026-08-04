@@ -1,4 +1,4 @@
-package com.smarthire.config;
+package com.smarthire.security;
 
 public class SecurityConfig {
 

@@ -2,6 +2,6 @@ package com.smarthire.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<T, ID> {
+public interface StudentRepository extends JpaRepository<T, ID> {
 
 }

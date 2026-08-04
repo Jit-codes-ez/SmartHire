@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SmartHireBackendApplication {
+public class SmarthireBackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SmartHireBackendApplication.class, args);
+		SpringApplication.run(SmarthireBackendApplication.class, args);
 	}
 
 }

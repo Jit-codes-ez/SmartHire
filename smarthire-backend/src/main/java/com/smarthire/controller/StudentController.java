@@ -1,5 +1,5 @@
 package com.smarthire.controller;
 
-public class AuthController {
+public class StudentController {
 
 }

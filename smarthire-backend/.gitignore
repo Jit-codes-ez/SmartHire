@@ -1,33 +1,76 @@
-HELP.md
+############################
+# Maven
+############################
 target/
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
+############################
+# Spring Boot
+############################
+HELP.md
+
+############################
+# Eclipse / STS
+############################
 .project
-.settings
+.classpath
+.settings/
+.factorypath
+.apt_generated/
 .springBeans
-.sts4-cache
+.sts4-cache/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+############################
+# IntelliJ IDEA
+############################
+.idea/
 *.iml
 *.ipr
+*.iws
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+############################
+# VS Code
+############################
 .vscode/
+
+############################
+# NetBeans
+############################
+nbproject/
+nbbuild/
+nbdist/
+.nb-gradle/
+build/
+
+############################
+# Logs
+############################
+*.log
+logs/
+
+############################
+# OS Files
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Environment Variables
+############################
+.env
+.env.*
+!.env.example
+
+############################
+# Application Secrets
+############################
+application-local.properties
+application-local.yml
+application-dev.properties
+application-dev.yml
+
+############################
+# Temporary Files
+############################
+*.tmp
+*.swp
