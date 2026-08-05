@@ -32,8 +32,7 @@ public class StudentServiceIMPL implements StudentService {
 	private CloudinaryService cloudinaryService;
 	
 	@Override
-	public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request) {
-
+	public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request) throws Exception {
 	    // Check if email already exists
 	    if (urepo.existsByEmail(request.getEmail())) {
 	        throw new EmailAlreadyExistsException("Email already exists.");
@@ -59,7 +58,7 @@ public class StudentServiceIMPL implements StudentService {
 	    student.setSkills(request.getSkills());
 	    student.setLinkedinUrl(request.getLinkedinUrl());
 	    
-	    // Saving Resume.pdf in Cloudinary Cloud Server
+	 // Saving Resume.pdf in Cloudinary Cloud Server
 	    String resumeUrl = cloudinaryService.upload(request.getResume());
 	    student.setResumeUrl(resumeUrl);
 

@@ -7,7 +7,7 @@ import com.smarthire.dto.student.StudentRegistrationResponse;
 
 public interface StudentService 
 {
-    StudentRegistrationResponse registerStudent(StudentRegistrationRequest request);
+	StudentRegistrationResponse registerStudent(StudentRegistrationRequest request) throws Exception;
     StudentLoginResponse loginStudent(StudentLoginRequest request);
     void logoutStudent(String token);
 
