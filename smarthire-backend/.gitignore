@@ -77,4 +77,4 @@ application-dev.yml
 ############################
 # SECRET KEYS
 ############################
-application-example.properties
+application.properties
