@@ -1,6 +1,7 @@
 package com.smarthire.service.impl;
 
 import com.smarthire.dto.student.StudentLoginRequest;
+import com.smarthire.dto.student.StudentLoginResponse;
 import com.smarthire.dto.student.StudentRegistrationRequest;
 import com.smarthire.entity.Student;
 import com.smarthire.entity.User;
@@ -64,7 +65,44 @@ public class StudentAuthServiceImpl implements StudentAuthService {
     }
 
     @Override
-    public String login(StudentLoginRequest request) {
-        return "Student Login Successful";
+    public StudentLoginResponse login(StudentLoginRequest request) {
+
+        // Find user by email
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> 
+                    new RuntimeException("Invalid email or password")
+                );
+
+
+        // Check encrypted password
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            throw new RuntimeException("Invalid email or password");
+        }
+
+
+        // Find student profile
+        Student student = studentRepository.findByUser(user)
+                .orElseThrow(() ->
+                    new RuntimeException("Student profile not found")
+                );
+
+
+        // Create response
+        StudentLoginResponse response = new StudentLoginResponse();
+
+        response.setStudentId(student.getId());
+        response.setFullName(student.getFullName());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+        response.setMessage("Login Successful");
+
+        // JWT later
+        response.setToken(null);
+
+
+        return response;
     }
 }

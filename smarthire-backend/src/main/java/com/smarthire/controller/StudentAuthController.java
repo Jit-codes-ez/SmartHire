@@ -1,6 +1,7 @@
 package com.smarthire.controller;
 
 import com.smarthire.dto.student.StudentLoginRequest;
+import com.smarthire.dto.student.StudentLoginResponse;
 import com.smarthire.dto.student.StudentRegistrationRequest;
 import com.smarthire.service.StudentAuthService;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,8 @@ public class StudentAuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody StudentLoginRequest request) {
+    public ResponseEntity<StudentLoginResponse> login(
+            @RequestBody StudentLoginRequest request) {
 
         return ResponseEntity.ok(studentAuthService.login(request));
     }

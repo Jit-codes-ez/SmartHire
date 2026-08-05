@@ -99,7 +99,9 @@ const onSubmit = async (data) => {
       formData.append('course', data.course); 
       formData.append('passingYear', data.passingYear);
       if (resumeFile) formData.append('resume', resumeFile);
-
+      for (const pair of formData.entries()) {
+  console.log(pair[0], pair[1]);
+}
       await axios.post('http://localhost:8080/api/student/register', formData, { headers: {
           'Content-Type': 'multipart/form-data', 
         },
