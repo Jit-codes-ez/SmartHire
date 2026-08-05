@@ -77,4 +77,4 @@ application-dev.yml
 ############################
 # SECRET KEYS
 ############################
-src/main/resources/application.properties
+application.properties
