@@ -3,6 +3,7 @@ package com.smarthire.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.smarthire.dto.cloudinary.CloudinaryUploadResponse;
 import com.smarthire.dto.student.StudentLoginRequest;
 import com.smarthire.dto.student.StudentLoginResponse;
 import com.smarthire.dto.student.StudentRegistrationRequest;
@@ -19,6 +20,7 @@ import com.smarthire.service.StudentService;
 
 
 
+
 @Service
 public class StudentServiceImpl implements StudentService {
 	
@@ -32,7 +34,7 @@ public class StudentServiceImpl implements StudentService {
 	private CloudinaryService cloudinaryService;
 	
 	@Override
-	public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request) throws Exception {
+	public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request){
 	    // Check if email already exists
 	    if (urepo.existsByEmail(request.getEmail())) {
 	        throw new EmailAlreadyExistsException("Email already exists.");
@@ -59,8 +61,10 @@ public class StudentServiceImpl implements StudentService {
 	    student.setLinkedinUrl(request.getLinkedinUrl());
 	    
 	 // Saving Resume.pdf in Cloudinary Cloud Server
-	    String resumeUrl = cloudinaryService.upload(request.getResume());
-	    student.setResumeUrl(resumeUrl);
+	    String folderName = request.getEmail().replace("@", "_").replace(".", "_").toLowerCase();
+	    CloudinaryUploadResponse uploadResponse = cloudinaryService.upload(request.getResume(), folderName);
+	    student.setResumeUrl(uploadResponse.getUrl());
+	    student.setResumePublicId(uploadResponse.getPublicId());
 
 	    // Link Student with User
 	    student.setUser(savedUser);

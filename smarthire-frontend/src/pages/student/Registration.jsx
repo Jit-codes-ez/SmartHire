@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import Reveal from '../../components/Reveal';
+import Modal from '../../components/Modal'; // adjust path to wherever Modal.jsx actually lives
+
 
 const COURSE_BRANCHES = { 
   BTECH: ['CSE', 'ECE', 'ME', 'EE', 'CE'], 
@@ -44,6 +46,68 @@ const selectedCourse = watch('course')
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
   const [countryOpen, setCountryOpen] = useState(false);
   const countryRef = useRef(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+
+  // OTP verification state
+const [resendCooldown, setResendCooldown] = useState(0);
+const [otpSent, setOtpSent] = useState(false);
+const [sendingOtp, setSendingOtp] = useState(false);
+const [otpValue, setOtpValue] = useState('');
+const [verifyingOtp, setVerifyingOtp] = useState(false);
+const [emailVerified, setEmailVerified] = useState(false);
+const [otpStatus, setOtpStatus] = useState(null); // null | 'success' | 'error'
+const [emailOtpError, setEmailOtpError] = useState('');
+
+const watchedEmail = watch('email');
+
+  //Resend OTP cooldown timer
+useEffect(() => {
+  if (resendCooldown <= 0) return;
+  const timer = setInterval(() => {
+    setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
+  }, 1000);
+  return () => clearInterval(timer);
+}, [resendCooldown]);
+
+// Handle sending OTP
+const handleSendOtp = async () => {
+  if (!watchedEmail || errors.email) return;
+  setSendingOtp(true);
+  setEmailOtpError('');
+  try {
+    await axios.post('http://localhost:8080/api/auth/send-otp', { email: watchedEmail });
+    setOtpSent(true);
+    setOtpStatus(null);
+    setOtpValue('');
+    setResendCooldown(30); // 30-second cooldown before resend is allowed
+  } catch (err) {
+    const data = err?.response?.data;
+    setEmailOtpError(
+      typeof data === 'string' ? data : data?.message || 'Failed to send OTP. Please try again.'
+    );
+  } finally {
+    setSendingOtp(false);
+  }
+};
+
+const handleVerifyOtp = async () => {
+  if (otpValue.length !== 6) return;
+  setVerifyingOtp(true);
+  try {
+    await axios.post('http://localhost:8080/api/auth/verify-otp', {
+      email: watchedEmail,
+      otp: otpValue,
+    });
+    setOtpStatus('success');
+    setEmailVerified(true);
+  } catch (err) {
+    setOtpStatus('error');
+    setEmailVerified(false);
+  } finally {
+    setVerifyingOtp(false);
+  }
+};
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -78,6 +142,14 @@ const onFileChange = (e) => {
 };
 
 const onSubmit = async (data) => {
+  if (!emailVerified) {
+    setServerError('Please verify your email before creating an account.');
+    return;
+  }
+  if (!resumeFile) {
+    setResumeError('Resume is required');
+    return;
+  }
   if (!resumeFile) {
     setResumeError('Resume is required');
     return;
@@ -107,13 +179,17 @@ const onSubmit = async (data) => {
         },
       });
 
-      navigate('/verify-otp', { state: { email: data.email } });
-    } catch (err) {
-      setServerError(
-        err?.response?.data?.message ||
-          'Something went wrong. Please try again or check your internet connection.'
-      );
-    } finally {
+      setRegisteredEmail(data.email);
+      setShowSuccessModal(true);
+    }  catch (err) {
+  const data = err?.response?.data;
+  const errorMessage =
+    typeof data === 'string'
+      ? data
+      : data?.message || 'Something went wrong. Please try again or check your internet connection.';
+
+  setServerError(errorMessage);
+} finally {
       setSubmitting(false);
     }
   };
@@ -155,23 +231,100 @@ const onSubmit = async (data) => {
               )}
             </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="email">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="jit@email.com"
-                className="w-full h-10 px-3 rounded-input border border-st-border bg-st-surface text-sm placeholder:text-st-muted focus:outline-none focus:shadow-focus focus:border-st-primary"
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email address' },
-                })}
-              />
-              {errors.email && <p className="mt-1 text-xs text-[#EF4444]">{errors.email.message}</p>}
-            </div>
+{/* Email */}
+<div>
+  <label className="block text-sm font-medium mb-1" htmlFor="email">
+    Email Address
+  </label>
+  <div className="flex gap-2">
+    <div className="flex-1 relative">
+      <input
+        id="email"
+        type="email"
+        placeholder="jit@email.com"
+        disabled={emailVerified}
+        className="w-full h-10 px-3 pr-8 rounded-input border border-st-border bg-st-surface text-sm placeholder:text-st-muted focus:outline-none focus:shadow-focus focus:border-st-primary disabled:bg-st-bg"
+        {...register('email', {
+          required: 'Email is required',
+          pattern: { value: /^\S+@\S+\.\S+$/, message: 'Enter a valid email address' },
+          onChange: () => {
+            setEmailVerified(false);
+            setOtpSent(false);
+            setOtpValue('');
+            setOtpStatus(null);
+            setEmailOtpError('');
+          },
+        })}
+      />
+      {emailVerified && (
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[#10B981] text-sm">✓</span>
+      )}
+    </div>
+
+    {/* Verify button only appears once a valid email is typed */}
+    {watchedEmail && !errors.email && (
+      <button
+        type="button"
+        onClick={handleSendOtp}
+        disabled={emailVerified || sendingOtp || resendCooldown > 0}
+        className="h-10 px-4 shrink-0 rounded-btn bg-st-primary text-white text-sm font-medium disabled:opacity-60 whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-200"
+      >
+        {emailVerified
+          ? 'Verified'
+          : sendingOtp
+          ? 'Sending…'
+          : resendCooldown > 0
+          ? `Resend (${resendCooldown}s)`
+          : otpSent
+          ? 'Resend'
+          : 'Verify'}
+      </button>
+    )}
+  </div>
+
+  {errors.email && <p className="mt-1 text-xs text-[#EF4444]">{errors.email.message}</p>}
+  {emailOtpError && <p className="mt-1 text-xs text-[#EF4444]">{emailOtpError}</p>}
+
+  {/* OTP field — appears after "Verify" is clicked */}
+  {otpSent && !emailVerified && (
+    <div className="mt-2 flex gap-2 items-start">
+      <div className="flex-1 relative">
+        <input
+          type="text"
+          inputMode="numeric"
+          maxLength={6}
+          placeholder="Enter OTP"
+          value={otpValue}
+          onChange={(e) => {
+            setOtpValue(e.target.value.replace(/\D/g, '').slice(0, 6));
+            setOtpStatus(null);
+          }}
+          className={`w-full h-10 px-3 pr-8 rounded-input border bg-st-surface text-sm placeholder:text-st-muted focus:outline-none focus:shadow-focus ${
+            otpStatus === 'error' ? 'border-[#EF4444]' : 'border-st-border focus:border-st-primary'
+          }`}
+        />
+        {otpStatus === 'success' && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[#10B981] text-sm">✓</span>
+        )}
+        {otpStatus === 'error' && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[#EF4444] text-sm">✕</span>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={handleVerifyOtp}
+        disabled={verifyingOtp || otpValue.length !== 6}
+        className="h-10 px-4 shrink-0 rounded-btn bg-st-primary text-white text-sm font-medium disabled:opacity-60"
+      >
+        {verifyingOtp ? 'Checking…' : 'Submit'}
+      </button>
+    </div>
+  )}
+  {otpStatus === 'error' && (
+    <p className="mt-1 text-xs text-[#EF4444]">Incorrect OTP. Please try again.</p>
+  )}
+</div>
 
             {/* Mobile — flag + caret combined input */}
             <div ref={countryRef} className="relative">
@@ -462,6 +615,34 @@ const onSubmit = async (data) => {
           </p>
         </div>
       </Reveal>
+
+      <Modal
+        title="Registration successful!"
+        open={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        size="sm"
+      >
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#D1FAE5]">
+            <svg className="w-7 h-7 text-[#059669]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-sm text-st-muted mb-6">
+            We've sent a verification code to <span className="font-medium text-st-text">{registeredEmail}</span>.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setShowSuccessModal(false);
+              navigate('/verify-otp', { state: { email: registeredEmail } });
+            }}
+            className="w-full h-10 rounded-btn bg-st-primary text-white text-sm font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-110 active:scale-95"
+          >
+            Continue to verification
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

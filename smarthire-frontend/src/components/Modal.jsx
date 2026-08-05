@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-
 const widthMap = { sm: 'max-w-sm', lg: 'max-w-lg' }
 
 /** Centered overlay. Dark semi-transparent backdrop. 12px radius. Max-width 480px default. */

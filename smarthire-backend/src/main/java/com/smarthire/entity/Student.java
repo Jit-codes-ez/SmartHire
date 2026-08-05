@@ -41,6 +41,9 @@ public class Student {
 
     @Column(length = 255)
     private String resumeUrl;
+    
+    @Column(nullable = false, unique = true)
+    private String resumePublicId;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -127,6 +130,15 @@ public class Student {
 
 	public void setResumeUrl(String resumeUrl) {
 		this.resumeUrl = resumeUrl;
+	}
+	
+
+	public String getResumePublicId() {
+		return resumePublicId;
+	}
+
+	public void setResumePublicId(String resumePublicId) {
+		this.resumePublicId = resumePublicId;
 	}
 
 	public User getUser() {
