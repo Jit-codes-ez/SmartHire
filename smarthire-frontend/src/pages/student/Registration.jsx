@@ -6,11 +6,11 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import Reveal from '../../components/Reveal';
 
-const COURSE_BRANCHES = {
-  'B.Tech': ['CSE', 'ECE', 'ME', 'EE', 'CE'],
-  'M.Tech': ['CSE', 'ECE', 'ME'],
-  BCA: ['BCA'],
-  MCA: ['MCA']
+const COURSE_BRANCHES = { 
+  BTECH: ['CSE', 'ECE', 'ME', 'EE', 'CE'], 
+  MTECH: ['CSE', 'ECE', 'ME'], 
+  BCA: ['BCA'], 
+  MCA: ['MCA'] 
 };
 const COURSES = Object.keys(COURSE_BRANCHES);
 
@@ -87,7 +87,7 @@ const onSubmit = async (data) => {
   setSubmitting(true);
   try {
       const formData = new FormData();
-      formData.append('name', data.fullName);
+      formData.append('fullName', data.fullName); 
       formData.append('email', data.email);
       formData.append('password', data.password);
       formData.append('role', 'STUDENT');
@@ -95,11 +95,14 @@ const onSubmit = async (data) => {
       formData.append('cgpa', data.cgpa);
       formData.append('linkedinUrl', data.linkedinUrl || '');
       formData.append('skills', data.skills || '');
-      formData.append('mobile', `${selectedCountry.dial}${data.mobile}`);
+      formData.append('mobileNumber', `${selectedCountry.dial}${data.mobile}`);
+      formData.append('course', data.course); 
+      formData.append('passingYear', data.passingYear);
       if (resumeFile) formData.append('resume', resumeFile);
 
-      await axios.post('/api/auth/register', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      await axios.post('http://localhost:8080/api/student/register', formData, { headers: {
+          'Content-Type': 'multipart/form-data', 
+        },
       });
 
       navigate('/verify-otp', { state: { email: data.email } });
@@ -311,10 +314,10 @@ const onSubmit = async (data) => {
       <option value="" disabled>
         Select course
       </option>
-      {COURSES.map((c) => (
-        <option key={c} value={c}>
-          {c}
-        </option>
+      {COURSES.map((c) => ( 
+        <option key={c} value={c}> 
+        {c === 'BTECH' ? 'B.Tech' : c === 'MTECH' ? 'M.Tech' : c} 
+        </option> 
       ))}
     </select>
     {errors.course && <p className="mt-1 text-xs text-[#EF4444]">{errors.course.message}</p>}

@@ -20,7 +20,7 @@ import com.smarthire.service.StudentService;
 
 
 @Service
-public class StudentServiceIMPL implements StudentService {
+public class StudentServiceImpl implements StudentService {
 	
 	@Autowired
 	UserRepository urepo;
@@ -88,5 +88,6 @@ public class StudentServiceIMPL implements StudentService {
 		// TODO Auto-generated method stub
 
 	}
+	
 
 }
