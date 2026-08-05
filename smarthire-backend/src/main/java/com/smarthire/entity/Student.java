@@ -39,12 +39,15 @@ public class Student {
     @Column(length = 255)
     private String linkedinUrl;
 
-    @Column(nullable = false)
+    @Column(length = 255)
     private String resumeUrl;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+    
+    public Student() {
+    }
 
 	public Long getId() {
 		return id;

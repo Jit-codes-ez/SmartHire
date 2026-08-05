@@ -2,17 +2,21 @@ package com.smarthire.dto.student;
 
 import com.smarthire.enums.Role;
 
-public class StudentRegistrationResponse {
+public class StudentLoginResponse {
 
     private Long studentId;
 
-    private String message;
+    private String fullName;
 
     private String email;
 
     private Role role;
 
-    public StudentRegistrationResponse() {
+    private String token;
+
+    private String message;
+
+    public StudentLoginResponse() {
     }
 
     public Long getStudentId() {
@@ -23,12 +27,12 @@ public class StudentRegistrationResponse {
         this.studentId = studentId;
     }
 
-    public String getMessage() {
-        return message;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getEmail() {
@@ -46,4 +50,21 @@ public class StudentRegistrationResponse {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
 }
