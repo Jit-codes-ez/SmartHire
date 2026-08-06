@@ -1,5 +1,6 @@
 package com.smarthire.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.smarthire.enums.Branch;
 import com.smarthire.enums.Course;
 
@@ -41,115 +42,111 @@ public class Student {
 
     @Column(length = 255)
     private String resumeUrl;
-    
+
     @Column(nullable = false, unique = true)
     private String resumePublicId;
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
-    
+
     public Student() {
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getFullName() {
-		return fullName;
-	}
+    public String getFullName() {
+        return fullName;
+    }
 
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
-	}
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
 
-	public void setMobileNumber(String mobileNumber) {
-		this.mobileNumber = mobileNumber;
-	}
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
 
-	public Course getCourse() {
-		return course;
-	}
+    public Course getCourse() {
+        return course;
+    }
 
-	public void setCourse(Course course) {
-		this.course = course;
-	}
+    public void setCourse(Course course) {
+        this.course = course;
+    }
 
-	public Branch getBranch() {
-		return branch;
-	}
+    public Branch getBranch() {
+        return branch;
+    }
 
-	public void setBranch(Branch branch) {
-		this.branch = branch;
-	}
+    public void setBranch(Branch branch) {
+        this.branch = branch;
+    }
 
-	public Integer getPassingYear() {
-		return passingYear;
-	}
+    public Integer getPassingYear() {
+        return passingYear;
+    }
 
-	public void setPassingYear(Integer passingYear) {
-		this.passingYear = passingYear;
-	}
+    public void setPassingYear(Integer passingYear) {
+        this.passingYear = passingYear;
+    }
 
-	public Double getCgpa() {
-		return cgpa;
-	}
+    public Double getCgpa() {
+        return cgpa;
+    }
 
-	public void setCgpa(Double cgpa) {
-		this.cgpa = cgpa;
-	}
+    public void setCgpa(Double cgpa) {
+        this.cgpa = cgpa;
+    }
 
-	public String getSkills() {
-		return skills;
-	}
+    public String getSkills() {
+        return skills;
+    }
 
-	public void setSkills(String skills) {
-		this.skills = skills;
-	}
+    public void setSkills(String skills) {
+        this.skills = skills;
+    }
 
-	public String getLinkedinUrl() {
-		return linkedinUrl;
-	}
+    public String getLinkedinUrl() {
+        return linkedinUrl;
+    }
 
-	public void setLinkedinUrl(String linkedinUrl) {
-		this.linkedinUrl = linkedinUrl;
-	}
+    public void setLinkedinUrl(String linkedinUrl) {
+        this.linkedinUrl = linkedinUrl;
+    }
 
-	public String getResumeUrl() {
-		return resumeUrl;
-	}
+    public String getResumeUrl() {
+        return resumeUrl;
+    }
 
-	public void setResumeUrl(String resumeUrl) {
-		this.resumeUrl = resumeUrl;
-	}
-	
+    public void setResumeUrl(String resumeUrl) {
+        this.resumeUrl = resumeUrl;
+    }
 
-	public String getResumePublicId() {
-		return resumePublicId;
-	}
+    public String getResumePublicId() {
+        return resumePublicId;
+    }
 
-	public void setResumePublicId(String resumePublicId) {
-		this.resumePublicId = resumePublicId;
-	}
+    public void setResumePublicId(String resumePublicId) {
+        this.resumePublicId = resumePublicId;
+    }
 
-	public User getUser() {
-		return user;
-	}
+    public User getUser() {
+        return user;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
-    
-    
-
-
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

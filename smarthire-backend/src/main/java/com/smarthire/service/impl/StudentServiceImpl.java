@@ -78,5 +78,29 @@ public class StudentServiceImpl implements StudentService {
 	    response.setMessage("Student registered successfully.");
 	    return response;
 	}
-	
+	@Override
+	public Student getStudentByEmail(String email) {
+	    return srepo.findByUserEmail(email)
+	            .orElseThrow(() -> new RuntimeException("Student not found"));
+	}
+	@Override
+	public Student updateProfile(String email, Student student) {
+
+	    Student existingStudent =
+	            srepo.findByUserEmail(email)
+	            .orElseThrow(
+	                () -> new RuntimeException("Student not found")
+	            );
+
+
+	    existingStudent.setFullName(student.getFullName());
+	    existingStudent.setMobileNumber(student.getMobileNumber());
+	    existingStudent.setCgpa(student.getCgpa());
+	    existingStudent.setSkills(student.getSkills());
+	    existingStudent.setLinkedinUrl(student.getLinkedinUrl());
+	    existingStudent.setPassingYear(student.getPassingYear());
+
+
+	    return srepo.save(existingStudent);
+	}
 }

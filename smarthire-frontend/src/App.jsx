@@ -24,6 +24,8 @@ import PostDrive from './pages/recruiter/PostDrive.jsx'
 import AdminDashboard from './pages/admin/Dashboard.jsx'
 import AdminStudents from './pages/admin/Students.jsx'
 import AdminRecruiters from './pages/admin/Recruiters.jsx'
+import UpdateProfile from "./pages/student/UpdateProfile.jsx";
+
 
 // Maps a URL prefix to the design-system theme it should render in.
 function themeForPath(pathname) {
@@ -70,6 +72,7 @@ export default function App() {
         <Route path="/admin/recruiters" element={<AdminRecruiters />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/student/profile/edit" element={<UpdateProfile />} />
       </Routes>
 
       <SiteFooter />
