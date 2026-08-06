@@ -617,7 +617,7 @@ const onSubmit = async (data) => {
       </Reveal>
 
       <Modal
-        title="Registration successful!"
+        title="Account created successfully!"
         open={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
         size="sm"
@@ -629,17 +629,17 @@ const onSubmit = async (data) => {
             </svg>
           </div>
           <p className="text-sm text-st-muted mb-6">
-            We've sent a verification code to <span className="font-medium text-st-text">{registeredEmail}</span>.
+            Your account has been created. You can now log in and start exploring open drives.
           </p>
           <button
             type="button"
             onClick={() => {
               setShowSuccessModal(false);
-              navigate('/verify-otp', { state: { email: registeredEmail } });
+              navigate('/login');
             }}
             className="w-full h-10 rounded-btn bg-st-primary text-white text-sm font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-110 active:scale-95"
           >
-            Continue to verification
+            Go to Login
           </button>
         </div>
       </Modal>

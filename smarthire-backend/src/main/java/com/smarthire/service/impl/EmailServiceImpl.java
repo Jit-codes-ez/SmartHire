@@ -64,10 +64,9 @@ public class EmailServiceImpl implements EmailService {
                         <td class="header-cell" style="background: linear-gradient(135deg, #4F46E5 0%%, #6366F1 100%%); padding: 32px 32px 28px;">
                           <table cellpadding="0" cellspacing="0">
                             <tr>
-                              <td style="width:36px; height:36px;">
-                                <img src="%s" width="36" height="36" alt="SmartHire"
-                                     style="display:block; border-radius:9px; background-color:#FFFFFF;" />
-                              </td>
+                              <td style="width:40px; height:40px; padding: 3px;">
+        						<img src="%s" width="34" height="34" alt="SmartHire" style="display:block; width:34px; height:34px; object-fit:contain; border-radius:8px; background-color:#FFFFFF;" />
+        					  </td>
                               <td style="padding-left:10px;">
                                 <span style="color:#FFFFFF; font-size:19px; font-weight:bold; letter-spacing:-0.3px;">SmartHire</span>
                               </td>
@@ -112,9 +111,9 @@ public class EmailServiceImpl implements EmailService {
 
                           <hr style="border:none; border-top:1px solid #E2E8F0; margin: 0 0 20px;" />
 
-                          <p style="margin:0; color:#94A3B8; font-size:12px; line-height:18px;">
+                          <p style="margin:0; color:#94A3B8; font-size:12px; line-height:18px; text-align: center;">
                             Need help? Reach us anytime at
-                            <a href="mailto:support@smarthire.com" style="color:#4F46E5; text-decoration:none;">support@smarthire.com</a>
+                            <a href="mailto:smarthire.js@gmail.com" style="color:#4F46E5; text-decoration:none;">SmartHire Support</a>
                           </p>
                         </td>
                       </tr>
@@ -122,13 +121,10 @@ public class EmailServiceImpl implements EmailService {
                       <!-- Footer -->
                       <tr>
                         <td class="footer-cell" style="background-color:#F8FAFC; padding: 18px 32px; border-top:1px solid #E2E8F0;">
-                          <table width="100%%" cellpadding="0" cellspacing="0" class="footer-table">
+                          <table width="100%%" cellpadding="0" cellspacing="0" class="footer-table" align = "centre" >
                             <tr>
-                              <td>
+                              <td style="text-align:center;">
                                 <span style="color:#94A3B8; font-size:11px;">© 2026 SmartHire. All rights reserved.</span>
-                              </td>
-                              <td align="right">
-                                <span style="color:#CBD5E1; font-size:11px;">Placement made simple.</span>
                               </td>
                             </tr>
                           </table>
