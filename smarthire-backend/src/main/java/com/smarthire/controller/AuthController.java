@@ -50,8 +50,17 @@ public class AuthController {
                 "OTP sent successfully"
         );
     }
+    
+ // Send OTP for Registration
+    @PostMapping("/send-registration-otp")
+    public ResponseEntity<String> sendRegistrationOtp(
+            @RequestBody SendOtpRequest request
+    ) {
 
+        authService.sendRegistrationOtp(request);
 
+        return ResponseEntity.ok("OTP sent successfully");
+    }
 
     // Verify OTP
     @PostMapping("/verify-otp")

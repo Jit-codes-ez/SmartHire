@@ -28,16 +28,34 @@ public class OtpServiceImpl implements OtpService {
 
     @Override
     public void verifyOtp(String email, String otp) {
+
         OtpEntry entry = otpStore.get(email);
+
+        System.out.println("==================================");
+        System.out.println("Email Received : " + email);
+        System.out.println("Entered OTP    : " + otp);
+
+        if (entry != null) {
+            System.out.println("Stored OTP     : " + entry.otp);
+            System.out.println("Verified       : " + entry.verified);
+            System.out.println("Expires At     : " + entry.expiresAt);
+        } else {
+            System.out.println("No OTP stored for this email");
+        }
+        System.out.println("==================================");
+
         if (entry == null) {
             throw new InvalidOtpException("No OTP found for this email. Please request a new one.");
         }
+
         if (entry.expiresAt.isBefore(LocalDateTime.now())) {
             throw new InvalidOtpException("OTP has expired. Please request a new one.");
         }
+
         if (!entry.otp.equals(otp)) {
             throw new InvalidOtpException("Incorrect OTP.");
         }
+
         entry.verified = true;
     }
 

@@ -2,11 +2,15 @@ package com.smarthire.service.impl;
 
 import com.smarthire.service.EmailService;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import java.io.UnsupportedEncodingException;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -14,18 +18,22 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
     @Override
     public void sendOtpEmail(String toEmail, String otp) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
             helper.setTo(toEmail);
             helper.setSubject("SmartHire — Your verification code");
-            helper.setText(buildOtpEmailHtml(otp), true); // true = isHtml
+            helper.setText(buildOtpEmailHtml(otp), true);
 
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to send OTP email", e);
         }
     }
@@ -83,7 +91,7 @@ public class EmailServiceImpl implements EmailService {
                           </div>
                           <h2 class="heading-text" style="margin:0 0 8px; color:#0F172A; font-size:21px; font-weight:bold;">Verify your email</h2>
                           <p style="margin:0 0 24px; color:#64748B; font-size:14px; line-height:21px;">
-                            Enter the code below to verify your email and continue creating your SmartHire account.
+                            Enter the code below to verify your email and continue using SmartHire.
                           </p>
 
                           <!-- OTP box -->

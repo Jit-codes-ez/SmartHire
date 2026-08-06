@@ -11,6 +11,8 @@ public interface AuthService {
     LoginResponse login(LoginRequest request);
 
     void sendOtp(SendOtpRequest request);
+    
+    void sendRegistrationOtp(SendOtpRequest request);
 
     VerifyOtpResponse verifyOtp(VerifyOtpRequest request);
 

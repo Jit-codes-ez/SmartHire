@@ -76,7 +76,7 @@ const handleSendOtp = async () => {
   setSendingOtp(true);
   setEmailOtpError('');
   try {
-    await axios.post('http://localhost:8080/api/auth/send-otp', { email: watchedEmail });
+    await axios.post('http://localhost:8080/api/auth/send-registration-otp', { email: watchedEmail });
     setOtpSent(true);
     setOtpStatus(null);
     setOtpValue('');

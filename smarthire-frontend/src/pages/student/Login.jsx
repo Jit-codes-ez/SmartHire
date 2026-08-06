@@ -33,35 +33,40 @@ export default function Login() {
 
   // Login button — validates credentials, then sends OTP automatically
   const handleCredentialsSubmit = async (e) => {
-    e.preventDefault();
-    setServerError('');
-    setLoading(true);
+  e.preventDefault();
+  setServerError('');
+  setLoading(true);
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const text = await response.text();
+    let data = {};
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const text = await response.text();
-      const data = text ? JSON.parse(text) : {};
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-      if (!data.role || !ROLE_DASHBOARDS[data.role]) {
-        throw new Error('Unrecognized account role. Please contact support.');
-      }
-
-      setPendingStudentData(data);
-      setCredentialsVerified(true);
-      await handleSendOtp();
-    } catch (error) {
-      setServerError(error.message);
-    } finally {
-      setLoading(false);
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { message: text }; // backend sent a plain string, not JSON
     }
-  };
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed');
+    }
+    if (!data.role || !ROLE_DASHBOARDS[data.role]) {
+      throw new Error('Unrecognized account role. Please contact support.');
+    }
+
+    setPendingStudentData(data);
+    setCredentialsVerified(true);
+    await handleSendOtp();
+  } catch (error) {
+    setServerError(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSendOtp = async () => {
     setSendingOtp(true);
@@ -182,9 +187,9 @@ export default function Login() {
             {/* OTP field — appears only after credentials are verified via Log In */}
             {credentialsVerified && (
               <div className="pt-2">
-                <div className="mb-2 rounded-input border border-st-border bg-st-bg px-3 py-2 text-sm text-st-muted">
+                <div className="mb-2 rounded-input border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
                   We've sent a verification code to{' '}
-                  <span className="font-medium text-st-text">{email}</span>.
+                  <span className="font-semibold text-green-800">{email}</span>.
                 </div>
 
                 <label className="block text-sm font-medium mb-1" htmlFor="loginOtp">

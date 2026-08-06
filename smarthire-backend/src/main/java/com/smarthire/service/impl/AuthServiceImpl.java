@@ -78,6 +78,13 @@ public class AuthServiceImpl implements AuthService {
         // Generate and send OTP
         otpService.generateAndSendOtp(request.getEmail());
     }
+    
+    @Override
+    public void sendRegistrationOtp(SendOtpRequest request) {
+
+        otpService.generateAndSendOtp(request.getEmail());
+
+    }
 
 
     @Override
