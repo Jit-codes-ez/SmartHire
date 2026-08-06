@@ -3,9 +3,6 @@ package com.smarthire.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.smarthire.dto.student.StudentLoginRequest;
-import com.smarthire.dto.student.StudentLoginResponse;
 import com.smarthire.dto.student.StudentRegistrationRequest;
 import com.smarthire.dto.student.StudentRegistrationResponse;
 import com.smarthire.service.StudentService;
@@ -32,24 +29,24 @@ public class StudentController {
     }
 
  
-    // Student Login
-    @PostMapping("/login")
-    public ResponseEntity<StudentLoginResponse> loginStudent(
-            @RequestBody StudentLoginRequest request) {
-
-        StudentLoginResponse response = studentService.loginStudent(request);
-
-        return ResponseEntity.ok(response);
-    }
-
-   // Student Logout
-    @PostMapping("/logout")
-    public ResponseEntity<String> logoutStudent(
-            @RequestHeader("Authorization") String token) {
-
-        studentService.logoutStudent(token);
-
-        return ResponseEntity.ok("Logged out successfully.");
-    }
+//    // Student Login
+//    @PostMapping("/login")
+//    public ResponseEntity<StudentLoginResponse> loginStudent(
+//            @RequestBody StudentLoginRequest request) {
+//
+//        StudentLoginResponse response = studentService.loginStudent(request);
+//
+//        return ResponseEntity.ok(response);
+//    }
+//
+//   // Student Logout
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logoutStudent(
+//            @RequestHeader("Authorization") String token) {
+//
+//        studentService.logoutStudent(token);
+//
+//        return ResponseEntity.ok("Logged out successfully.");
+//    }
 
 }

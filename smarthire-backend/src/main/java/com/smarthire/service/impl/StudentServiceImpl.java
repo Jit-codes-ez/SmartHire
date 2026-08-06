@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.smarthire.dto.cloudinary.CloudinaryUploadResponse;
-import com.smarthire.dto.student.StudentLoginRequest;
-import com.smarthire.dto.student.StudentLoginResponse;
 import com.smarthire.dto.student.StudentRegistrationRequest;
 import com.smarthire.dto.student.StudentRegistrationResponse;
 import com.smarthire.entity.Student;
@@ -81,17 +79,4 @@ public class StudentServiceImpl implements StudentService {
 	    return response;
 	}
 	
-	@Override
-	public StudentLoginResponse loginStudent(StudentLoginRequest request) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void logoutStudent(String token) {
-		// TODO Auto-generated method stub
-
-	}
-	
-
 }

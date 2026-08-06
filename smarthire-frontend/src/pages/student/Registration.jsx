@@ -267,8 +267,7 @@ const onSubmit = async (data) => {
         type="button"
         onClick={handleSendOtp}
         disabled={emailVerified || sendingOtp || resendCooldown > 0}
-        className="h-10 px-4 shrink-0 rounded-btn bg-st-primary text-white text-sm font-medium disabled:opacity-60 whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-200"
-      >
+        className="h-10 px-4 shrink-0 rounded-btn bg-st-primary text-white text-sm font-medium disabled:opacity-60 duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95 disabled:hover:scale-100">
         {emailVerified
           ? 'Verified'
           : sendingOtp
@@ -315,8 +314,7 @@ const onSubmit = async (data) => {
         type="button"
         onClick={handleVerifyOtp}
         disabled={verifyingOtp || otpValue.length !== 6}
-        className="h-10 px-4 shrink-0 rounded-btn bg-st-primary text-white text-sm font-medium disabled:opacity-60"
-      >
+        className="h-10 px-4 shrink-0 rounded-btn bg-st-primary text-white text-sm font-medium disabled:opacity-60 duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95 disabled:hover:scale-100">
         {verifyingOtp ? 'Checking…' : 'Submit'}
       </button>
     </div>
@@ -601,8 +599,7 @@ const onSubmit = async (data) => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-10 rounded-btn bg-st-primary text-white text-sm font-medium mt-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95 disabled:opacity-60 disabled:hover:scale-100"
-            >
+              className="h-10 px-4 shrink-0 rounded-btn bg-st-primary text-white text-sm font-medium disabled:opacity-60 duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95 disabled:hover:scale-100">
               {submitting ? 'Creating account…' : 'Create Account'}
             </button>
           </form>

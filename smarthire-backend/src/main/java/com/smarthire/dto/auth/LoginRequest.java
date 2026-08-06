@@ -1,12 +1,11 @@
-package com.smarthire.dto.student;
+package com.smarthire.dto.auth;
 
-public class StudentLoginRequest {
+public class LoginRequest {
 
     private String email;
-
     private String password;
 
-    public StudentLoginRequest() {
+    public LoginRequest() {
     }
 
     public String getEmail() {
