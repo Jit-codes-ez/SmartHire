@@ -83,25 +83,8 @@ public class StudentServiceImpl implements StudentService {
 	
 	@Override
 	public StudentLoginResponse loginStudent(StudentLoginRequest request) {
-
-	    User user = urepo.findByEmail(request.getEmail())
-	            .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-
-	    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-	        throw new RuntimeException("Invalid credentials");
-	    }
-
-	    Student student = srepo.findByUser(user)
-	            .orElseThrow(() -> new RuntimeException("Student not found"));
-
-	    StudentLoginResponse response = new StudentLoginResponse();
-	    response.setStudentId(student.getId());
-	    response.setFullName(student.getFullName());
-	    response.setEmail(user.getEmail());
-	    response.setRole(user.getRole());
-	    response.setMessage("Login successful");
-
-	    return response;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

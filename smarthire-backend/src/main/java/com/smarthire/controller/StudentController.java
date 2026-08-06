@@ -1,7 +1,5 @@
 package com.smarthire.controller;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +34,12 @@ public class StudentController {
  
     // Student Login
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody StudentLoginRequest request) {
-        try {
-            StudentLoginResponse response = studentService.loginStudent(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Invalid credentials"));
-        }
+    public ResponseEntity<StudentLoginResponse> loginStudent(
+            @RequestBody StudentLoginRequest request) {
+
+        StudentLoginResponse response = studentService.loginStudent(request);
+
+        return ResponseEntity.ok(response);
     }
 
    // Student Logout
