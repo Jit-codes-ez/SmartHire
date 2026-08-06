@@ -94,32 +94,38 @@ export default function Login() {
   };
 
   const handleVerifyOtp = async () => {
-    if (otpValue.length !== 6) return;
-    setVerifyingOtp(true);
-    try {
-      const response = await fetch('http://localhost:8080/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp: otpValue }),
-      });
+  if (otpValue.length !== 6) return;
+  setVerifyingOtp(true);
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp: otpValue }),
+    });
 
-      if (!response.ok) {
-        throw new Error();
-      }
-
-      setOtpStatus('success');
-      localStorage.setItem('student', JSON.stringify(pendingStudentData));
-      window.dispatchEvent(new Event('authChange'));
-      showToast('Logged in successfully!', 'success');
-
-      const destination = ROLE_DASHBOARDS[pendingStudentData.role] || '/login';
-      navigate(destination);
-    } catch {
-      setOtpStatus('error');
-    } finally {
-      setVerifyingOtp(false);
+    if (!response.ok) {
+      throw new Error();
     }
-  };
+
+    const data = await response.json();
+
+    setOtpStatus('success');
+    localStorage.setItem('student', JSON.stringify({
+      email: data.email,
+      role: data.role,
+      token: data.token,
+    }));
+    window.dispatchEvent(new Event('authChange'));
+    showToast('Logged in successfully!', 'success');
+
+    const destination = ROLE_DASHBOARDS[data.role] || '/login';
+    navigate(destination);
+  } catch {
+    setOtpStatus('error');
+  } finally {
+    setVerifyingOtp(false);
+  }
+};
 
   return (
     <div className="min-h-[calc(100vh-128px)] bg-st-bg flex items-center justify-center px-4 py-12 font-sans text-st-text">

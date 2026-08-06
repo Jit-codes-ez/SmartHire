@@ -1,5 +1,6 @@
 package com.smarthire.service.impl;
 
+import com.smarthire.enums.OtpPurpose;
 import com.smarthire.exception.InvalidOtpException;
 import com.smarthire.service.EmailService;
 import com.smarthire.service.OtpService;
@@ -19,19 +20,27 @@ public class OtpServiceImpl implements OtpService {
     @Autowired
     private EmailService emailService;
 
+    // Purpose-scoped key so a LOGIN otp and a REGISTRATION otp for the same
+    // email never collide or cross-verify each other.
+    private String buildKey(String email, OtpPurpose purpose) {
+        return purpose.name() + ":" + email.toLowerCase();
+    }
+
     @Override
-    public void generateAndSendOtp(String email) {
+    public void generateAndSendOtp(String email, OtpPurpose purpose) {
         String otp = String.format("%06d", new Random().nextInt(999999));
-        otpStore.put(email, new OtpEntry(otp, LocalDateTime.now().plusMinutes(10), false));
+        otpStore.put(buildKey(email, purpose), new OtpEntry(otp, LocalDateTime.now().plusMinutes(10), false));
         emailService.sendOtpEmail(email, otp);
     }
 
     @Override
-    public void verifyOtp(String email, String otp) {
+    public void verifyOtp(String email, String otp, OtpPurpose purpose) {
 
-        OtpEntry entry = otpStore.get(email);
+        String key = buildKey(email, purpose);
+        OtpEntry entry = otpStore.get(key);
 
         System.out.println("==================================");
+        System.out.println("Purpose        : " + purpose);
         System.out.println("Email Received : " + email);
         System.out.println("Entered OTP    : " + otp);
 
@@ -40,7 +49,7 @@ public class OtpServiceImpl implements OtpService {
             System.out.println("Verified       : " + entry.verified);
             System.out.println("Expires At     : " + entry.expiresAt);
         } else {
-            System.out.println("No OTP stored for this email");
+            System.out.println("No OTP stored for this email/purpose");
         }
         System.out.println("==================================");
 
@@ -60,8 +69,8 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
-    public boolean isEmailVerified(String email) {
-        OtpEntry entry = otpStore.get(email);
+    public boolean isEmailVerified(String email, OtpPurpose purpose) {
+        OtpEntry entry = otpStore.get(buildKey(email, purpose));
         return entry != null && entry.verified;
     }
 

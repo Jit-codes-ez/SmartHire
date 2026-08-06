@@ -30,7 +30,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception ex) {
-        ex.printStackTrace();
-        return new ResponseEntity<>("Something went wrong.", HttpStatus.INTERNAL_SERVER_ERROR);
+        ex.printStackTrace(); // ADD THIS LINE TEMPORARILY
+        return new ResponseEntity<>(
+                "Something went wrong.",
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+    
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<String> handleEmailNotVerified(EmailNotVerifiedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN); // 403
     }
 }

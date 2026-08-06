@@ -8,12 +8,16 @@ import com.smarthire.dto.student.StudentRegistrationRequest;
 import com.smarthire.dto.student.StudentRegistrationResponse;
 import com.smarthire.entity.Student;
 import com.smarthire.entity.User;
+import com.smarthire.enums.OtpPurpose;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.smarthire.enums.Role;
 import com.smarthire.exception.EmailAlreadyExistsException;
+import com.smarthire.exception.EmailNotVerifiedException;
+import com.smarthire.repository.RecruiterRequestRepository;
 import com.smarthire.repository.StudentRepository;
 import com.smarthire.repository.UserRepository;
 import com.smarthire.service.CloudinaryService;
+import com.smarthire.service.OtpService;
 import com.smarthire.service.StudentService;
 
 
@@ -21,7 +25,7 @@ import com.smarthire.service.StudentService;
 
 @Service
 public class StudentServiceImpl implements StudentService {
-	
+
 	@Autowired
 	UserRepository urepo;
 	@Autowired
@@ -30,12 +34,23 @@ public class StudentServiceImpl implements StudentService {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private CloudinaryService cloudinaryService;
+	@Autowired
+	private OtpService otpService;
 	
+	@Autowired
+	private RecruiterRequestRepository recruiterRequestRepository; 
+
 	@Override
 	public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request){
-	    // Check if email already exists
-	    if (urepo.existsByEmail(request.getEmail())) {
+	    // Check if email already exists as a user OR has a pending/rejected recruiter request
+	    if (urepo.existsByEmail(request.getEmail())
+	            || recruiterRequestRepository.existsByEmail(request.getEmail())) {
 	        throw new EmailAlreadyExistsException("Email already exists.");
+	    }
+
+	    // Block registration unless the email was OTP-verified first
+	    if (!otpService.isEmailVerified(request.getEmail(), OtpPurpose.REGISTRATION)) {
+	        throw new EmailNotVerifiedException("Please verify your email before registering.");
 	    }
 
 	    // Create User
@@ -57,7 +72,7 @@ public class StudentServiceImpl implements StudentService {
 	    student.setCgpa(request.getCgpa());
 	    student.setSkills(request.getSkills());
 	    student.setLinkedinUrl(request.getLinkedinUrl());
-	    
+
 	 // Saving Resume.pdf in Cloudinary Cloud Server
 	    String folderName = request.getEmail().replace("@", "_").replace(".", "_").toLowerCase();
 	    CloudinaryUploadResponse uploadResponse = cloudinaryService.upload(request.getResume(), folderName);
@@ -95,6 +110,8 @@ public class StudentServiceImpl implements StudentService {
 
 	    existingStudent.setFullName(student.getFullName());
 	    existingStudent.setMobileNumber(student.getMobileNumber());
+	    existingStudent.setCourse(student.getCourse());
+	    existingStudent.setBranch(student.getBranch());
 	    existingStudent.setCgpa(student.getCgpa());
 	    existingStudent.setSkills(student.getSkills());
 	    existingStudent.setLinkedinUrl(student.getLinkedinUrl());

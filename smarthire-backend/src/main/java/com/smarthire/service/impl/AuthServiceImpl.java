@@ -9,7 +9,10 @@ import com.smarthire.dto.auth.LoginResponse;
 import com.smarthire.dto.auth.SendOtpRequest;
 import com.smarthire.dto.auth.VerifyOtpRequest;
 import com.smarthire.dto.auth.VerifyOtpResponse;
+import com.smarthire.dto.otp.LoginOtpResponse;
+import com.smarthire.dto.otp.LoginOtpVerifyRequest;
 import com.smarthire.entity.User;
+import com.smarthire.enums.OtpPurpose;
 import com.smarthire.exception.InvalidCredentialsException;
 import com.smarthire.repository.UserRepository;
 import com.smarthire.security.JwtService;
@@ -37,14 +40,14 @@ public class AuthServiceImpl implements AuthService {
 
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> 
+                .orElseThrow(() ->
                     new InvalidCredentialsException("Invalid email or password")
                 );
 
 
         // Check password
         if (!passwordEncoder.matches(
-                request.getPassword(), 
+                request.getPassword(),
                 user.getPassword()
         )) {
             throw new InvalidCredentialsException("Invalid email or password");
@@ -76,13 +79,13 @@ public class AuthServiceImpl implements AuthService {
 
 
         // Generate and send OTP
-        otpService.generateAndSendOtp(request.getEmail());
+        otpService.generateAndSendOtp(request.getEmail(), OtpPurpose.LOGIN);
     }
-    
+
     @Override
     public void sendRegistrationOtp(SendOtpRequest request) {
 
-        otpService.generateAndSendOtp(request.getEmail());
+        otpService.generateAndSendOtp(request.getEmail(), OtpPurpose.REGISTRATION);
 
     }
 
@@ -93,7 +96,8 @@ public class AuthServiceImpl implements AuthService {
         // This will throw InvalidOtpException if OTP is wrong
         otpService.verifyOtp(
                 request.getEmail(),
-                request.getOtp()
+                request.getOtp(),
+                OtpPurpose.LOGIN
         );
 
 
@@ -111,6 +115,27 @@ public class AuthServiceImpl implements AuthService {
                 token,
                 user.getEmail(),
                 user.getRole()
+        );
+    }
+
+
+    // New — called by OtpController's /login/verify-otp
+    @Override
+    public LoginOtpResponse verifyLoginOtp(LoginOtpVerifyRequest request) {
+
+        // Throws InvalidOtpException if wrong/expired
+        otpService.verifyOtp(request.getEmail(), request.getOtp(), OtpPurpose.LOGIN);
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("User not found"));
+
+        String token = jwtService.generateToken(user);
+
+        return new LoginOtpResponse(
+                "OTP verified successfully",
+                user.getEmail(),
+                token,
+                user.getRole().toString()
         );
     }
 

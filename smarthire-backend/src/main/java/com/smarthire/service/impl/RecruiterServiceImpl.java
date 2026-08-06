@@ -7,9 +7,12 @@ import org.springframework.stereotype.Service;
 import com.smarthire.dto.recruiter.RecruiterRegistrationRequest;
 import com.smarthire.dto.recruiter.RecruiterRegistrationResponse;
 import com.smarthire.entity.RecruiterRequest;
+import com.smarthire.enums.OtpPurpose;
 import com.smarthire.exception.EmailAlreadyExistsException;
+import com.smarthire.exception.EmailNotVerifiedException;
 import com.smarthire.repository.RecruiterRequestRepository;
 import com.smarthire.repository.UserRepository;
+import com.smarthire.service.OtpService;
 import com.smarthire.service.RecruiterService;
 
 @Service
@@ -20,9 +23,12 @@ public class RecruiterServiceImpl implements RecruiterService {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private OtpService otpService;
 
     @Override
     public RecruiterRegistrationResponse registerRecruiter(RecruiterRegistrationRequest request) {
@@ -32,6 +38,11 @@ public class RecruiterServiceImpl implements RecruiterService {
                 || recruiterRequestRepository.existsByEmail(request.getEmail())) {
 
             throw new EmailAlreadyExistsException("Email already exists.");
+        }
+
+        // Block registration unless the email was OTP-verified first
+        if (!otpService.isEmailVerified(request.getEmail(), OtpPurpose.REGISTRATION)) {
+            throw new EmailNotVerifiedException("Please verify your email before registering.");
         }
 
         RecruiterRequest recruiter = new RecruiterRequest();

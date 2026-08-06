@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Card from "../../components/Card.jsx";
 import Button from "../../components/Button.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
+import { authFetch } from "../../lib/authFetch.js";
 
 const COURSE_BRANCHES = {
   BTECH: ['CSE', 'ECE', 'ME', 'EE', 'CE'],
@@ -21,7 +22,21 @@ const COUNTRIES = [
   { code: 'JP', dial: '+81', name: 'Japan' },
 ];
 
-// Splits a stored "+911234567890" into { country, formattedNumber }
+const inputClass =
+  "w-full h-10 px-3 rounded-input border border-st-border bg-st-surface text-sm text-st-text placeholder:text-st-muted focus:outline-none focus:shadow-focus focus:border-st-primary disabled:bg-st-bg disabled:text-st-muted";
+
+// Moved OUTSIDE the component — defined once, not recreated every render
+function Field({ label, children }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium mb-1 text-st-text">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 function parseStoredMobile(stored) {
   if (!stored) return { country: COUNTRIES[0], formattedNumber: "" };
 
@@ -49,7 +64,6 @@ export default function UpdateProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Mobile number UI state — mirrors registration's pattern
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
   const [mobileValue, setMobileValue] = useState("");
   const [mobileError, setMobileError] = useState("");
@@ -72,7 +86,7 @@ export default function UpdateProfile() {
       return;
     }
 
-    fetch(
+    authFetch(
       `http://localhost:8080/api/student/profile/${encodeURIComponent(loginData.email)}`
     )
       .then((res) => {
@@ -141,7 +155,7 @@ export default function UpdateProfile() {
         mobileNumber: `${selectedCountry.dial}${digits}`,
       };
 
-      const response = await fetch(
+      const response = await authFetch(
         `http://localhost:8080/api/student/profile/${encodeURIComponent(loginData.email)}`,
         {
           method: "PUT",
@@ -151,6 +165,11 @@ export default function UpdateProfile() {
       );
 
       if (!response.ok) {
+        if (response.status === 401) {
+          showToast("Your session has expired. Please log in again.", "error");
+          navigate("/login");
+          return;
+        }
         const errorMessage = await response.text();
         console.log("Backend Error:", errorMessage);
         throw new Error("Profile update failed");
@@ -186,18 +205,6 @@ export default function UpdateProfile() {
     );
   }
 
-  const Field = ({ label, children }) => (
-    <div>
-      <label className="block text-sm font-medium mb-1 text-st-text">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-
-  const inputClass =
-    "w-full h-10 px-3 rounded-input border border-st-border bg-st-surface text-sm text-st-text placeholder:text-st-muted focus:outline-none focus:shadow-focus focus:border-st-primary disabled:bg-st-bg disabled:text-st-muted";
-
   const availableBranches = COURSE_BRANCHES[student.course] || [];
   const branchValue = availableBranches.includes(student.branch) ? student.branch : "";
 
@@ -224,7 +231,6 @@ export default function UpdateProfile() {
               />
             </Field>
 
-            {/* Mobile — same flag + caret + formatted input as registration */}
             <div ref={countryRef} className="relative">
               <label className="block text-sm font-medium mb-1 text-st-text">
                 Mobile Number
