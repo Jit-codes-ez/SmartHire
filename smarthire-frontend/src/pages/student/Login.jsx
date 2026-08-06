@@ -72,7 +72,7 @@ export default function Login() {
     setSendingOtp(true);
     setEmailOtpError('');
     try {
-      const response = await fetch('http://localhost:8080/api/auth/send-otp', {
+      const response = await fetch('http://localhost:8080/api/auth/login/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
