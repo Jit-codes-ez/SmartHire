@@ -94,7 +94,7 @@ export default function Dashboard() {
       role="student"
       userName={student.fullName}
       onLogout={handleLogout}
-      title={`Welcome back, ${student.fullName}! 👋`}
+      title={`Welcome back, ${student.fullName}! `}
       subtitle="Here's what's happening with your placement journey."
     >
 

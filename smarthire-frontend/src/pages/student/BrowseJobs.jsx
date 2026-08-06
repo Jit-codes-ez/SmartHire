@@ -62,7 +62,7 @@ export default function BrowseJobs() {
 
     <div className="mb-8">
       <h1 className="text-4xl font-bold text-gray-800">
-        Browse Drives 🚀
+        Browse Drives 
       </h1>
 
       <p className="text-gray-500 mt-2">
@@ -119,27 +119,27 @@ export default function BrowseJobs() {
             <div className="space-y-2 text-sm text-gray-600">
 
               <p>
-                🛠️ <span className="font-medium">Skills:</span>{" "}
+                <span className="font-medium">Skills:</span>{" "}
                 {job.skills?.join(", ")}
               </p>
 
               <p>
-                🎓 <span className="font-medium">CGPA:</span>{" "}
+                <span className="font-medium">CGPA:</span>{" "}
                 {job.cgpaCutoff}
               </p>
 
               <p>
-                📍 <span className="font-medium">Location:</span>{" "}
+                <span className="font-medium">Location:</span>{" "}
                 {job.location}
               </p>
 
               <p>
-                👥 <span className="font-medium">Openings:</span>{" "}
+                <span className="font-medium">Openings:</span>{" "}
                 {job.openings}
               </p>
 
               <p>
-                📅 <span className="font-medium">Deadline:</span>{" "}
+                <span className="font-medium">Deadline:</span>{" "}
                 {job.deadline}
               </p>
 
