@@ -1,85 +1,73 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import CenteredFormLayout from '../../layouts/CenteredFormLayout.jsx'
-import Button from '../../components/Button.jsx'
-import { useToast } from '../../context/ToastContext.jsx'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CenteredFormLayout from "../../layouts/CenteredFormLayout.jsx";
+import Button from "../../components/Button.jsx";
+import { useToast } from "../../context/ToastContext.jsx";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
 
-  const navigate = useNavigate()
-  const { showToast } = useToast()
-
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-
-      setLoading(true)
+      setLoading(true);
 
       const response = await fetch(
         "http://localhost:8080/api/student/login",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             email,
-            password
-          })
+            password,
+          }),
         }
-      )
+      );
 
+      // Read response as text first
+      const text = await response.text();
 
-      const data = await response.json()
+      let data = {};
 
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed")
+      // Try converting to JSON
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { message: text };
       }
 
+      // Login failed
+      if (!response.ok) {
+        throw new Error(data.message || "Invalid credentials");
+      }
 
-      // Save login data
-      localStorage.setItem(
-        "student",
-        JSON.stringify(data)
-      )
+      // Save logged-in student
+      localStorage.setItem("student", JSON.stringify(data));
 
+      showToast("Logged in successfully!", "success");
 
-      showToast("Logged in successfully!", "success")
-
-      navigate("/student/dashboard")
-
-
-    } catch(error) {
-
-      showToast(error.message, "error")
-
+      navigate("/student/dashboard");
+    } catch (error) {
+      showToast(error.message || "Invalid credentials", "error");
     } finally {
-
-      setLoading(false)
-
+      setLoading(false);
     }
-  }
-
+  };
 
   return (
-    <CenteredFormLayout 
-      title="Welcome back" 
+    <CenteredFormLayout
+      title="Welcome back"
       subtitle="Log in to continue to SmartHire."
     >
-
-      <form 
-        onSubmit={handleSubmit} 
-        className="space-y-4"
-      >
-
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="label" htmlFor="email">
             Email Address
@@ -89,17 +77,14 @@ export default function Login() {
             id="email"
             type="email"
             className="input"
-            placeholder="jit@email.com"
+            placeholder="Enter your email"
             value={email}
-            onChange={(e)=>setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
-
         </div>
 
-
         <div>
-
           <label className="label" htmlFor="password">
             Password
           </label>
@@ -108,60 +93,50 @@ export default function Login() {
             id="password"
             type="password"
             className="input"
-            placeholder="••••••••"
+            placeholder="Enter your password"
             value={password}
-            onChange={(e)=>setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
-
         </div>
 
-
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full"
           disabled={loading}
         >
           {loading ? "Logging in..." : "Log In"}
         </Button>
-
-
       </form>
 
-
-      <div 
-        className="mt-6 pt-4 border-t text-xs text-center space-y-2" 
-        style={{ borderColor: 'var(--border)' }}
+      <div
+        className="mt-6 pt-4 border-t text-xs text-center space-y-2"
+        style={{ borderColor: "var(--border)" }}
       >
-
         <p className="muted">
           Demo shortcuts — jump straight into a portal:
         </p>
 
         <div className="flex justify-center gap-3">
-
-          <button 
-            className="underline" 
-            style={{ color: 'var(--primary)' }}
-            onClick={() => navigate('/recruiter/dashboard')}
+          <button
+            type="button"
+            className="underline"
+            style={{ color: "var(--primary)" }}
+            onClick={() => navigate("/recruiter/dashboard")}
           >
             Recruiter
           </button>
 
-
-          <button 
-            className="underline" 
-            style={{ color: 'var(--primary)' }}
-            onClick={() => navigate('/admin/dashboard')}
+          <button
+            type="button"
+            className="underline"
+            style={{ color: "var(--primary)" }}
+            onClick={() => navigate("/admin/dashboard")}
           >
             Admin
           </button>
-
         </div>
-
       </div>
-
-
     </CenteredFormLayout>
-  )
+  );
 }
