@@ -1,5 +1,7 @@
 package com.smarthire.controller;
 
+import com.smarthire.dto.AdminResponse;
+import com.smarthire.entity.User;
 import com.smarthire.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +50,12 @@ public class AdminController {
         adminService.rejectRecruiter(id);
 
         return ResponseEntity.ok("Recruiter rejected successfully");
+    }
+    
+    // Show Admin
+    @GetMapping("/admins")
+    public List<AdminResponse> getAllAdmins() {
+        return adminService.getAllAdmins();
     }
     
 }

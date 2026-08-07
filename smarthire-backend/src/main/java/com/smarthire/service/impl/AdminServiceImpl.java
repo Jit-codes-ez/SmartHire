@@ -1,5 +1,6 @@
 package com.smarthire.service.impl;
 
+import com.smarthire.dto.AdminResponse;
 import com.smarthire.entity.Recruiter;
 import com.smarthire.entity.RecruiterRequest;
 import com.smarthire.entity.Student;
@@ -12,6 +13,9 @@ import com.smarthire.repository.StudentRepository;
 import com.smarthire.repository.UserRepository;
 import com.smarthire.service.AdminService;
 import com.smarthire.service.EmailService;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -104,6 +108,8 @@ public class AdminServiceImpl implements AdminService {
                     "Recruiter request has already been processed"
             );
         }
+        
+        String adminEmail = getLoggedInAdminEmail();
 
         // Check whether email already exists in users
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -137,9 +143,8 @@ public class AdminServiceImpl implements AdminService {
         recruiterRepository.save(recruiter);
 
         // Mark request as APPROVED
-        request.setStatus(
-                RecruiterRequestStatus.APPROVED
-        );
+        request.setStatus(RecruiterRequestStatus.APPROVED);
+        request.setApprovedRejectedBy(adminEmail);
         recruiterRequestRepository.save(request);
         emailService.sendRecruiterApprovalEmail(request.getEmail(), request.getFullName());
     }
@@ -162,9 +167,9 @@ public class AdminServiceImpl implements AdminService {
                     "Recruiter request has already been processed"
             );
         }
-        request.setStatus(
-                RecruiterRequestStatus.REJECTED
-        );
+        String adminEmail = getLoggedInAdminEmail();
+        request.setStatus(RecruiterRequestStatus.REJECTED);
+        request.setApprovedRejectedBy(adminEmail);
         recruiterRequestRepository.save(request);
         emailService.sendRecruiterRejectionEmail(request.getEmail(), request.getFullName());
     }
@@ -280,14 +285,16 @@ public class AdminServiceImpl implements AdminService {
     
     // ADMINS
     @Override
-    public List<User> getAllAdmins() {
-        List<User> admins = new ArrayList<>();
-        for (User user : userRepository.findAll()) {
-            if (user.getRole() == Role.ADMIN) {
-                admins.add(user);
-            }
-        }
-        return admins;
+    public List<AdminResponse> getAllAdmins() {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getRole() == Role.ADMIN)
+                .map(user -> new AdminResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getRole()
+                ))
+                .toList();
     }
     @Override
     public User addAdmin(User admin) {
@@ -320,53 +327,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public User updateAdmin(
-            Long id,
-            User updatedAdmin) {
-        User existingAdmin =
-                userRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Admin not found"
-                                )
-                        );
-
-        if (existingAdmin.getRole()
-                != Role.ADMIN) {
-            throw new RuntimeException(
-                    "User is not an admin"
-            );
-        }
-        if (updatedAdmin.getEmail() != null &&
-                !updatedAdmin.getEmail()
-                        .equals(existingAdmin.getEmail())) {
-
-            if (userRepository.existsByEmail(
-                    updatedAdmin.getEmail())) {
-
-                throw new RuntimeException(
-                        "A user with this email already exists"
-                );
-            }
-            existingAdmin.setEmail(
-                    updatedAdmin.getEmail()
-            );
-        }
-        if (updatedAdmin.getPassword() != null &&
-                !updatedAdmin.getPassword()
-                        .trim().isEmpty()) {
-
-            existingAdmin.setPassword(
-                    passwordEncoder.encode(
-                            updatedAdmin.getPassword()
-                    )
-            );
-        }
-        existingAdmin.setRole(Role.ADMIN);
-        return userRepository.save(existingAdmin);
-    }
-
-    @Override
     public void deleteAdmin(Long id) {
         User admin =
                 userRepository.findById(id)
@@ -382,5 +342,16 @@ public class AdminServiceImpl implements AdminService {
             );
         }
         userRepository.delete(admin);
+    }
+    
+    private String getLoggedInAdminEmail() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Admin is not authenticated");
+        }
+
+        return authentication.getName();
     }
 }

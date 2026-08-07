@@ -191,33 +191,29 @@ export default function AdminDashboard() {
   const [actioningId, setActioningId] = useState(null);
   const [viewingRecruiter, setViewingRecruiter] = useState(null);
 
-  /* ── Data loading ── */
+/* ── Data loading ── */
+const fetchAll = async () => {
+  try {
+    const [dashRes, pendingRes, adminsRes] = await Promise.all([
+      authFetch("http://localhost:8080/api/admin/dashboard"),
+      authFetch("http://localhost:8080/api/admin/recruiters/pending"),
+      authFetch("http://localhost:8080/api/admin/admins?limit=3"),
+    ]);
 
-  const fetchAll = async () => {
-    try {
-      const [dashRes, pendingRes, studentsRes, recruitersRes, adminsRes] =
-        await Promise.all([
-          authFetch("http://localhost:8080/api/admin/dashboard"),
-          authFetch("http://localhost:8080/api/admin/recruiters/pending"),
-          authFetch("http://localhost:8080/api/admin/students?limit=3"),
-          authFetch("http://localhost:8080/api/admin/recruiters?limit=3"),
-          authFetch("http://localhost:8080/api/admin/admins?limit=3"),
-        ]);
-
-      if (!dashRes.ok) throw new Error("Failed to fetch dashboard");
-
-      setDashboard(await dashRes.json());
-      setPendingRecruiters(pendingRes.ok ? await pendingRes.json() : []);
-      setRecentStudents(studentsRes.ok ? await studentsRes.json() : []);
-      setApprovedRecruiters(recruitersRes.ok ? await recruitersRes.json() : []);
-      setAdmins(adminsRes.ok ? await adminsRes.json() : []);
-    } catch (err) {
-      console.error(err);
-      showToast("Unable to load dashboard", "error");
-    } finally {
-      setLoading(false);
+    if (!dashRes.ok) {
+      throw new Error("Failed to fetch dashboard");
     }
-  };
+
+    setDashboard(await dashRes.json());
+    setPendingRecruiters(pendingRes.ok ? await pendingRes.json() : []);
+    setAdmins(adminsRes.ok ? await adminsRes.json() : []);
+  } catch (err) {
+    console.error(err);
+    showToast("Unable to load dashboard", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (!loginData?.email) {
@@ -488,13 +484,6 @@ export default function AdminDashboard() {
         <DarkCard>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-semibold text-slate-100">Admins</h2>
-            <DarkButton
-              size="sm"
-              variant="secondary"
-              onClick={() => navigate("/admin/admins")}
-            >
-              View All →
-            </DarkButton>
           </div>
 
           {admins.length === 0 ? (
@@ -522,35 +511,6 @@ export default function AdminDashboard() {
                       <p className="text-slate-400 text-xs mt-0.5">
                         {a.role || "Admin"}
                       </p>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <DarkButton
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => navigate(`/admin/admins/edit/${a.id}`)}
-                      >
-                        Edit
-                      </DarkButton>
-                      {/* Prevent self-deletion */}
-                      {!isSelf && (
-                        <DarkButton
-                          size="sm"
-                          variant="danger"
-                          onClick={() => {
-                            if (confirm(`Delete admin ${a.email}?`)) {
-                              authFetch(
-                                `http://localhost:8080/api/admin/admins/${a.id}`,
-                                { method: "DELETE" }
-                              ).then(() => {
-                                showToast("Admin deleted", "success");
-                                fetchAll();
-                              }).catch(() => showToast("Delete failed", "error"));
-                            }
-                          }}
-                        >
-                          Delete
-                        </DarkButton>
-                      )}
                     </div>
                   </div>
                 );
