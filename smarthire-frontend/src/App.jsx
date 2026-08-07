@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 
+import ScrollToTop from "./components/ScrollToTop";
 import SiteHeader from './components/SiteHeader.jsx'
 import SiteFooter from './components/SiteFooter.jsx'
 
@@ -47,6 +48,7 @@ export default function App() {
 
   return (
     <>
+    <ScrollToTop />
       <SiteHeader />
 
       <Routes>
