@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import DashboardLayout from "../../layouts/DashboardLayout.jsx";
-import Card from "../../components/Card.jsx";
-import Button from "../../components/Button.jsx";
-import { useToast } from "../../context/ToastContext.jsx";
+import DashboardLayout from "../../layouts/DashboardLayout";
+import Card from "../../components/Card";
+import Button from "../../components/Button";
+import { useToast } from "../../context/ToastContext";
 
 function BranchBar({ branch, rate }) {
   return (
     <div className="mb-5">
       <div className="flex justify-between mb-2">
         <span className="font-medium">{branch}</span>
-        <span className="text-sm text-gray-500">{rate}%</span>
+        <span className="text-teal-600 font-semibold">{rate}%</span>
       </div>
 
-      <div className="w-full h-2 bg-gray-200 rounded-full">
+      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-2 rounded-full bg-teal-600 transition-all"
+          className="h-full bg-teal-600 transition-all duration-700"
           style={{ width: `${rate}%` }}
         />
       </div>
@@ -28,7 +28,15 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const [dashboard, setDashboard] = useState(null);
+  const [dashboard, setDashboard] = useState({
+    totalStudents: 0,
+    totalRecruiters: 0,
+    pendingRecruiters: 0,
+    activeDrives: 0,
+    totalApplications: 0,
+    branchPlacement: [],
+  });
+
   const [activities, setActivities] = useState([]);
   const [pendingRecruiters, setPendingRecruiters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,73 +47,80 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      /*
-      Backend APIs
+      const [
+        dashboardRes,
+        activityRes,
+        recruiterRes,
+      ] = await Promise.all([
+        fetch("http://localhost:8080/api/admin/dashboard"),
+        fetch("http://localhost:8080/api/admin/activities"),
+        fetch("http://localhost:8080/api/admin/recruiters/pending"),
+      ]);
 
-      GET /api/admin/dashboard
-      GET /api/admin/activities
-      GET /api/admin/pending-recruiters
-      */
+      if (!dashboardRes.ok)
+        throw new Error("Failed to fetch dashboard");
 
-      /*
-      const dashboardRes = await fetch("http://localhost:8080/api/admin/dashboard");
       const dashboardData = await dashboardRes.json();
-
-      const activityRes = await fetch("http://localhost:8080/api/admin/activities");
-      const activityData = await activityRes.json();
-
-      const recruiterRes = await fetch("http://localhost:8080/api/admin/pending-recruiters");
-      const recruiterData = await recruiterRes.json();
+      const activityData = activityRes.ok
+        ? await activityRes.json()
+        : [];
+      const recruiterData = recruiterRes.ok
+        ? await recruiterRes.json()
+        : [];
 
       setDashboard(dashboardData);
       setActivities(activityData);
       setPendingRecruiters(recruiterData);
-      */
-
-      setDashboard({
-        totalStudents: 0,
-        totalRecruiters: 0,
-        activeDrives: 0,
-        totalApplications: 0,
-        branchPlacement: []
-      });
-
-      setActivities([]);
-      setPendingRecruiters([]);
-
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.error(err);
+      showToast("Unable to load dashboard", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const stats = dashboard
-    ? [
-        {
-          label: "Students",
-          value: dashboard.totalStudents
-        },
-        {
-          label: "Recruiters",
-          value: dashboard.totalRecruiters
-        },
-        {
-          label: "Active Drives",
-          value: dashboard.activeDrives
-        },
-        {
-          label: "Applications",
-          value: dashboard.totalApplications
-        }
-      ]
-    : [];
+  const stats = [
+    {
+      title: "Students",
+      value: dashboard.totalStudents,
+      color: "text-blue-600",
+    },
+    {
+      title: "Recruiters",
+      value: dashboard.totalRecruiters,
+      color: "text-green-600",
+    },
+    {
+      title: "Pending",
+      value: dashboard.pendingRecruiters,
+      color: "text-orange-500",
+    },
+    {
+      title: "Drives",
+      value: dashboard.activeDrives,
+      color: "text-purple-600",
+    },
+    {
+      title: "Applications",
+      value: dashboard.totalApplications,
+      color: "text-teal-600",
+    },
+  ];
 
   if (loading) {
     return (
-      <h2 className="text-center mt-10 text-lg">
-        Loading Dashboard...
-      </h2>
+      <DashboardLayout
+        role="admin"
+        userName="Administrator"
+        title="Admin Dashboard"
+        subtitle="Loading dashboard..."
+      >
+        <div className="flex justify-center py-20">
+          <div className="animate-pulse text-xl font-semibold">
+            Loading Dashboard...
+          </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -115,36 +130,94 @@ export default function Dashboard() {
       userName="Administrator"
       onLogout={() => navigate("/login")}
       title="Admin Dashboard"
-      subtitle="Monitor students, recruiters and placement activities."
+      subtitle="Manage students, recruiters and placement activities."
     >
+      {/* Quick Actions */}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        {stats.map((stat) => (
-          <Card key={stat.label}>
+      <div className="flex flex-wrap gap-4 mb-8">
+
+        <Button
+          onClick={() => navigate("/admin/students/add")}
+        >
+          + Add Student
+        </Button>
+
+        <Button
+          onClick={() => navigate("/admin/recruiters/add")}
+        >
+          + Add Recruiter
+        </Button>
+
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/admin/students")}
+        >
+          Manage Students
+        </Button>
+
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/admin/recruiters")}
+        >
+          Manage Recruiters
+        </Button>
+
+        <Button
+          variant="secondary"
+          onClick={loadDashboard}
+        >
+          Refresh
+        </Button>
+
+      </div>
+
+      {/* Statistics */}
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-5 mb-8">
+
+        {stats.map((item) => (
+
+          <Card key={item.title}>
+
             <p className="text-gray-500 text-sm">
-              {stat.label}
+              {item.title}
             </p>
 
-            <h2 className="text-3xl font-bold mt-2 text-teal-600">
-              {stat.value}
+            <h2
+              className={`text-4xl font-bold mt-3 ${item.color}`}
+            >
+              {item.value}
             </h2>
+
           </Card>
+
         ))}
+
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
+                {/* Placement Statistics */}
 
         <Card className="lg:col-span-2">
 
-          <h2 className="text-xl font-semibold mb-6">
-            Placement by Branch
-          </h2>
+          <div className="flex justify-between items-center mb-6">
 
-          {dashboard.branchPlacement.length === 0 ? (
-            <p className="text-gray-500">
-              No statistics available.
-            </p>
-          ) : (
+            <h2 className="text-xl font-semibold">
+              Placement by Branch
+            </h2>
+
+            <Button
+              variant="secondary"
+              onClick={() => navigate("/admin/reports")}
+            >
+              View Report
+            </Button>
+
+          </div>
+
+          {dashboard.branchPlacement &&
+          dashboard.branchPlacement.length > 0 ? (
+
             dashboard.branchPlacement.map((branch) => (
               <BranchBar
                 key={branch.branch}
@@ -152,112 +225,301 @@ export default function Dashboard() {
                 rate={branch.rate}
               />
             ))
+
+          ) : (
+
+            <div className="py-10 text-center text-gray-500">
+              No placement statistics available.
+            </div>
+
           )}
 
         </Card>
 
+        {/* Recent Activities */}
+
         <Card>
 
-          <h2 className="text-xl font-semibold mb-6">
-            Recent Activity
-          </h2>
+          <div className="flex justify-between items-center mb-6">
+
+            <h2 className="text-xl font-semibold">
+              Recent Activities
+            </h2>
+
+            <Button
+              variant="secondary"
+              onClick={loadDashboard}
+            >
+              Refresh
+            </Button>
+
+          </div>
 
           {activities.length === 0 ? (
-            <p className="text-gray-500">
-              No recent activity.
-            </p>
+
+            <div className="py-8 text-center text-gray-500">
+              No recent activities.
+            </div>
+
           ) : (
-            <ul className="space-y-3">
+
+            <div className="space-y-4">
+
               {activities.map((activity) => (
-                <li
+
+                <div
                   key={activity.id}
-                  className="border-b pb-3 text-sm"
+                  className="border-b pb-3 last:border-none"
                 >
-                  {activity.message}
-                </li>
+
+                  <p className="font-medium">
+                    {activity.message}
+                  </p>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    {activity.time}
+                  </p>
+
+                </div>
+
               ))}
-            </ul>
+
+            </div>
+
           )}
 
         </Card>
 
       </div>
 
+      {/* Dashboard Summary */}
+
+      <div className="grid md:grid-cols-3 gap-6 mt-8">
+
+        <Card>
+
+          <h3 className="text-lg font-semibold mb-3">
+            Student Summary
+          </h3>
+
+          <p className="text-gray-600">
+            Total Registered Students
+          </p>
+
+          <h2 className="text-4xl font-bold text-blue-600 mt-2">
+            {dashboard.totalStudents}
+          </h2>
+
+          <Button
+            className="mt-5 w-full"
+            onClick={() => navigate("/admin/students")}
+          >
+            View Students
+          </Button>
+
+        </Card>
+
+        <Card>
+
+          <h3 className="text-lg font-semibold mb-3">
+            Recruiter Summary
+          </h3>
+
+          <p className="text-gray-600">
+            Approved Recruiters
+          </p>
+
+          <h2 className="text-4xl font-bold text-green-600 mt-2">
+            {dashboard.totalRecruiters}
+          </h2>
+
+          <Button
+            className="mt-5 w-full"
+            onClick={() => navigate("/admin/recruiters")}
+          >
+            View Recruiters
+          </Button>
+
+        </Card>
+
+        <Card>
+
+          <h3 className="text-lg font-semibold mb-3">
+            Pending Approvals
+          </h3>
+
+          <p className="text-gray-600">
+            Waiting for Verification
+          </p>
+
+          <h2 className="text-4xl font-bold text-orange-500 mt-2">
+            {dashboard.pendingRecruiters}
+          </h2>
+
+          <Button
+            className="mt-5 w-full"
+            variant="secondary"
+            onClick={() =>
+              navigate("/admin/recruiters?tab=pending")
+            }
+          >
+            Review Requests
+          </Button>
+
+        </Card>
+
+      </div>
+
+      {/* Pending Recruiter Approvals */}
+
       <Card className="mt-8">
 
         <div className="flex justify-between items-center mb-6">
+
           <h2 className="text-xl font-semibold">
             Pending Recruiter Approvals
           </h2>
 
           <Button
             variant="secondary"
-            onClick={() => navigate("/admin/recruiters")}
+            onClick={() =>
+              navigate("/admin/recruiters?tab=pending")
+            }
           >
             View All
           </Button>
+
         </div>
+                {pendingRecruiters.length === 0 ? (
 
-        {pendingRecruiters.length === 0 ? (
-          <p className="text-gray-500">
+          <div className="py-10 text-center text-gray-500">
             No pending recruiter approvals.
-          </p>
+          </div>
+
         ) : (
-          <div className="space-y-4">
 
-            {pendingRecruiters.map((recruiter) => (
+          <div className="overflow-x-auto">
 
-              <div
-                key={recruiter.id}
-                className="flex justify-between items-center border-b pb-4"
-              >
+            <table className="w-full">
 
-                <div>
+              <thead>
 
-                  <h3 className="font-semibold">
-                    {recruiter.company}
-                  </h3>
+                <tr className="border-b">
 
-                  <p className="text-gray-500 text-sm">
-                    {recruiter.name}
-                  </p>
+                  <th className="text-left py-3">Company</th>
+                  <th className="text-left py-3">Recruiter</th>
+                  <th className="text-left py-3">Email</th>
+                  <th className="text-center py-3">Actions</th>
 
-                  <p className="text-gray-400 text-xs">
-                    {recruiter.email}
-                  </p>
+                </tr>
 
-                </div>
+              </thead>
 
-                <div className="flex gap-2">
+              <tbody>
 
-                  <Button
-                    onClick={() =>
-                      showToast("Recruiter approved", "success")
-                    }
+                {pendingRecruiters.map((recruiter) => (
+
+                  <tr
+                    key={recruiter.id}
+                    className="border-b hover:bg-gray-50 transition"
                   >
-                    Approve
-                  </Button>
 
-                  <Button
-                    variant="danger"
-                    onClick={() =>
-                      showToast("Recruiter rejected", "error")
-                    }
-                  >
-                    Reject
-                  </Button>
+                    <td className="py-4 font-semibold">
+                      {recruiter.company}
+                    </td>
 
-                </div>
+                    <td>{recruiter.name}</td>
 
-              </div>
+                    <td>{recruiter.email}</td>
 
-            ))}
+                    <td>
+
+                      <div className="flex justify-center gap-2">
+
+                        <Button
+                          onClick={async () => {
+                            try {
+
+                              await fetch(
+                                `http://localhost:8080/api/admin/recruiters/${recruiter.id}/approve`,
+                                {
+                                  method: "PUT",
+                                }
+                              );
+
+                              showToast(
+                                "Recruiter approved",
+                                "success"
+                              );
+
+                              loadDashboard();
+
+                            } catch (err) {
+
+                              showToast(
+                                "Approval failed",
+                                "error"
+                              );
+
+                            }
+                          }}
+                        >
+                          Approve
+                        </Button>
+
+                        <Button
+                          variant="danger"
+                          onClick={async () => {
+
+                            try {
+
+                              await fetch(
+                                `http://localhost:8080/api/admin/recruiters/${recruiter.id}/reject`,
+                                {
+                                  method: "PUT",
+                                }
+                              );
+
+                              showToast(
+                                "Recruiter rejected",
+                                "success"
+                              );
+
+                              loadDashboard();
+
+                            } catch (err) {
+
+                              showToast(
+                                "Reject failed",
+                                "error"
+                              );
+
+                            }
+                          }}
+                        >
+                          Reject
+                        </Button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
 
           </div>
+
         )}
 
       </Card>
 
     </DashboardLayout>
+
   );
+
 }
