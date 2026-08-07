@@ -23,8 +23,8 @@ import Applicants from './pages/recruiter/Applicants.jsx'
 import PostDrive from './pages/recruiter/PostDrive.jsx'
 
 import AdminDashboard from './pages/admin/Dashboard.jsx'
-import AdminStudents from './pages/admin/Students.jsx'
-import AdminRecruiters from './pages/admin/Recruiters.jsx'
+import AdminStudents from './pages/admin/ManageStudents.jsx'
+import AdminRecruiters from './pages/admin/ManageRecruiters.jsx'
 import UpdateProfile from "./pages/student/UpdateProfile.jsx";
 import TermsConditions from "./pages/TermsConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";

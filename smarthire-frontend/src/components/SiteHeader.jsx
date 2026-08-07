@@ -2,30 +2,73 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import smartHireLogo from "../assets/SmartHireLogo.png";
 
+function getLoggedInUser() {
+  for (const key of ["student", "recruiter", "admin"]) {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      try {
+        return { key, data: JSON.parse(stored) };
+      } catch {
+        // ignore malformed entry
+      }
+    }
+  }
+  return null;
+}
+
+// Nav links differ by role so each user only sees what's relevant to them.
+function getNavLinks(user) {
+  if (!user) {
+    // Logged-out: public pages only
+    return [
+      { to: "/Home", label: "Home" },
+      { to: "/about", label: "About" },
+      { to: "/contact", label: "Contact" },
+    ];
+  }
+
+  const role = user.data?.role;
+
+  if (role === "ADMIN") {
+    return [
+      { to: "/Home", label: "Home" },
+      { to: "/admin/dashboard", label: "Dashboard" },
+      { to: "/admin/students", label: "Students" },
+      { to: "/admin/recruiters", label: "Recruiters" },
+    ];
+  }
+
+  if (role === "RECRUITER") {
+    return [
+      { to: "/Home", label: "Home" },
+      { to: "/recruiter/dashboard", label: "Dashboard" },
+      { to: "/student/jobs", label: "Jobs" },
+    ];
+  }
+
+  // STUDENT 
+  return [
+    { to: "/Home", label: "Home" },
+    { to: "/student/dashboard", label: "Dashboard" },
+    { to: "/student/jobs", label: "Jobs" },
+  ];
+}
+
 export default function SiteHeader() {
   const navigate = useNavigate();
-  const [student, setStudent] = useState(() => {
-    const stored = localStorage.getItem("student");
-    return stored ? JSON.parse(stored) : null;
-  });
+  const [user, setUser] = useState(() => getLoggedInUser());
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const syncAuth = () => {
-      const stored = localStorage.getItem("student");
-      setStudent(stored ? JSON.parse(stored) : null);
-    };
-
+    const syncAuth = () => setUser(getLoggedInUser());
     window.addEventListener("storage", syncAuth);
     window.addEventListener("authChange", syncAuth);
-
     return () => {
       window.removeEventListener("storage", syncAuth);
       window.removeEventListener("authChange", syncAuth);
     };
   }, []);
 
-  // Close mobile menu on route change / resize back to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setMenuOpen(false);
@@ -35,65 +78,80 @@ export default function SiteHeader() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("student");
+    if (user) localStorage.removeItem(user.key);
     window.dispatchEvent(new Event("authChange"));
     setMenuOpen(false);
     navigate("/login");
   };
 
-  const navLinks = [
-    { to: "/", label: "Home" },
-    { to: "/student/jobs", label: "Jobs" },
-    { to: "/about", label: "About" },
-    { to: "/contact", label: "Contact" },
-  ];
+  const navLinks = getNavLinks(user);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+    <header
+      className="sticky top-0 z-50 border-b shadow-sm transition-colors duration-200"
+      style={{
+        background: "var(--surface, #fff)",
+        borderColor: "var(--border, #e2e8f0)",
+        color: "var(--text, #1e293b)",
+      }}
+    >
       <div className="max-w-7xl mx-auto h-16 px-4 sm:px-6 flex items-center justify-between">
-
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setMenuOpen(false)}>
-          <img
-            src={smartHireLogo}
-            alt="SmartHire"
-            className="h-12 sm:h-16 md:h-20 w-auto"
-          />
+        <Link
+          to="/Home"
+          className="flex items-center gap-2 shrink-0"
+          onClick={() => setMenuOpen(false)}
+        >
+          <img src={smartHireLogo} alt="SmartHire" className="h-12 sm:h-16 md:h-20 w-auto" />
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+        {/* Desktop nav */}
+        <nav
+          className="hidden md:flex items-center gap-8 text-sm font-medium"
+          style={{ color: "var(--muted, #64748b)" }}
+        >
           {navLinks.map((link) => (
-            <Link key={link.to} to={link.to} className="transition hover:text-blue-600">
+            <Link
+              key={link.to}
+              to={link.to}
+              className="transition"
+              style={{ color: "inherit" }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--primary, #2563eb)")
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.color = "inherit")}
+            >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        {/* Desktop Login / Logout */}
+        {/* Desktop login/logout */}
         <div className="hidden md:block">
-          {student ? (
+          {user ? (
             <button
               onClick={handleLogout}
-              className="px-8 lg:px-10 py-2 rounded-md bg-red-600 text-white text-sm font-medium disabled:opacity-60 duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95 disabled:hover:scale-100"
+              className="px-8 lg:px-10 py-2 rounded-md text-white text-sm font-medium duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95"
+              style={{ background: "var(--danger, #dc2626)" }}
             >
               Logout
             </button>
           ) : (
             <Link
               to="/login"
-              className="px-8 lg:px-10 py-2 rounded-md bg-blue-600 text-white text-sm font-medium disabled:opacity-60 duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95 disabled:hover:scale-100"
+              className="px-8 lg:px-10 py-2 rounded-md text-white text-sm font-medium duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-95"
+              style={{ background: "var(--primary, #2563eb)" }}
             >
               Login
             </Link>
           )}
         </div>
 
-        {/* Mobile Hamburger Button */}
+        {/* Mobile hamburger */}
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
-          className="md:hidden flex items-center justify-center h-10 w-10 rounded-md text-slate-600 hover:bg-slate-100 transition"
+          className="md:hidden flex items-center justify-center h-10 w-10 rounded-md transition"
+          style={{ color: "var(--muted, #64748b)" }}
           aria-label="Toggle menu"
           aria-expanded={menuOpen}
         >
@@ -109,29 +167,40 @@ export default function SiteHeader() {
         </button>
       </div>
 
-      {/* Mobile Menu Panel */}
+      {/* Mobile menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          menuOpen ? "max-h-96 border-t border-slate-200" : "max-h-0"
+          menuOpen ? "max-h-96 border-t" : "max-h-0"
         }`}
+        style={{ borderColor: "var(--border, #e2e8f0)" }}
       >
-        <nav className="flex flex-col px-4 py-3 gap-1 text-sm font-medium text-slate-600 bg-white">
+        <nav
+          className="flex flex-col px-4 py-3 gap-1 text-sm font-medium"
+          style={{
+            background: "var(--surface, #fff)",
+            color: "var(--muted, #64748b)",
+          }}
+        >
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
               onClick={() => setMenuOpen(false)}
-              className="px-2 py-2.5 rounded-md transition hover:bg-slate-50 hover:text-blue-600"
+              className="px-2 py-2.5 rounded-md transition"
             >
               {link.label}
             </Link>
           ))}
 
-          <div className="pt-2 mt-1 border-t border-slate-100">
-            {student ? (
+          <div
+            className="pt-2 mt-1 border-t"
+            style={{ borderColor: "var(--border, #e2e8f0)" }}
+          >
+            {user ? (
               <button
                 onClick={handleLogout}
-                className="w-full px-4 py-2.5 rounded-md bg-red-600 text-white text-sm font-medium duration-200 active:scale-95"
+                className="w-full px-4 py-2.5 rounded-md text-white text-sm font-medium duration-200 active:scale-95"
+                style={{ background: "var(--danger, #dc2626)" }}
               >
                 Logout
               </button>
@@ -139,7 +208,8 @@ export default function SiteHeader() {
               <Link
                 to="/login"
                 onClick={() => setMenuOpen(false)}
-                className="block w-full text-center px-4 py-2.5 rounded-md bg-blue-600 text-white text-sm font-medium duration-200 active:scale-95"
+                className="block w-full text-center px-4 py-2.5 rounded-md text-white text-sm font-medium duration-200 active:scale-95"
+                style={{ background: "var(--primary, #2563eb)" }}
               >
                 Login
               </Link>

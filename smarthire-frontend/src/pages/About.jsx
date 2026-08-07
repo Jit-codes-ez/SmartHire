@@ -89,52 +89,53 @@ const workflow = [
   return (
     <div className="min-h-screen bg-[#F8FAFF] text-[#1A2130]">
 
-      {/* HERO */}
+      {/* Header */}
 
-      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+      <div className="bg-gradient-to-r from-blue-700 to-indigo-700 text-white py-16">
+        <div className="max-w-6xl mx-auto px-6">
 
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-6">
-          <Brain size={16} />
-          AI Powered Campus Recruitment
-        </div>
+          <h1 className="text-4xl font-bold">
+            About SmartHire
+          </h1>
 
-        <h1 className="text-5xl font-bold mb-6">
-          About SmartHire
-        </h1>
-
-        <p className="max-w-3xl mx-auto text-lg text-slate-600 leading-8">
-          SmartHire is an intelligent campus recruitment platform designed to
-          simplify placement management for students, recruiters and placement
-          administrators through AI-powered resume analysis and smart
-          recruitment workflows.
-        </p>
-
-      </section>
-
-      {/* MISSION */}
-
-      <Reveal as="section" className="max-w-6xl mx-auto px-6 py-20">
-
-        <div className="bg-white rounded-xl border border-slate-200 p-8">
-
-          <div className="flex items-center gap-3 mb-5">
-
-            <Target className="text-blue-600" />
-
-            <h2 className="text-2xl font-bold">
-              Our Mission
-            </h2>
-
-          </div>
-
-          <p className="text-slate-600 leading-8">
-            We believe campus recruitment should be simple, transparent and
-            efficient. SmartHire reduces manual work by automating resume
-            screening, helping recruiters identify suitable candidates quickly
-            while giving students a better application experience.
+          <p className="mt-4 text-blue-100 max-w-3xl leading-8">
+            SmartHire is an intelligent campus recruitment platform designed
+            to simplify placement management for students, recruiters and
+            placement administrators through AI-powered resume analysis and
+            smart recruitment workflows.
           </p>
 
         </div>
+      </div>
+
+      {/* Mission */}
+
+      <Reveal>
+
+        <section className="max-w-6xl mx-auto px-6 py-12">
+
+          <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm hover:shadow-lg transition">
+
+            <div className="flex items-center gap-3 mb-5">
+
+              <Target className="text-blue-600"/>
+
+              <h2 className="text-2xl font-bold text-gray-800">
+                Our Mission
+              </h2>
+
+            </div>
+
+            <p className="text-gray-600 leading-8">
+              We believe campus recruitment should be simple, transparent and
+              efficient. SmartHire reduces manual work by automating resume
+              screening, helping recruiters identify suitable candidates quickly
+              while giving students a better application experience.
+            </p>
+
+          </div>
+
+        </section>
 
       </Reveal>
 

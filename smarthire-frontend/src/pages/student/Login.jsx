@@ -9,6 +9,12 @@ const ROLE_DASHBOARDS = {
   ADMIN: '/admin/dashboard',
 };
 
+const ROLE_STORAGE_KEY = {
+  STUDENT: 'student',
+  RECRUITER: 'recruiter',
+  ADMIN: 'admin',       
+};
+
 export default function Login() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -109,17 +115,21 @@ export default function Login() {
 
     const data = await response.json();
 
-    setOtpStatus('success');
-    localStorage.setItem('student', JSON.stringify({
-      email: data.email,
-      role: data.role,
-      token: data.token,
-    }));
+      const storageKey = ROLE_STORAGE_KEY[data.role] || 'student';
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          email: data.email,
+          role: data.role,
+          token: data.token,
+          fullName: data.fullName || data.name || '',
+        })
+      );
     window.dispatchEvent(new Event('authChange'));
     showToast('Logged in successfully!', 'success');
 
     const destination = ROLE_DASHBOARDS[data.role] || '/login';
-    navigate(destination);
+    setTimeout(() => navigate(destination), 50)
   } catch {
     setOtpStatus('error');
   } finally {
@@ -261,6 +271,8 @@ export default function Login() {
 
           <p className="mt-6 text-center text-sm text-st-muted">
             Don't have an account?{' '}
+          </p>
+          <p>
             <Link to="/student/register" className="text-st-primary font-medium">
               Register as Student
             </Link>{' '}
