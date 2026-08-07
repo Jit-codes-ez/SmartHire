@@ -23,8 +23,10 @@ import Applicants from './pages/recruiter/Applicants.jsx'
 import PostDrive from './pages/recruiter/PostDrive.jsx'
 
 import AdminDashboard from './pages/admin/Dashboard.jsx'
-import AdminStudents from './pages/admin/ManageStudents.jsx'
-import AdminRecruiters from './pages/admin/ManageRecruiters.jsx'
+import ManageAdmins from './pages/admin/ManageAdmins.jsx'
+import ManageStudent from './pages/admin/ManageStudents.jsx'
+import ManageRecruiters from './pages/admin/ManageRecruiters.jsx'
+import AddAdmin from "./pages/admin/AddAdmin";
 import UpdateProfile from "./pages/student/UpdateProfile.jsx";
 import TermsConditions from "./pages/TermsConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -78,8 +80,10 @@ export default function App() {
 
         {/* Admin portal — Dark Teal theme */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/students" element={<AdminStudents />} />
-        <Route path="/admin/recruiters" element={<AdminRecruiters />} />
+        <Route path="/admin/add-admin" element={<AddAdmin />} />
+        <Route path="/admin/manage-admins" element={<ManageAdmins />} />
+        <Route path="/admin/manage-students" element={<ManageStudent />} />
+        <Route path="/admin/manage-recruiters" element={<ManageRecruiters />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
         <Route path="/student/profile/edit" element={<UpdateProfile />} />

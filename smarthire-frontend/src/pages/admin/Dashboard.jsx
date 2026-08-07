@@ -58,18 +58,19 @@ function DarkButton({
 function RecruiterModal({ recruiter, onClose, onApprove, onReject, actioning }) {
   if (!recruiter) return null;
 
-  const fields = [
-    { label: "Full Name", value: recruiter.name },
-    { label: "Email", value: recruiter.email },
-    { label: "Phone", value: recruiter.phone || "—" },
-    { label: "Company", value: recruiter.company },
-    { label: "Website", value: recruiter.website || "—" },
-    { label: "Designation", value: recruiter.designation || "—" },
-    { label: "Industry", value: recruiter.industry || "—" },
-    { label: "Country", value: recruiter.country || "—" },
-    { label: "State", value: recruiter.state || "—" },
-    { label: "Registration Number", value: recruiter.registrationNumber || "—" },
-  ];
+const fields = [
+  { label: "Full Name", value: recruiter.fullName },
+  { label: "Email", value: recruiter.email },
+  { label: "Phone", value: recruiter.mobileNumber },
+  { label: "Company", value: recruiter.companyName },
+  { label: "Website", value: recruiter.companyWebsite },
+  { label: "Designation", value: recruiter.designation },
+  { label: "Industry", value: recruiter.industry },
+  { label: "City", value: recruiter.city},
+  { label: "Country", value: recruiter.country },
+  { label: "State", value: recruiter.state },
+  { label: "Registration Number", value: recruiter.companyRegistrationNumber},
+];
 
   return (
     <div
@@ -341,7 +342,6 @@ export default function AdminDashboard() {
 
         {/* ── 1. WELCOME CARD ─────────────────────────────────────────── */}
         <DarkCard>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             {/* Left – identity */}
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-full bg-teal-600/20 border-2 border-teal-600/50 flex items-center justify-center text-teal-300 font-bold text-xl shrink-0 select-none">
@@ -349,44 +349,18 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-slate-100 text-lg font-semibold leading-tight">
-                  Welcome back, {displayName} 👋
+                  Welcome back, {displayName}
                 </p>
-                <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-teal-600/15 text-teal-400 text-[11px] font-semibold tracking-wide uppercase">
-                  {loginData?.role || "Administrator"}
+                <p>
+                <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-teal-600/15 text-teal-400 text-[15px] font-semibold tracking-wide uppercase">
+                  {loginData?.role || "Administrator"} {' : '}
+                <span className="text-slate-400 text-xs mt-2"> {loginData?.email} </span>
                 </span>
-                <p className="text-slate-400 text-xs mt-2">
-                  📧 {loginData?.email}
                 </p>
-                {lastLogin && (
-                  <p className="text-slate-500 text-xs mt-0.5">
-                    🕒 Last login: {lastLogin}
-                  </p>
-                )}
+
               </div>
             </div>
 
-            {/* Right – quick summary */}
-            <div className="sm:text-right space-y-1 shrink-0">
-              <p className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-2">
-                You currently have
-              </p>
-              {dashboard.pendingRecruiters > 0 && (
-                <div className="flex sm:justify-end items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-orange-400 animate-pulse" />
-                  <span className="text-sm text-orange-300">
-                    {dashboard.pendingRecruiters} recruiter{" "}
-                    {dashboard.pendingRecruiters === 1 ? "request" : "requests"} waiting
-                  </span>
-                </div>
-              )}
-              <p className="text-sm text-slate-400">
-                {dashboard.totalStudents} registered students
-              </p>
-              <p className="text-sm text-slate-400">
-                {dashboard.totalRecruiters} approved recruiters
-              </p>
-            </div>
-          </div>
         </DarkCard>
 
         {/* ── 2. TOP STATISTICS ───────────────────────────────────────── */}
@@ -402,32 +376,17 @@ export default function AdminDashboard() {
             Quick Actions
           </h3>
           <div className="flex flex-wrap gap-3">
-            <DarkButton onClick={() => navigate("/admin/admins/add")}>
+            <DarkButton onClick={() => navigate("/admin/add-admin")}>
               + Add Admin
             </DarkButton>
-            <DarkButton variant="secondary" onClick={() => navigate("/admin/admins")}>
+            <DarkButton variant="secondary" onClick={() => navigate("/admin/manage-admins")}>
               Manage Admins
             </DarkButton>
-            <DarkButton variant="secondary" onClick={() => navigate("/admin/students")}>
+            <DarkButton variant="secondary" onClick={() => navigate("/admin/manage-students")}>
               Manage Students
             </DarkButton>
-            <DarkButton variant="secondary" onClick={() => navigate("/admin/recruiters")}>
+            <DarkButton variant="secondary" onClick={() => navigate("/admin/manage-recruiters")}>
               Manage Recruiters
-            </DarkButton>
-            <DarkButton
-              variant="secondary"
-              onClick={() =>
-                document
-                  .getElementById("pending-recruiters")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              Pending Approvals
-              {dashboard.pendingRecruiters > 0 && (
-                <span className="ml-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                  {dashboard.pendingRecruiters}
-                </span>
-              )}
             </DarkButton>
             <DarkButton variant="ghost" onClick={fetchAll}>
               ↻ Refresh
@@ -466,13 +425,13 @@ export default function AdminDashboard() {
                 <thead>
                   <tr className="border-b border-slate-700">
                     <th className="text-left py-3 px-2 text-slate-400 font-medium text-xs uppercase tracking-wide">
-                      Company
-                    </th>
-                    <th className="text-left py-3 px-2 text-slate-400 font-medium text-xs uppercase tracking-wide">
                       Recruiter
                     </th>
                     <th className="text-left py-3 px-2 text-slate-400 font-medium text-xs uppercase tracking-wide hidden md:table-cell">
                       Email
+                    </th>
+                    <th className="text-left py-3 px-2 text-slate-400 font-medium text-xs uppercase tracking-wide">
+                      Company
                     </th>
                     <th className="text-center py-3 px-2 text-slate-400 font-medium text-xs uppercase tracking-wide">
                       Actions
@@ -485,12 +444,12 @@ export default function AdminDashboard() {
                       key={r.id}
                       className="border-b border-slate-700/50 hover:bg-slate-700/30 transition"
                     >
-                      <td className="py-4 px-2 font-semibold text-slate-100">
-                        {r.company}
-                      </td>
-                      <td className="py-4 px-2 text-slate-300">{r.name}</td>
+                      <td className="py-4 px-2 text-slate-300">{r.fullName || r.name || "N/A"}</td>
                       <td className="py-4 px-2 text-slate-400 hidden md:table-cell">
                         {r.email}
+                      </td>
+                      <td className="py-4 px-2 font-semibold text-slate-100">
+                        {r.companyname || r.companyName || "N/A"}
                       </td>
                       <td className="py-4 px-2">
                         <div className="flex items-center justify-center gap-2">
@@ -525,138 +484,7 @@ export default function AdminDashboard() {
             </div>
           )}
         </DarkCard>
-
-        {/* ── 5. STUDENT MANAGEMENT PREVIEW ───────────────────────────── */}
-        <DarkCard>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold text-slate-100">
-              Recent Students
-            </h2>
-            <DarkButton
-              size="sm"
-              variant="secondary"
-              onClick={() => navigate("/admin/students")}
-            >
-              View All →
-            </DarkButton>
-          </div>
-
-          {recentStudents.length === 0 ? (
-            <p className="text-slate-500 text-sm py-6 text-center">
-              No students registered yet.
-            </p>
-          ) : (
-            <div className="divide-y divide-slate-700/50">
-              {recentStudents.map((s) => (
-                <div
-                  key={s.id}
-                  className="py-4 flex items-center justify-between gap-4"
-                >
-                  <div>
-                    <p className="text-slate-100 font-medium">{s.name}</p>
-                    <p className="text-slate-400 text-xs mt-0.5">
-                      {s.department || s.course || "—"}{" "}
-                      {s.batch || s.year ? `· ${s.batch || s.year}` : ""}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <DarkButton
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => navigate(`/admin/students/edit/${s.id}`)}
-                    >
-                      Edit
-                    </DarkButton>
-                    <DarkButton
-                      size="sm"
-                      variant="danger"
-                      onClick={() => {
-                        if (confirm(`Delete student ${s.name}?`)) {
-                          authFetch(
-                            `http://localhost:8080/api/admin/students/${s.id}`,
-                            { method: "DELETE" }
-                          ).then(() => {
-                            showToast("Student deleted", "success");
-                            fetchAll();
-                          }).catch(() => showToast("Delete failed", "error"));
-                        }
-                      }}
-                    >
-                      Delete
-                    </DarkButton>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </DarkCard>
-
-        {/* ── 6. RECRUITER MANAGEMENT PREVIEW ─────────────────────────── */}
-        <DarkCard>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold text-slate-100">
-              Approved Recruiters
-            </h2>
-            <DarkButton
-              size="sm"
-              variant="secondary"
-              onClick={() => navigate("/admin/recruiters")}
-            >
-              View All →
-            </DarkButton>
-          </div>
-
-          {approvedRecruiters.length === 0 ? (
-            <p className="text-slate-500 text-sm py-6 text-center">
-              No approved recruiters yet.
-            </p>
-          ) : (
-            <div className="divide-y divide-slate-700/50">
-              {approvedRecruiters.map((r) => (
-                <div
-                  key={r.id}
-                  className="py-4 flex items-center justify-between gap-4"
-                >
-                  <div>
-                    <p className="text-slate-100 font-medium">{r.company}</p>
-                    <p className="text-slate-400 text-xs mt-0.5">
-                      {r.name}
-                      {r.email ? ` · ${r.email}` : ""}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <DarkButton
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => navigate(`/admin/recruiters/edit/${r.id}`)}
-                    >
-                      Edit
-                    </DarkButton>
-                    <DarkButton
-                      size="sm"
-                      variant="danger"
-                      onClick={() => {
-                        if (confirm(`Delete recruiter ${r.name}?`)) {
-                          authFetch(
-                            `http://localhost:8080/api/admin/recruiters/${r.id}`,
-                            { method: "DELETE" }
-                          ).then(() => {
-                            showToast("Recruiter deleted", "success");
-                            fetchAll();
-                          }).catch(() => showToast("Delete failed", "error"));
-                        }
-                      }}
-                    >
-                      Delete
-                    </DarkButton>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </DarkCard>
-
-        {/* ── 7. ADMIN MANAGEMENT PREVIEW ─────────────────────────────── */}
+        {/* ──  ADMIN MANAGEMENT PREVIEW ─────────────────────────────── */}
         <DarkCard>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-semibold text-slate-100">Admins</h2>

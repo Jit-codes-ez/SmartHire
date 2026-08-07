@@ -31,10 +31,9 @@ function getNavLinks(user) {
 
   if (role === "ADMIN") {
     return [
-      { to: "/Home", label: "Home" },
       { to: "/admin/dashboard", label: "Dashboard" },
-      { to: "/admin/students", label: "Students" },
-      { to: "/admin/recruiters", label: "Recruiters" },
+      { to: "/admin/manage-students", label: "Students" },
+      { to: "/admin/manage-recruiters", label: "Recruiters" },
     ];
   }
 

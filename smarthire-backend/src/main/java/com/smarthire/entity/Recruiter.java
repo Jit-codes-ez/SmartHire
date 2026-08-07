@@ -1,12 +1,11 @@
 package com.smarthire.entity;
 
-import com.smarthire.enums.RecruiterRequestStatus;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "recruiter_requests")
-public class RecruiterRequest {
+@Table(name = "recruiters")
+public class Recruiter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,12 +13,6 @@ public class RecruiterRequest {
 
     @Column(nullable = false)
     private String fullName;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password;
 
     @Column(nullable = false)
     private String mobileNumber;
@@ -46,12 +39,15 @@ public class RecruiterRequest {
 
     private String companyRegistrationNumber;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RecruiterRequestStatus status = RecruiterRequestStatus.PENDING;
-    
-    @Column(name = "approved_rejected_by")
-    private String approvedRejectedBy;
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+
+    public Recruiter() {
+    }
+
 
     public Long getId() {
         return id;
@@ -61,28 +57,13 @@ public class RecruiterRequest {
         this.id = id;
     }
 
+
     public String getFullName() {
         return fullName;
     }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getMobileNumber() {
@@ -93,6 +74,7 @@ public class RecruiterRequest {
         this.mobileNumber = mobileNumber;
     }
 
+
     public String getCompanyName() {
         return companyName;
     }
@@ -100,6 +82,7 @@ public class RecruiterRequest {
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
     }
+
 
     public String getDesignation() {
         return designation;
@@ -109,6 +92,7 @@ public class RecruiterRequest {
         this.designation = designation;
     }
 
+
     public String getCompanyWebsite() {
         return companyWebsite;
     }
@@ -116,6 +100,7 @@ public class RecruiterRequest {
     public void setCompanyWebsite(String companyWebsite) {
         this.companyWebsite = companyWebsite;
     }
+
 
     public String getCity() {
         return city;
@@ -125,6 +110,7 @@ public class RecruiterRequest {
         this.city = city;
     }
 
+
     public String getState() {
         return state;
     }
@@ -132,6 +118,7 @@ public class RecruiterRequest {
     public void setState(String state) {
         this.state = state;
     }
+
 
     public String getCountry() {
         return country;
@@ -141,6 +128,7 @@ public class RecruiterRequest {
         this.country = country;
     }
 
+
     public String getIndustry() {
         return industry;
     }
@@ -148,6 +136,7 @@ public class RecruiterRequest {
     public void setIndustry(String industry) {
         this.industry = industry;
     }
+
 
     public String getCompanyRegistrationNumber() {
         return companyRegistrationNumber;
@@ -157,21 +146,12 @@ public class RecruiterRequest {
         this.companyRegistrationNumber = companyRegistrationNumber;
     }
 
-    public RecruiterRequestStatus getStatus() {
-        return status;
+
+    public User getUser() {
+        return user;
     }
 
-    public void setStatus(RecruiterRequestStatus status) {
-        this.status = status;
+    public void setUser(User user) {
+        this.user = user;
     }
-
-	public String getApprovedRejectedBy() {
-		return approvedRejectedBy;
-	}
-
-	public void setApprovedRejectedBy(String approvedRejectedBy) {
-		this.approvedRejectedBy = approvedRejectedBy;
-	}
-    
-    
 }

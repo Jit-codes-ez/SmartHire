@@ -195,26 +195,26 @@ export default function ManageStudents() {
     </div>
   );
 
-  // ── Loading state ──
-  if (loading) {
-    return (
-      <FullWidthListLayout
-        title="Manage Students"
-        subtitle="View and manage all registered students."
-        filters={filtersUI}
-      >
-        <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-400">
-          <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-          <p className="text-sm">Loading students…</p>
-        </div>
-      </FullWidthListLayout>
-    );
-  }
+  // // ── Loading state ──
+  // if (loading) {
+  //   return (
+  //     <FullWidthListLayout
+  //       title=" Student Management"
+  //       subtitle="View and manage all registered students."
+  //       filters={filtersUI}
+  //     >
+  //       <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-400">
+  //         <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+  //         <p className="text-sm">Loading students…</p>
+  //       </div>
+  //     </FullWidthListLayout>
+  //   );
+  // }
 
   // ── Main render ──
   return (
     <FullWidthListLayout
-      title="Manage Students"
+      title=" Student Management"
       subtitle="View and manage all registered students."
       filters={filtersUI}
     >
