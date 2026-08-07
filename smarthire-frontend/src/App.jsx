@@ -25,6 +25,10 @@ import AdminDashboard from './pages/admin/Dashboard.jsx'
 import AdminStudents from './pages/admin/Students.jsx'
 import AdminRecruiters from './pages/admin/Recruiters.jsx'
 import UpdateProfile from "./pages/student/UpdateProfile.jsx";
+import TermsConditions from "./pages/TermsConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import HelpCenter from "./pages/HelpCenter";
+import Contact from "./pages/Contact";
 
 
 // Maps a URL prefix to the design-system theme it should render in.
@@ -73,6 +77,10 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/login" replace />} />
         <Route path="/student/profile/edit" element={<UpdateProfile />} />
+        <Route path="/terms" element={<TermsConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/help-center" element={<HelpCenter />} />
       </Routes>
 
       <SiteFooter />

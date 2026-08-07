@@ -90,11 +90,12 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                    .requestMatchers(
-                            "/api/auth/**",
-                            "/api/student/**",
-                            "/api/recruiter/register"
-                    ).permitAll()
+            		.requestMatchers(
+            			    "/api/auth/**",
+            			    "/api/student/**",
+            			    "/api/recruiter/**",
+            			    "/api/admin/**"
+            			).permitAll()
 
                     .requestMatchers(
                             org.springframework.http.HttpMethod.OPTIONS,

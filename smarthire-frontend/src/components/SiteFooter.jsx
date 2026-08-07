@@ -24,10 +24,22 @@ export default function SiteFooter() {
             />
           </Link>
         </div>
-        <div className="flex items-center gap-6 text-xs font-medium" style={{ color: "#64748B" }}>
-          <a href="#" className="hover:text-[#1A2130]">Privacy</a>
-          <a href="#" className="hover:text-[#1A2130]">Help Center</a>
-        </div>
+        <div className="flex items-center gap-6 text-sm font-medium text-gray-500">
+
+          <Link
+            to="/privacy"
+            className="hover:text-blue-600 transition"
+          >
+            Privacy Policy
+          </Link>
+
+          <Link
+            to="/help-center"
+            className="hover:text-blue-600 transition"
+          >
+            Help Center
+          </Link>
+</div>
       </div>
       <div className="text-center text-xs pb-6 px-4" style={{ color: "#94A3B8" }}>
         © {year} SmartHire. All rights reserved.

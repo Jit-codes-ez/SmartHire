@@ -520,30 +520,40 @@ export default function RecruiterRegistration() {
                 {...register('companyRegistrationNumber')}
               />
             </div>
+{/* Terms & Conditions */}
+<div className="flex items-start gap-2 pt-1">
+  <label className="flex items-start gap-2 text-sm">
+    <input
+      type="checkbox"
+      {...register("acceptTerms", {
+        required: "You must accept the Terms & Conditions and Privacy Policy."
+      })}
+    />
 
-            {/* Terms & Conditions */}
-            <div className="flex items-start gap-2 pt-1">
-              <input
-                id="acceptTerms"
-                type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border-rc-border text-rc-primary focus:ring-rc-primary/30"
-                {...register('acceptTerms', { required: 'You must accept the Terms & Conditions' })}
-              />
-              <label htmlFor="acceptTerms" className="text-sm text-rc-muted leading-5">
-                I agree to SmartHire's{' '}
-                <Link to="/terms" className="text-rc-primary font-medium" target="_blank">
-                  Terms & Conditions
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" className="text-rc-primary font-medium" target="_blank">
-                  Privacy Policy
-                </Link>
-                .
-              </label>
-            </div>
-            {errors.acceptTerms && (
-              <p className="text-xs text-[#DC2626] -mt-2">{errors.acceptTerms.message}</p>
-            )}
+    <span>
+      I agree to SmartHire's{" "}
+      <Link
+        to="/terms"
+        className="text-blue-600 hover:text-blue-700 hover:underline"
+      >
+        Terms & Conditions
+      </Link>{" "}
+      and{" "}
+      <Link
+        to="/privacy"
+        className="text-blue-600 hover:text-blue-700 hover:underline"
+      >
+        Privacy Policy
+      </Link>.
+    </span>
+  </label>
+</div>
+
+{errors.acceptTerms && (
+  <p className="text-xs text-red-500 mt-1">
+    {errors.acceptTerms.message}
+  </p>
+)}
 
             <button
               type="submit"
