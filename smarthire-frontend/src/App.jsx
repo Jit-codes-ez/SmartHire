@@ -30,6 +30,9 @@ import TermsConditions from "./pages/TermsConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import HelpCenter from "./pages/HelpCenter";
 import Contact from "./pages/Contact";
+import ForgotPassword from "./pages/student/ForgotPassword.jsx";
+import VerifyResetOtp from "./pages/student/VerifyResetOtp";
+import ResetPassword from "./pages/student/ResetPassword";
 
 
 // Maps a URL prefix to the design-system theme it should render in.
@@ -65,6 +68,7 @@ export default function App() {
         <Route path="/student/jobs" element={<BrowseJobs />} />
         <Route path="/student/jobs/:id" element={<JobDetail />} />
         <Route path="/student/applications" element={<MyApplications />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Recruiter portal — Warm Indigo theme */}
         <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
@@ -83,6 +87,8 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/help-center" element={<HelpCenter />} />
+        <Route path="/verify-reset-otp" element={<VerifyResetOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
 
       <SiteFooter />

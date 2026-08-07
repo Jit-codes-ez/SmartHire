@@ -19,7 +19,9 @@ import com.smarthire.repository.RecruiterRequestRepository;
 import com.smarthire.repository.UserRepository;
 import com.smarthire.service.AuthService;
 import com.smarthire.service.OtpService;
-
+import com.smarthire.dto.auth.ForgotPasswordRequest;
+import com.smarthire.dto.auth.ResetPasswordRequest;
+import com.smarthire.dto.auth.VerifyResetOtpRequest;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -70,4 +72,5 @@ public class OtpController {
         otpService.verifyOtp(request.getEmail(), request.getOtp(), OtpPurpose.REGISTRATION);
         return new RegistrationOtpResponse("OTP verified successfully", request.getEmail());
     }
+
 }

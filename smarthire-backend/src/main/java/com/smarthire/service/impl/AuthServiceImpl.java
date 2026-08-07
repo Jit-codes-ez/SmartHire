@@ -15,6 +15,9 @@ import com.smarthire.repository.UserRepository;
 import com.smarthire.security.JwtService;
 import com.smarthire.service.AuthService;
 import com.smarthire.service.OtpService;
+import com.smarthire.dto.auth.ForgotPasswordRequest;
+import com.smarthire.dto.auth.ResetPasswordRequest;
+import com.smarthire.dto.auth.VerifyResetOtpRequest;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -83,5 +86,41 @@ public class AuthServiceImpl implements AuthService {
         // JWT is stateless.
         // Remove token from frontend.
         // No database operation required.
+    }
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new InvalidCredentialsException("Email not registered"));
+
+        otpService.generateAndSendOtp(
+                user.getEmail(),
+                OtpPurpose.RESET_PASSWORD
+        );
+    }
+    @Override
+    public void verifyResetOtp(VerifyResetOtpRequest request) {
+
+        otpService.verifyOtp(
+                request.getEmail(),
+                request.getOtp(),
+                OtpPurpose.RESET_PASSWORD
+        );
+    }
+    @Override
+    public void resetPassword(ResetPasswordRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new InvalidCredentialsException("User not found"));
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getNewPassword()
+                )
+        );
+
+        userRepository.save(user);
     }
 }
