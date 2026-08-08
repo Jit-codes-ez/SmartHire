@@ -33,5 +33,6 @@ public interface AdminService {
     // Admins
     List<AdminResponse> getAllAdmins();
     User addAdmin(User admin);
-    void deleteAdmin(Long id);
+    void deleteAdmin(Long id, String loggedInEmail);
+   
 }

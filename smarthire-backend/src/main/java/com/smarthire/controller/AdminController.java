@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Map;
 
 @RestController
@@ -56,6 +57,28 @@ public class AdminController {
     @GetMapping("/admins")
     public List<AdminResponse> getAllAdmins() {
         return adminService.getAllAdmins();
+    }
+    
+ // Add Admin
+    @PostMapping("/addAdmin")
+    public ResponseEntity<String> addAdmin(@RequestBody User admin) {
+
+        adminService.addAdmin(admin);
+
+        return ResponseEntity.ok("Admin created successfully");
+    }
+    
+    @DeleteMapping("/admins/{id}")
+    public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String loggedInEmail = authentication.getName();
+
+        adminService.deleteAdmin(id, loggedInEmail);
+
+        return ResponseEntity.ok("Admin deleted successfully");
     }
     
 }

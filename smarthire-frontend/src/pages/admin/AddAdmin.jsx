@@ -63,32 +63,80 @@ export default function AddAdmin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!email.trim() || !password.trim()) {
-      showToast("Please fill all fields.", "error");
-      return;
+  if (!email.trim() || !password.trim()) {
+    showToast("Please fill all fields.", "error");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      "http://localhost:8080/api/admin/addAdmin",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password,
+        }),
+      }
+    );
+
+    const contentType = response.headers.get("content-type");
+
+    let errorMessage = "Failed to create admin.";
+
+    if (contentType?.includes("application/json")) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        errorMessage =
+          data?.message ||
+          data?.error ||
+          "Failed to create admin.";
+      }
+    } else {
+      const text = await response.text();
+
+      if (!response.ok) {
+        errorMessage = text || "Failed to create admin.";
+      }
     }
 
-    setLoading(true);
-
-    try {
-      console.log({ email, password });
-
-      showToast(
-        "Admin creation ready. Backend integration pending.",
-        "success"
-      );
-
-      setEmail("");
-      setPassword("");
-    } catch {
-      showToast("Something went wrong.", "error");
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(errorMessage);
     }
-  };
+
+    showToast(
+      "Admin created successfully.",
+      "success"
+    );
+
+    setEmail("");
+    setPassword("");
+    setShowPassword(false);
+
+  } catch (error) {
+    console.error("Add admin error:", error);
+
+    showToast(
+      error.message || "Something went wrong.",
+      "error"
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <DashboardLayout

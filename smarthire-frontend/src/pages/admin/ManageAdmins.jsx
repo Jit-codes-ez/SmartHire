@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import FullWidthListLayout from "../../layouts/FullWidthListLayout.jsx";
 import Card from "../../components/Card.jsx";
 import Button from "../../components/Button.jsx";
@@ -8,45 +7,18 @@ import EmptyState from "../../components/EmptyState.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 import { authFetch } from "../../lib/authFetch.js";
 
-// ── Icons ────────────────────────────────────────────────────────────────────
-
-function IconBuilding({ className = "h-5 w-5" }) {
+export function IconAdmin({ className = "h-5 w-5" }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round"
-        d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1" />
-    </svg>
-  );
-}
-
-function IconCheckCircle({ className = "h-5 w-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        d="M16 21v-1a4 4 0 00-4-4H6a4 4 0 00-4 4v1" />
       <path strokeLinecap="round" strokeLinejoin="round"
-        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-function IconClock({ className = "h-5 w-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        d="M9 11a4 4 0 100-8 4 4 0 000 8z" />
       <path strokeLinecap="round" strokeLinejoin="round"
-        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        d="M17.5 4l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z" />
     </svg>
   );
 }
-
-function IconXCircle({ className = "h-5 w-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M15 9l-6 6m0-6l6 6m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-// ── Component ────────────────────────────────────────────────────────────────
 
 export default function Admins() {
   const navigate = useNavigate();
@@ -54,113 +26,107 @@ export default function Admins() {
 
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("PENDING");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const loginData = JSON.parse(localStorage.getItem("admin"));
+  const loggedInEmail = loginData?.email;
+
+const [deleteTarget, setDeleteTarget] = useState(null);
+const [deleting, setDeleting] = useState(false);
 
   const itemsPerPage = 8;
 
-  // ── Fetch ──
   const loadAdmins = async () => {
     try {
       setLoading(true);
-      const response = await authFetch("http://localhost:8080/api/admin/admins");
-      if (!response.ok) throw new Error("Failed to load admins");
-      setAdmins(await response.json());
+
+      const response = await authFetch(
+        "http://localhost:8080/api/admin/admins"
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to load admins");
+      }
+
+      const data = await response.json();
+      setAdmins(data);
     } catch (error) {
-      console.error(error);
+      console.error("Load admins error:", error);
       showToast("Unable to load admins", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { loadAdmins(); }, []);
+  useEffect(() => {
+    loadAdmins();
+  }, []);
 
-  // ── Approve / Reject ──
-  const updateStatus = async (id, status) => {
-    try {
-      const response = await authFetch(
-        `http://localhost:8080/api/admin/admins/${id}/${status}`,
-        { method: "PUT" }
-      );
-      if (!response.ok) throw new Error("Failed");
+  const deleteAdmin = async () => {
+  if (!deleteTarget) return;
+  setDeleting(true);
+  try {
+    const response = await authFetch(
+      `http://localhost:8080/api/admin/admins/${deleteTarget.id}`,
+      { method: "DELETE" }
+    );
+    const message = await response.text();
+    if (!response.ok) throw new Error(message || "Delete failed");
+    setAdmins((prev) => prev.filter((admin) => admin.id !== deleteTarget.id));
+    showToast("Admin deleted successfully", "success");
+    setDeleteTarget(null);
+  } catch (error) {
+    showToast(error.message || "Failed to delete admin", "error");
+  } finally {
+    setDeleting(false);
+  }
+};
 
-      setAdmins((prev) =>
-        prev.map((r) =>
-          r.id === id
-            ? { ...r, status: status === "approve" ? "APPROVED" : "REJECTED" }
-            : r
-        )
-      );
+  const totalAdmins = admins.length;
 
-      showToast(
-        status === "approve" ? "Admin approved" : "Admin rejected",
-        "success"
-      );
-    } catch (error) {
-      console.error(error);
-      showToast("Operation failed", "error");
-    }
-  };
-
-  // ── Delete ──
-  const deleteAdmin = async (id) => {
-    if (!window.confirm("Delete this admin permanently?")) return;
-    try {
-      const response = await authFetch(
-        `http://localhost:8080/api/admin/admins/${id}`,
-        { method: "DELETE" }
-      );
-      if (!response.ok) throw new Error("Delete failed");
-      setAdmins((prev) => prev.filter((r) => r.id !== id));
-      showToast("Admin deleted", "success");
-    } catch (error) {
-      console.error(error);
-      showToast("Delete failed", "error");
-    }
-  };
-
-  // ── Stats ──
-  const stats = useMemo(() => ({
-    total: admins.length,
-    approved: admins.filter((r) => r.status === "APPROVED").length,
-    pending: admins.filter((r) => r.status === "PENDING").length,
-    rejected: admins.filter((r) => r.status === "REJECTED").length,
-  }), [admins]);
-
-  // ── Filter + paginate ──
   const filteredAdmins = useMemo(() => {
-    return admins.filter((r) => {
-      const matchesTab = r.status === activeTab;
-      const text = `${r.companyName} ${r.fullName} ${r.email}`.toLowerCase();
-      return matchesTab && text.includes(search.toLowerCase());
-    });
-  }, [admins, activeTab, search]);
+    const searchText = search.trim().toLowerCase();
 
-  const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
+    if (!searchText) {
+      return admins;
+    }
+
+    return admins.filter((admin) =>
+      admin.email?.toLowerCase().includes(searchText)
+    );
+  }, [admins, search]);
+
+  const totalPages = Math.ceil(
+    filteredAdmins.length / itemsPerPage
+  );
+
   const currentAdmins = filteredAdmins.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
 
-  // ── Shared filters UI ──
   const filtersUI = (
-    <div className="flex flex-col md:flex-row gap-4">
+    <div className="flex gap-3 w-full">
       <input
         type="text"
         className="input flex-1"
-        placeholder="Search company, admin or email…"
+        placeholder="Search admin by email..."
         value={search}
-        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
       />
-      <Button variant="secondary" onClick={loadAdmins}>
+
+      <Button
+        variant="secondary"
+        onClick={loadAdmins}
+      >
         Refresh
       </Button>
     </div>
   );
 
-  // ── Loading state ──
   if (loading) {
     return (
       <FullWidthListLayout
@@ -168,103 +134,47 @@ export default function Admins() {
         userName="Admin"
         onLogout={() => navigate("/login")}
         title="Admin Management"
-        subtitle="Review and manage admin accounts."
+        subtitle="Manage administrator accounts."
       >
-        <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-400">
-          <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-          <p className="text-sm">Loading admins…</p>
+        <div className="py-12 text-center text-slate-400">
+          Loading admins...
         </div>
       </FullWidthListLayout>
     );
   }
 
-  // ── Main render ──
   return (
     <FullWidthListLayout
       role="admin"
       userName="Admin"
       onLogout={() => navigate("/login")}
       title="Admin Management"
-      subtitle="Approve, reject and manage admin accounts."
+      subtitle="Delete and manage administrator accounts."
       filters={filtersUI}
     >
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-blue-50 text-blue-600">
-              <IconBuilding />
-            </span>
-            <p className="text-gray-500 text-sm">Total Admins</p>
+      <Card className="mb-8">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-lg bg-teal-500/10 flex items-center justify-center">
+            <IconAdmin className="h-7 w-7 text-teal-400" />
           </div>
-          <h2 className="text-3xl font-bold text-blue-600">{stats.total}</h2>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-green-50 text-green-600">
-              <IconCheckCircle />
-            </span>
-            <p className="text-gray-500 text-sm">Approved</p>
+          <div>
+            <p className="text-sm text-slate-400">Total Admins</p>
+            <p className="text-3xl font-bold text-teal-400 mt-1">
+              {totalAdmins}
+            </p>
           </div>
-          <h2 className="text-3xl font-bold text-green-600">{stats.approved}</h2>
-        </Card>
+        </div>
+      </Card>
 
-        <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-yellow-50 text-yellow-600">
-              <IconClock />
-            </span>
-            <p className="text-gray-500 text-sm">Pending</p>
-          </div>
-          <h2 className="text-3xl font-bold text-yellow-600">{stats.pending}</h2>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-red-50 text-red-600">
-              <IconXCircle />
-            </span>
-            <p className="text-gray-500 text-sm">Rejected</p>
-          </div>
-          <h2 className="text-3xl font-bold text-red-600">{stats.rejected}</h2>
-        </Card>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-3 mb-6">
-        <Button
-          variant={activeTab === "PENDING" ? "primary" : "secondary"}
-          onClick={() => { setActiveTab("PENDING"); setPage(1); }}
-        >
-          Pending Admins
-        </Button>
-
-        <Button
-          variant={activeTab === "APPROVED" ? "primary" : "secondary"}
-          onClick={() => { setActiveTab("APPROVED"); setPage(1); }}
-        >
-          Approved Admins
-        </Button>
-
-        <Button
-          variant={activeTab === "REJECTED" ? "primary" : "secondary"}
-          onClick={() => { setActiveTab("REJECTED"); setPage(1); }}
-        >
-          Rejected Admins
-        </Button>
-      </div>
-
-      {/* Admin List */}
       {currentAdmins.length === 0 ? (
         <Card>
           <EmptyState
-            icon={<IconBuilding className="h-10 w-10 text-slate-300" />}
+            icon={<IconAdmin className="h-10 w-10 text-slate-300" />}
             title="No admins found"
             description={
-              activeTab === "PENDING"
-                ? "No admins are waiting for approval."
-                : "No admins available."
+              search
+                ? "No administrators match your search."
+                : "No administrator accounts are available."
             }
           />
         </Card>
@@ -273,84 +183,68 @@ export default function Admins() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3">Company</th>
-                  <th className="text-left py-3">Admin</th>
-                  <th className="text-left py-3">Email</th>
-                  <th className="text-left py-3">Industry</th>
-                  <th className="text-left py-3">Status</th>
-                  <th className="text-center py-3">Actions</th>
+                <tr className="border-b border-slate-700">
+                  <th className="text-left py-3 text-sm font-semibold">
+                    Admin
+                  </th>
+                  <th className="text-center py-3 text-sm font-semibold">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {currentAdmins.map((r) => (
-                  <tr key={r.id} className="border-b hover:bg-gray-50 transition">
-                    <td className="py-4">
-                      <p className="font-semibold">{r.companyName}</p>
-                    </td>
+{currentAdmins.map((admin) => {
+const isCurrentAdmin =
+admin.email?.toLowerCase() === loggedInEmail?.toLowerCase();
 
-                    <td>
-                      <p className="font-medium">{r.fullName}</p>
-                      <p className="text-xs text-gray-500">{r.designation}</p>
-                    </td>
+return (
+<tr
+key={admin.id}
+className="border-b border-slate-700 hover:bg-slate-800/60 transition"
+>
+<td className="py-4">
+<div className="flex items-center gap-3">
+<div className="h-9 w-9 rounded-full bg-teal-500/10 flex items-center justify-center">
+<IconAdmin className="h-5 w-5 text-teal-400" />
+</div>
 
-                    <td>
-                      <p className="text-sm">{r.email}</p>
-                      <p className="text-xs text-gray-500">{r.mobileNumber}</p>
-                    </td>
+<div>
+<p className="text-sm font-medium">
+{admin.email}
+</p>
 
-                    <td>{r.industry || "N/A"}</td>
+<p className="text-xs text-slate-500">
+{isCurrentAdmin ? "Administrator" : "Administrator"}
+</p>
+</div>
+</div>
+</td>
 
-                    <td>
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
-                          r.status === "APPROVED"
-                            ? "bg-green-100 text-green-700"
-                            : r.status === "REJECTED"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {r.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="flex justify-center gap-2">
-                        {r.status === "PENDING" && (
-                          <>
-                            <Button onClick={() => updateStatus(r.id, "approve")}>
-                              Approve
-                            </Button>
-                            <Button variant="danger" onClick={() => updateStatus(r.id, "reject")}>
-                              Reject
-                            </Button>
-                          </>
-                        )}
-
-                        {r.status === "APPROVED" && (
-                          <Button
-                            variant="secondary"
-                            onClick={() => navigate(`/admin/admins/${r.id}`)}
-                          >
-                            View
-                          </Button>
-                        )}
-
-                        <Button variant="danger" onClick={() => deleteAdmin(r.id)}>
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+<td className="py-4">
+<div className="flex justify-center gap-2">
+{isCurrentAdmin ? (
+<span className="px-3 py-2 text-xs font-medium text-teal-400 bg-teal-500/10 rounded-lg">
+Current Admin
+</span>
+) : (
+<Button
+variant="danger"
+onClick={() => setDeleteTarget(admin)}
+>
+Delete
+</Button>
+)}
+</div>
+</td>
+</tr>
+);
+})}
               </tbody>
             </table>
           </div>
         </Card>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-3 mt-8">
           <Button
@@ -372,6 +266,51 @@ export default function Admins() {
           </Button>
         </div>
       )}
+
+      {deleteTarget && (
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+<div className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-800 p-6 shadow-2xl">
+<h2 className="text-xl font-semibold text-slate-100">
+Delete Administrator
+</h2>
+
+<p className="mt-3 text-sm text-slate-400">
+Are you sure you want to permanently delete this administrator?
+</p>
+
+<div className="mt-4 rounded-lg border border-slate-700 bg-slate-900 p-4">
+<p className="text-sm font-medium text-slate-100">
+{deleteTarget.email}
+</p>
+<p className="mt-1 text-xs text-slate-500">
+Administrator account
+</p>
+</div>
+
+<p className="mt-4 text-xs text-red-400">
+This action cannot be undone.
+</p>
+
+<div className="mt-6 flex justify-end gap-3">
+<Button
+variant="secondary"
+disabled={deleting}
+onClick={() => setDeleteTarget(null)}
+>
+Cancel
+</Button>
+
+<Button
+variant="danger"
+disabled={deleting}
+onClick={deleteAdmin}
+>
+{deleting ? "Deleting..." : "Delete Admin"}
+</Button>
+</div>
+</div>
+</div>
+)}
     </FullWidthListLayout>
   );
 }

@@ -7,6 +7,7 @@ import com.smarthire.entity.Student;
 import com.smarthire.entity.User;
 import com.smarthire.enums.RecruiterRequestStatus;
 import com.smarthire.enums.Role;
+import com.smarthire.exception.EmailAlreadyExistsException;
 import com.smarthire.repository.RecruiterRepository;
 import com.smarthire.repository.RecruiterRequestRepository;
 import com.smarthire.repository.StudentRepository;
@@ -22,10 +23,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
 
 @Service
 @Transactional
@@ -48,7 +50,6 @@ public class AdminServiceImpl implements AdminService {
     
     @Autowired
     private EmailService emailService;
-
 
     // DASHBOARD
     @Override
@@ -113,9 +114,7 @@ public class AdminServiceImpl implements AdminService {
 
         // Check whether email already exists in users
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException(
-                    "A user with this email already exists"
-            );
+            throw new EmailAlreadyExistsException("A user with this email already exists");
         }
 
         // Create User
@@ -300,46 +299,28 @@ public class AdminServiceImpl implements AdminService {
     public User addAdmin(User admin) {
         if (admin.getEmail() == null ||
                 admin.getEmail().trim().isEmpty()) {
-            throw new RuntimeException(
-                    "Admin email is required"
-            );
+            throw new RuntimeException("Admin email is required");
         }
         if (userRepository.existsByEmail(admin.getEmail())) {
-
-            throw new RuntimeException(
-                    "A user with this email already exists"
-            );
+            throw new EmailAlreadyExistsException("A user with this email already exists");
         }
-
         User newAdmin = new User();
-        newAdmin.setEmail(
-                admin.getEmail()
-        );
-        newAdmin.setPassword(
-                passwordEncoder.encode(
-                        admin.getPassword()
-                )
-        );
-        newAdmin.setRole(
-                Role.ADMIN
-        );
+        newAdmin.setEmail(admin.getEmail().trim());
+        newAdmin.setPassword(passwordEncoder.encode(admin.getPassword()));
+
+        // Never trust the role sent by the frontend
+        newAdmin.setRole(Role.ADMIN);
         return userRepository.save(newAdmin);
     }
 
     @Override
-    public void deleteAdmin(Long id) {
-        User admin =
-                userRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Admin not found"
-                                )
-                        );
+    public void deleteAdmin(Long id, String loggedInEmail) {
+        User admin = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Admin not found"));
         if (admin.getRole() != Role.ADMIN) {
-
-            throw new RuntimeException(
-                    "User is not an admin"
-            );
+            throw new RuntimeException("User is not an admin");
+        }
+        if (admin.getEmail().equalsIgnoreCase(loggedInEmail)) {
+            throw new RuntimeException("You cannot delete the administrator account you are currently logged in with");
         }
         userRepository.delete(admin);
     }
@@ -354,4 +335,5 @@ public class AdminServiceImpl implements AdminService {
 
         return authentication.getName();
     }
+    
 }
