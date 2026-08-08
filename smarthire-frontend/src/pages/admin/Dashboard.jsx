@@ -63,7 +63,7 @@ const fields = [
   { label: "Email", value: recruiter.email },
   { label: "Phone", value: recruiter.mobileNumber },
   { label: "Company", value: recruiter.companyName },
-  { label: "Website", value: recruiter.companyWebsite },
+  { label: "Website", value: recruiter.companyWebsite, link: recruiter.companyWebsite },
   { label: "Designation", value: recruiter.designation },
   { label: "Industry", value: recruiter.industry },
   { label: "City", value: recruiter.city},
@@ -108,19 +108,34 @@ const fields = [
         </div>
 
         {/* Fields */}
-        <div className="px-6 py-4 max-h-[60vh] overflow-y-auto space-y-3">
-          {fields.map(({ label, value }) => (
-            <div
-              key={label}
-              className="flex items-start gap-3 py-2 border-b border-slate-700/50 last:border-0"
-            >
-              <span className="text-xs text-slate-400 w-36 shrink-0 pt-0.5">
-                {label}
-              </span>
-              <span className="text-sm text-slate-100 break-all">{value}</span>
-            </div>
-          ))}
-        </div>
+<div className="px-6 py-4 max-h-[60vh] overflow-y-auto space-y-3">
+  {fields.map(({ label, value, link }) => (
+    <div
+      key={label}
+      className="flex items-start gap-3 py-2 border-b border-slate-700/50 last:border-0"
+    >
+      <span className="text-xs text-slate-400 w-36 shrink-0 pt-0.5">
+        {label}
+      </span>
+      <span className="text-sm text-slate-100 break-all flex items-center gap-1.5">
+        {value}
+        {link && (
+          
+          <a  href={link.startsWith("http") ? link : `https://${link}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-400 hover:text-teal-400 transition shrink-0"
+            aria-label={`Open ${label}`}
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        )}
+      </span>
+    </div>
+  ))}
+</div>
 
         {/* Actions */}
         <div className="flex gap-3 px-6 py-4 border-t border-slate-700 bg-slate-800/80">

@@ -172,7 +172,7 @@ public class AdminServiceImpl implements AdminService {
         request.setStatus(RecruiterRequestStatus.REJECTED);
         request.setApprovedRejectedBy(adminEmail);
         recruiterRequestRepository.save(request);
-        emailService.sendRecruiterRejectionEmail(request.getEmail(), request.getFullName());
+        emailService.sendRecruiterRejectionEmail(request.getEmail(), request.getFullName(), adminEmail);
     }
 
     // STUDENTS
@@ -267,24 +267,21 @@ public class AdminServiceImpl implements AdminService {
         if (reason == null || reason.trim().isEmpty()) {
             throw new RuntimeException("Reason for deletion is required");
         }
-
         Recruiter recruiter = recruiterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Recruiter not found"));
-
         User user = recruiter.getUser();
-
         if (user == null) {
             throw new RuntimeException("Recruiter account is not linked to a user");
         }
-
         String email = user.getEmail();
         String fullName = recruiter.getFullName();
-
         emailService.sendRecruiterDeletionEmail(email, fullName, reason.trim());
-
+        recruiterRequestRepository.findByEmail(email).ifPresent(recruiterRequestRepository::delete);
         recruiterRepository.delete(recruiter);
         userRepository.delete(user);
     }
+    
+    
     
     // ADMINS
     @Override

@@ -53,17 +53,17 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendRecruiterRejectionEmail(String toEmail, String fullName) {
+    public void sendRecruiterRejectionEmail(String toEmail, String fullName, String adminEmail) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
             helper.setTo(toEmail);
             helper.setSubject("SmartHire — Recruiter Registration Update");
-            helper.setText(buildRecruiterRejectionEmailHtml(fullName), true);
+            helper.setText(buildRecruiterRejectionEmailHtml(fullName, adminEmail), true);
             mailSender.send(message);
         } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send recruiter rejection email",e);
+            throw new RuntimeException("Failed to send recruiter rejection email", e);
         }
     }
     
@@ -314,9 +314,8 @@ public class EmailServiceImpl implements EmailService {
             """.formatted(logoUrl, fullName);
     }
     
-    private String buildRecruiterRejectionEmailHtml(String fullName) {
-        String logoUrl =
-            "https://raw.githubusercontent.com/Jit-codes-ez/SmartHire/main/Assets/Logo.png";
+    private String buildRecruiterRejectionEmailHtml(String fullName, String adminEmail) {
+        String logoUrl = "https://raw.githubusercontent.com/Jit-codes-ez/SmartHire/main/Assets/Logo.png";
 
         return """
             <!DOCTYPE html>
@@ -387,7 +386,11 @@ public class EmailServiceImpl implements EmailService {
                           </div>
 
                           <p style="margin:0 0 24px;color:#64748B;font-size:14px;line-height:21px;">
-                            If you believe this was unexpected or need further information, please contact SmartHire support.
+                            If you believe this was unexpected or need further information, please contact the administrator at
+                            <a href="mailto:%s" style="color:#4F46E5;text-decoration:none;font-weight:600;">
+                              %s
+                            </a>
+                            for further resolution.
                           </p>
 
                           <hr style="border:none;border-top:1px solid #E2E8F0;margin:0 0 20px;">
@@ -420,7 +423,7 @@ public class EmailServiceImpl implements EmailService {
 
             </body>
             </html>
-            """.formatted(logoUrl, fullName);
+            """.formatted(logoUrl, fullName, adminEmail, adminEmail);
     }
     
     private String buildStudentDeletionEmailHtml(String fullName, String reason) {
