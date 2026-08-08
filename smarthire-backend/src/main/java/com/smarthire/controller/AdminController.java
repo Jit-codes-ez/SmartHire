@@ -35,6 +35,11 @@ public class AdminController {
 
         return ResponseEntity.ok(adminService.getPendingRecruiters());
     }
+ // Get all recruiters
+    @GetMapping("/recruiters")
+    public ResponseEntity<List<?>> getAllRecruiters() {
+        return ResponseEntity.ok(adminService.getAllRecruiters());
+    }
     
     // Approve recruiter
     @PutMapping("/recruiters/{id}/approve")
@@ -42,7 +47,13 @@ public class AdminController {
         adminService.approveRecruiter(id);
         return ResponseEntity.ok("Recruiter approved successfully");
     }
-    
+    @DeleteMapping("/recruiters/{id}")
+    public ResponseEntity<String> deleteRecruiter(@PathVariable Long id) {
+
+        adminService.deleteRecruiter(id);
+
+        return ResponseEntity.ok("Recruiter deleted successfully");
+    }
     // Reject recruiter
     @PutMapping("/recruiters/{id}/reject")
     public ResponseEntity<String> rejectRecruiter(

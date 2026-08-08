@@ -1,6 +1,7 @@
 package com.smarthire.service.impl;
 
 import com.smarthire.dto.AdminResponse;
+import com.smarthire.dto.RecruiterResponse;
 import com.smarthire.entity.Recruiter;
 import com.smarthire.entity.RecruiterRequest;
 import com.smarthire.entity.Student;
@@ -227,10 +228,26 @@ public class AdminServiceImpl implements AdminService {
 
     // RECRUITERS
     @Override
-    public List<Recruiter> getAllRecruiters() {
-        return recruiterRepository.findAll();
-    }
+    public List<RecruiterResponse> getAllRecruiters() {
 
+        return recruiterRepository.findAll()
+                .stream()
+                .map(recruiter -> new RecruiterResponse(
+                        recruiter.getId(),
+                        recruiter.getFullName(),
+                        recruiter.getUser().getEmail(),
+                        recruiter.getMobileNumber(),
+                        recruiter.getCompanyName(),
+                        recruiter.getDesignation(),
+                        recruiter.getCompanyWebsite(),
+                        recruiter.getCity(),
+                        recruiter.getState(),
+                        recruiter.getCountry(),
+                        recruiter.getIndustry(),
+                        recruiter.getCompanyRegistrationNumber()
+                ))
+                .toList();
+    }
     @Override
     public Recruiter getRecruiter(Long id) {
         return recruiterRepository.findById(id)

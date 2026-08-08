@@ -1,6 +1,7 @@
 package com.smarthire.service;
 
 import com.smarthire.dto.AdminResponse;
+import com.smarthire.dto.RecruiterResponse;
 import com.smarthire.entity.Recruiter;
 import com.smarthire.entity.Student;
 import com.smarthire.entity.User;
@@ -25,7 +26,7 @@ public interface AdminService {
     void deleteStudent(Long id);
 
     // Recruiters
-    List<Recruiter> getAllRecruiters();
+    List<RecruiterResponse> getAllRecruiters();
     Recruiter getRecruiter(Long id);
     Recruiter updateRecruiter(Long id, Recruiter recruiter);
     void deleteRecruiter(Long id);

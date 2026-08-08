@@ -8,45 +8,23 @@ import EmptyState from "../../components/EmptyState.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 import { authFetch } from "../../lib/authFetch.js";
 
-// ── Icons ────────────────────────────────────────────────────────────────────
-
 function IconBuilding({ className = "h-5 w-5" }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1" />
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.8}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1"
+      />
     </svg>
   );
 }
-
-function IconCheckCircle({ className = "h-5 w-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-function IconClock({ className = "h-5 w-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-function IconXCircle({ className = "h-5 w-5" }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M15 9l-6 6m0-6l6 6m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  );
-}
-
-// ── Component ────────────────────────────────────────────────────────────────
 
 export default function Recruiters() {
   const navigate = useNavigate();
@@ -54,19 +32,25 @@ export default function Recruiters() {
 
   const [recruiters, setRecruiters] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("PENDING");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
   const itemsPerPage = 8;
 
-  // ── Fetch ──
   const loadRecruiters = async () => {
     try {
       setLoading(true);
-      const response = await authFetch("http://localhost:8080/api/admin/recruiters");
-      if (!response.ok) throw new Error("Failed to load recruiters");
-      setRecruiters(await response.json());
+
+      const response = await authFetch(
+        "http://localhost:8080/api/admin/recruiters"
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to load recruiters");
+      }
+
+      const data = await response.json();
+      setRecruiters(data);
     } catch (error) {
       console.error(error);
       showToast("Unable to load recruiters", "error");
@@ -75,92 +59,81 @@ export default function Recruiters() {
     }
   };
 
-  useEffect(() => { loadRecruiters(); }, []);
+  useEffect(() => {
+    loadRecruiters();
+  }, []);
 
-  // ── Approve / Reject ──
-  const updateStatus = async (id, status) => {
-    try {
-      const response = await authFetch(
-        `http://localhost:8080/api/admin/recruiters/${id}/${status}`,
-        { method: "PUT" }
-      );
-      if (!response.ok) throw new Error("Failed");
-
-      setRecruiters((prev) =>
-        prev.map((r) =>
-          r.id === id
-            ? { ...r, status: status === "approve" ? "APPROVED" : "REJECTED" }
-            : r
-        )
-      );
-
-      showToast(
-        status === "approve" ? "Recruiter approved" : "Recruiter rejected",
-        "success"
-      );
-    } catch (error) {
-      console.error(error);
-      showToast("Operation failed", "error");
-    }
-  };
-
-  // ── Delete ──
   const deleteRecruiter = async (id) => {
-    if (!window.confirm("Delete this recruiter permanently?")) return;
+    if (!window.confirm("Delete this recruiter permanently?")) {
+      return;
+    }
+
     try {
       const response = await authFetch(
         `http://localhost:8080/api/admin/recruiters/${id}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+        }
       );
-      if (!response.ok) throw new Error("Delete failed");
+
+      if (!response.ok) {
+        throw new Error("Delete failed");
+      }
+
       setRecruiters((prev) => prev.filter((r) => r.id !== id));
-      showToast("Recruiter deleted", "success");
+
+      showToast("Recruiter deleted successfully", "success");
     } catch (error) {
       console.error(error);
       showToast("Delete failed", "error");
     }
   };
 
-  // ── Stats ──
-  const stats = useMemo(() => ({
-    total: recruiters.length,
-    approved: recruiters.filter((r) => r.status === "APPROVED").length,
-    pending: recruiters.filter((r) => r.status === "PENDING").length,
-    rejected: recruiters.filter((r) => r.status === "REJECTED").length,
-  }), [recruiters]);
-
-  // ── Filter + paginate ──
   const filteredRecruiters = useMemo(() => {
-    return recruiters.filter((r) => {
-      const matchesTab = r.status === activeTab;
-      const text = `${r.companyName} ${r.fullName} ${r.email}`.toLowerCase();
-      return matchesTab && text.includes(search.toLowerCase());
-    });
-  }, [recruiters, activeTab, search]);
+    const searchText = search.toLowerCase().trim();
 
-  const totalPages = Math.ceil(filteredRecruiters.length / itemsPerPage);
+    return recruiters.filter((r) => {
+      const text = `
+        ${r.companyName || ""}
+        ${r.fullName || ""}
+        ${r.email || ""}
+        ${r.designation || ""}
+        ${r.mobileNumber || ""}
+        ${r.industry || ""}
+      `.toLowerCase();
+
+      return text.includes(searchText);
+    });
+  }, [recruiters, search]);
+
+  const totalPages = Math.ceil(
+    filteredRecruiters.length / itemsPerPage
+  );
+
   const currentRecruiters = filteredRecruiters.slice(
     (page - 1) * itemsPerPage,
     page * itemsPerPage
   );
 
-  // ── Shared filters UI ──
   const filtersUI = (
     <div className="flex flex-col md:flex-row gap-4">
       <input
         type="text"
         className="input flex-1"
-        placeholder="Search company, recruiter or email…"
+        placeholder="Search company, recruiter or email..."
         value={search}
-        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
       />
+
       <Button variant="secondary" onClick={loadRecruiters}>
         Refresh
       </Button>
     </div>
   );
 
-  // ── Loading state ──
   if (loading) {
     return (
       <FullWidthListLayout
@@ -168,103 +141,62 @@ export default function Recruiters() {
         userName="Admin"
         onLogout={() => navigate("/login")}
         title="Recruiter Management"
-        subtitle="Review and manage recruiter registrations."
+        subtitle="Delete and manage recruiter accounts."
       >
         <div className="flex flex-col items-center justify-center py-24 gap-3 text-slate-400">
           <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-          <p className="text-sm">Loading recruiters…</p>
+          <p className="text-sm">Loading recruiters...</p>
         </div>
       </FullWidthListLayout>
     );
   }
 
-  // ── Main render ──
   return (
     <FullWidthListLayout
       role="admin"
       userName="Admin"
       onLogout={() => navigate("/login")}
       title="Recruiter Management"
-      subtitle="Approve, reject and manage recruiter accounts."
+      subtitle="Delete and manage recruiter accounts."
       filters={filtersUI}
     >
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      {/* Total Recruiters */}
+      <div className="mb-8">
         <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-blue-50 text-blue-600">
-              <IconBuilding />
+          <div className="flex items-center gap-3">
+            <span className="p-3 rounded-lg bg-blue-50 text-blue-600">
+              <IconBuilding className="h-6 w-6" />
             </span>
-            <p className="text-gray-500 text-sm">Total Recruiters</p>
+
+            <div>
+              <p className="text-gray-500 text-sm">
+                Total Recruiters
+              </p>
+
+              <h2 className="text-3xl font-bold text-blue-600">
+                {recruiters.length}
+              </h2>
+            </div>
           </div>
-          <h2 className="text-3xl font-bold text-blue-600">{stats.total}</h2>
         </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-green-50 text-green-600">
-              <IconCheckCircle />
-            </span>
-            <p className="text-gray-500 text-sm">Approved</p>
-          </div>
-          <h2 className="text-3xl font-bold text-green-600">{stats.approved}</h2>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-yellow-50 text-yellow-600">
-              <IconClock />
-            </span>
-            <p className="text-gray-500 text-sm">Pending</p>
-          </div>
-          <h2 className="text-3xl font-bold text-yellow-600">{stats.pending}</h2>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 rounded-lg bg-red-50 text-red-600">
-              <IconXCircle />
-            </span>
-            <p className="text-gray-500 text-sm">Rejected</p>
-          </div>
-          <h2 className="text-3xl font-bold text-red-600">{stats.rejected}</h2>
-        </Card>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-3 mb-6">
-        <Button
-          variant={activeTab === "PENDING" ? "primary" : "secondary"}
-          onClick={() => { setActiveTab("PENDING"); setPage(1); }}
-        >
-          Pending Recruiters
-        </Button>
-
-        <Button
-          variant={activeTab === "APPROVED" ? "primary" : "secondary"}
-          onClick={() => { setActiveTab("APPROVED"); setPage(1); }}
-        >
-          Approved Recruiters
-        </Button>
-
-        <Button
-          variant={activeTab === "REJECTED" ? "primary" : "secondary"}
-          onClick={() => { setActiveTab("REJECTED"); setPage(1); }}
-        >
-          Rejected
-        </Button>
       </div>
 
       {/* Recruiter List */}
       {currentRecruiters.length === 0 ? (
         <Card>
           <EmptyState
-            icon={<IconBuilding className="h-10 w-10 text-slate-300" />}
-            title="No recruiters found"
+            icon={
+              <IconBuilding className="h-10 w-10 text-slate-300" />
+            }
+            title={
+              search
+                ? "No recruiters found"
+                : "No recruiters available"
+            }
             description={
-              activeTab === "PENDING"
-                ? "No recruiters are waiting for approval."
-                : "No recruiters available."
+              search
+                ? "Try searching with a different company, recruiter or email."
+                : "There are currently no recruiter accounts."
             }
           />
         </Card>
@@ -274,70 +206,56 @@ export default function Recruiters() {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3">Company</th>
-                  <th className="text-left py-3">Recruiter</th>
-                  <th className="text-left py-3">Email</th>
-                  <th className="text-left py-3">Industry</th>
-                  <th className="text-left py-3">Status</th>
-                  <th className="text-center py-3">Actions</th>
+                  <th className="text-left py-3">
+                    Recruiter
+                  </th>
+
+                  <th className="text-center py-3">
+                    Actions
+                  </th>
                 </tr>
               </thead>
+
               <tbody>
                 {currentRecruiters.map((r) => (
-                  <tr key={r.id} className="border-b hover:bg-gray-50 transition">
+                  <tr
+                    key={r.id}
+                    className="border-b hover:bg-slate-800/70 transition-colors duration-200"
+                  >
                     <td className="py-4">
-                      <p className="font-semibold">{r.companyName}</p>
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center justify-center h-11 w-11 rounded-full bg-blue-50 text-blue-600">
+                          <IconBuilding className="h-5 w-5" />
+                        </span>
+
+                        <div>
+                          <p className="font-semibold text-white">
+                            {r.companyName || "Company Not Available"}
+                          </p>
+
+                          <p className="text-sm font-medium text-white">
+                            {r.fullName || "Recruiter"}
+                          </p>
+
+                          <p className="text-xs text-slate-200">
+                            {r.email || "Email not available"}
+                          </p>
+
+                          {r.designation && (
+                          <p className="text-xs text-slate-200">
+                            {r.designation}
+                          </p>
+                  )}
+                        </div>
+                      </div>
                     </td>
 
-                    <td>
-                      <p className="font-medium">{r.fullName}</p>
-                      <p className="text-xs text-gray-500">{r.designation}</p>
-                    </td>
-
-                    <td>
-                      <p className="text-sm">{r.email}</p>
-                      <p className="text-xs text-gray-500">{r.mobileNumber}</p>
-                    </td>
-
-                    <td>{r.industry || "N/A"}</td>
-
-                    <td>
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
-                          r.status === "APPROVED"
-                            ? "bg-green-100 text-green-700"
-                            : r.status === "REJECTED"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {r.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="flex justify-center gap-2">
-                        {r.status === "PENDING" && (
-                          <>
-                            <Button onClick={() => updateStatus(r.id, "approve")}>
-                              Approve
-                            </Button>
-                            <Button variant="danger" onClick={() => updateStatus(r.id, "reject")}>
-                              Reject
-                            </Button>
-                          </>
-                        )}
-
-                        {r.status === "APPROVED" && (
-                          <Button
-                            variant="secondary"
-                            onClick={() => navigate(`/admin/recruiters/${r.id}`)}
-                          >
-                            View
-                          </Button>
-                        )}
-
-                        <Button variant="danger" onClick={() => deleteRecruiter(r.id)}>
+                    <td className="py-4">
+                      <div className="flex justify-center">
+                        <Button
+                          variant="danger"
+                          onClick={() => deleteRecruiter(r.id)}
+                        >
                           Delete
                         </Button>
                       </div>
@@ -360,9 +278,11 @@ export default function Recruiters() {
           >
             Previous
           </Button>
+
           <span className="font-semibold text-sm">
             Page {page} of {totalPages}
           </span>
+
           <Button
             variant="secondary"
             disabled={page === totalPages}
