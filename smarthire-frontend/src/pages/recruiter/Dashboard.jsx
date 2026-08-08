@@ -236,7 +236,7 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <Button
                 onClick={() =>
-                  navigate("/recruiter/profile/edit")
+                  navigate("/recruiter/update-profile")
                 }
               >
                 Update Profile
@@ -244,7 +244,7 @@ export default function Dashboard() {
 
               <Button
                 onClick={() =>
-                  navigate("/recruiter/jobs/create")
+                  navigate("/recruiter/drives/new")
                 }
               >
                 Post Job

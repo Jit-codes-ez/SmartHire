@@ -21,6 +21,7 @@ import RecruiterDashboard from './pages/recruiter/Dashboard.jsx'
 import MyDrives from './pages/recruiter/MyDrives.jsx'
 import Applicants from './pages/recruiter/Applicants.jsx'
 import PostDrive from './pages/recruiter/PostDrive.jsx'
+import RecruiterUpdateProfile from './pages/recruiter/UpdateProfile.jsx'
 
 import AdminDashboard from './pages/admin/Dashboard.jsx'
 import ManageAdmins from './pages/admin/ManageAdmins.jsx'
@@ -74,6 +75,7 @@ export default function App() {
 
         {/* Recruiter portal — Warm Indigo theme */}
         <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
+        <Route path="/recruiter/update-profile" element={<RecruiterUpdateProfile />} />
         <Route path="/recruiter/drives" element={<MyDrives />} />
         <Route path="/recruiter/drives/:id/applicants" element={<Applicants />} />
         <Route path="/recruiter/drives/new" element={<PostDrive />} />
