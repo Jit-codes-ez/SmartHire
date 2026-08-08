@@ -2,6 +2,8 @@ package com.smarthire.dto.recruiter;
 
 import java.time.LocalDate;
 
+import com.smarthire.enums.JobStatus;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -30,6 +32,8 @@ public class PostJobRequest {
 
     @NotNull
     private LocalDate applicationDeadline;
+    
+    private JobStatus status;
 
     public PostJobRequest() {
     }
@@ -97,4 +101,14 @@ public class PostJobRequest {
     public void setApplicationDeadline(LocalDate applicationDeadline) {
         this.applicationDeadline = applicationDeadline;
     }
+
+	public JobStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(JobStatus status) {
+		this.status = status;
+	}
+    
+    
 }

@@ -1,6 +1,7 @@
 package com.smarthire.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,8 @@ import com.smarthire.service.JobService;
 import com.smarthire.service.RecruiterService;
 import com.smarthire.dto.recruiter.PostJobRequest;
 import com.smarthire.entity.Job;
+import com.smarthire.enums.JobStatus;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -63,18 +66,13 @@ public class RecruiterController {
 
         return ResponseEntity.ok(response);
     }
-    @PostMapping("/jobs/{email}")
-    public ResponseEntity<Job> postJob(
-            @PathVariable String email,
-            @Valid @RequestBody PostJobRequest request) {
-
+    
+    @PostMapping("/drives/{email}")
+    public ResponseEntity<Job> postDrive(@PathVariable String email, @Valid @RequestBody PostJobRequest request) {
         Job job = jobService.postJob(email, request);
-
-        return new ResponseEntity<>(
-                job,
-                HttpStatus.CREATED
-        );
+        return new ResponseEntity<>(job, HttpStatus.CREATED);
     }
+    
     @GetMapping("/jobs/{email}")
     public ResponseEntity<List<Job>> getRecruiterJobs(
             @PathVariable String email) {
@@ -82,6 +80,38 @@ public class RecruiterController {
         List<Job> jobs = jobService.getJobsByRecruiter(email);
 
         return ResponseEntity.ok(jobs);
+    }
+    
+    @PatchMapping("/jobs/{id}/{email}/status")
+    public ResponseEntity<Job> updateJobStatus(
+            @PathVariable Long id,
+            @PathVariable String email,
+            @RequestParam JobStatus status) {
+
+        Job updatedJob =
+                jobService.updateJobStatus(id, email, status);
+
+        return ResponseEntity.ok(updatedJob);
+    }
+    
+    @PutMapping("/jobs/{id}/{email}")
+    public ResponseEntity<Job> updateJob(
+            @PathVariable Long id,
+            @PathVariable String email,
+            @Valid @RequestBody PostJobRequest request) {
+        return ResponseEntity.ok(
+                jobService.updateJob(id, email, request)
+        );
+    }
+
+    @DeleteMapping("/jobs/{id}/{email}")
+    public ResponseEntity<String> deleteJob(
+            @PathVariable Long id,
+            @PathVariable String email) {
+
+        jobService.deleteJob(id, email);
+
+        return ResponseEntity.ok("Job deleted successfully");
     }
 
 }

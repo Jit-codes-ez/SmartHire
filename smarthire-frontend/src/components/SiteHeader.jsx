@@ -41,7 +41,7 @@ function getNavLinks(user) {
     return [
       { to: "/Home", label: "Home" },
       { to: "/recruiter/dashboard", label: "Dashboard" },
-      { to: "/student/jobs", label: "Jobs" },
+      { to: "/recruiter/drives", label: "My Drives" },
     ];
   }
 

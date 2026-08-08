@@ -3,6 +3,8 @@ package com.smarthire.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.smarthire.enums.JobStatus;
+
 @Entity
 @Table(name = "jobs")
 public class Job {
@@ -35,8 +37,9 @@ public class Job {
     @Column(nullable = false)
     private LocalDate applicationDeadline;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private JobStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruiter_id", nullable = false)
@@ -117,15 +120,15 @@ public class Job {
         this.applicationDeadline = applicationDeadline;
     }
 
-    public String getStatus() {
-        return status;
-    }
+    public JobStatus getStatus() {
+		return status;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setStatus(JobStatus status) {
+		this.status = status;
+	}
 
-    public Recruiter getRecruiter() {
+	public Recruiter getRecruiter() {
         return recruiter;
     }
 
