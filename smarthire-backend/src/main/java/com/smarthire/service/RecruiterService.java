@@ -5,14 +5,7 @@ import com.smarthire.dto.recruiter.RecruiterRegistrationRequest;
 import com.smarthire.dto.recruiter.RecruiterRegistrationResponse;
 
 public interface RecruiterService {
-
-    RecruiterRegistrationResponse registerRecruiter(
-            RecruiterRegistrationRequest request
-    );
-
+    RecruiterRegistrationResponse registerRecruiter(RecruiterRegistrationRequest request);
     RecruiterProfileResponse getRecruiterProfile(String email);
-    RecruiterProfileResponse updateRecruiterProfile(
-            String email,
-            RecruiterProfileResponse request
-    );
+    RecruiterProfileResponse updateRecruiterProfile(String email,RecruiterProfileResponse request);
 }

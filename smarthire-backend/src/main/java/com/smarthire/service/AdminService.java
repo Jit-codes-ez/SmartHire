@@ -2,6 +2,7 @@ package com.smarthire.service;
 
 import com.smarthire.dto.AdminResponse;
 import com.smarthire.dto.RecruiterResponse;
+import com.smarthire.dto.StudentResponse;
 import com.smarthire.entity.Recruiter;
 import com.smarthire.entity.Student;
 import com.smarthire.entity.User;
@@ -19,17 +20,15 @@ public interface AdminService {
     void approveRecruiter(Long recruiterRequestId);
     void rejectRecruiter(Long recruiterRequestId);
     
-    // Students
-    List<Student> getAllStudents();
+ // Students
+    List<StudentResponse> getAllStudents();
     Student getStudent(Long id);
-    Student updateStudent(Long id, Student student);
-    void deleteStudent(Long id);
+    void deleteStudent(Long id, String reason);
 
-    // Recruiters
+ // Recruiters
     List<RecruiterResponse> getAllRecruiters();
     Recruiter getRecruiter(Long id);
-    Recruiter updateRecruiter(Long id, Recruiter recruiter);
-    void deleteRecruiter(Long id);
+    void deleteRecruiter(Long id, String reason);
 
     // Admins
     List<AdminResponse> getAllAdmins();

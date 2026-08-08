@@ -7,4 +7,8 @@ public interface EmailService {
     void sendRecruiterApprovalEmail(String toEmail, String fullName);
 
     void sendRecruiterRejectionEmail(String toEmail, String fullName);
+    
+    void sendStudentDeletionEmail(String toEmail, String fullName, String reason);
+    
+    void sendRecruiterDeletionEmail(String toEmail, String fullName, String reason);
 }

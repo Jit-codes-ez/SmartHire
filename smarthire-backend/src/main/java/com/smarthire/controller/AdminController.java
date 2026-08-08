@@ -1,6 +1,7 @@
 package com.smarthire.controller;
 
 import com.smarthire.dto.AdminResponse;
+import com.smarthire.dto.DeleteAccountRequest;
 import com.smarthire.entity.User;
 import com.smarthire.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +49,8 @@ public class AdminController {
         return ResponseEntity.ok("Recruiter approved successfully");
     }
     @DeleteMapping("/recruiters/{id}")
-    public ResponseEntity<String> deleteRecruiter(@PathVariable Long id) {
-
-        adminService.deleteRecruiter(id);
-
+    public ResponseEntity<String> deleteRecruiter(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        adminService.deleteRecruiter(id, body.get("reason"));
         return ResponseEntity.ok("Recruiter deleted successfully");
     }
     // Reject recruiter
@@ -79,17 +78,32 @@ public class AdminController {
         return ResponseEntity.ok("Admin created successfully");
     }
     
+    //Delete Admin
     @DeleteMapping("/admins/{id}")
     public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String loggedInEmail = authentication.getName();
 
         adminService.deleteAdmin(id, loggedInEmail);
 
         return ResponseEntity.ok("Admin deleted successfully");
+    }
+    
+    // Get all recruiters
+    @GetMapping("/students")
+    public ResponseEntity<List<?>> getAllStudents() {
+        return ResponseEntity.ok(adminService.getAllStudents());
+    }
+    
+    // Delete Student
+    @DeleteMapping("/students/{id}")
+    public ResponseEntity<String> deleteStudent(@PathVariable Long id, @RequestBody DeleteAccountRequest request) {
+
+        adminService.deleteStudent(id,request.getReason());
+
+        return ResponseEntity.ok("Student deleted successfully");
     }
     
 }

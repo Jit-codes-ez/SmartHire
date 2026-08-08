@@ -2,6 +2,7 @@ package com.smarthire.service.impl;
 
 import com.smarthire.dto.AdminResponse;
 import com.smarthire.dto.RecruiterResponse;
+import com.smarthire.dto.StudentResponse;
 import com.smarthire.entity.Recruiter;
 import com.smarthire.entity.RecruiterRequest;
 import com.smarthire.entity.Student;
@@ -176,8 +177,23 @@ public class AdminServiceImpl implements AdminService {
 
     // STUDENTS
     @Override
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
+    public List<StudentResponse> getAllStudents() {
+    	return studentRepository.findAll()
+                .stream()
+                .map(student -> new StudentResponse(
+                        student.getId(),
+                        student.getFullName(),
+                        student.getUser().getEmail(),
+                        student.getMobileNumber(),
+                        student.getCourse(),
+                        student.getBranch(),
+                        student.getPassingYear(),
+                        student.getCgpa(),
+                        student.getSkills(),
+                        student.getLinkedinUrl(),
+                        student.getResumeUrl()
+                ))
+                .toList();
     }
 
     @Override
@@ -189,38 +205,26 @@ public class AdminServiceImpl implements AdminService {
                         )
                 );
     }
+    
     @Override
-    public Student updateStudent(
-            Long id,
-            Student updatedStudent) {
-        Student existingStudent =
-                studentRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Student not found"
-                                )
-                        );
-        existingStudent.setFullName(updatedStudent.getFullName());
-        existingStudent.setMobileNumber(updatedStudent.getMobileNumber());
-        existingStudent.setCourse(updatedStudent.getCourse());
-        existingStudent.setBranch(updatedStudent.getBranch());
-        existingStudent.setPassingYear(updatedStudent.getPassingYear());
-        existingStudent.setCgpa(updatedStudent.getCgpa());
-        existingStudent.setSkills(updatedStudent.getSkills());
-        existingStudent.setLinkedinUrl(updatedStudent.getLinkedinUrl());
-        existingStudent.setResumeUrl(updatedStudent.getResumeUrl());
-        return studentRepository.save(existingStudent);
-    }
+    public void deleteStudent(Long id, String reason) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
-    @Override
-    public void deleteStudent(Long id) {
-        Student student =
-                studentRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Student not found"));
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new RuntimeException("Deletion reason is required");
+        }
+
         User user = student.getUser();
+        String email = user != null ? user.getEmail() : null;
+        String fullName = student.getFullName();
+
+        if (email != null) {
+            emailService.sendStudentDeletionEmail(email, fullName, reason.trim());
+        }
+
         studentRepository.delete(student);
+
         if (user != null) {
             userRepository.delete(user);
         }
@@ -259,44 +263,27 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Recruiter updateRecruiter(
-            Long id,
-            Recruiter updatedRecruiter) {
-        Recruiter existingRecruiter =
-                recruiterRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Recruiter not found"
-                                )
-                        );
-
-        existingRecruiter.setFullName(updatedRecruiter.getFullName());
-        existingRecruiter.setMobileNumber(updatedRecruiter.getMobileNumber());
-        existingRecruiter.setCompanyName(updatedRecruiter.getCompanyName());
-        existingRecruiter.setDesignation(updatedRecruiter.getDesignation());
-        existingRecruiter.setCompanyWebsite(updatedRecruiter.getCompanyWebsite());
-        existingRecruiter.setCity(updatedRecruiter.getCity());
-        existingRecruiter.setState(updatedRecruiter.getState());
-        existingRecruiter.setCountry(updatedRecruiter.getCountry());
-        existingRecruiter.setIndustry(updatedRecruiter.getIndustry());
-        existingRecruiter.setCompanyRegistrationNumber(updatedRecruiter.getCompanyRegistrationNumber());
-        return recruiterRepository.save(existingRecruiter);
-    }
-
-    @Override
-    public void deleteRecruiter(Long id) {
-        Recruiter recruiter =
-                recruiterRepository.findById(id)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Recruiter not found"
-                                )
-                        );
-        User user = recruiter.getUser();
-        recruiterRepository.delete(recruiter);
-        if (user != null) {
-            userRepository.delete(user);
+    public void deleteRecruiter(Long id, String reason) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new RuntimeException("Reason for deletion is required");
         }
+
+        Recruiter recruiter = recruiterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Recruiter not found"));
+
+        User user = recruiter.getUser();
+
+        if (user == null) {
+            throw new RuntimeException("Recruiter account is not linked to a user");
+        }
+
+        String email = user.getEmail();
+        String fullName = recruiter.getFullName();
+
+        emailService.sendRecruiterDeletionEmail(email, fullName, reason.trim());
+
+        recruiterRepository.delete(recruiter);
+        userRepository.delete(user);
     }
     
     // ADMINS
