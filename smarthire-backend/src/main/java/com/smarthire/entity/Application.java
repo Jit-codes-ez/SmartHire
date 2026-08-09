@@ -2,6 +2,7 @@ package com.smarthire.entity;
 
 import com.smarthire.enums.ApplicationStatus;
 import com.smarthire.enums.InterviewType;
+import com.smarthire.enums.ResumeScoreStatus;
 
 import jakarta.persistence.*;
 
@@ -61,6 +62,21 @@ public class Application {
     
     // JOINING DETAILS
     private LocalDate joiningDate;
+    
+    private Integer resumeScore;
+
+    @Column(columnDefinition = "TEXT")
+    private String resumeScoreSummary;
+
+    @Column(columnDefinition = "TEXT")
+    private String matchedSkills;
+
+    @Column(columnDefinition = "TEXT")
+    private String missingSkills;
+
+    @Column(name = "resume_score_status")
+    @Enumerated(EnumType.STRING)
+    private ResumeScoreStatus resumeScoreStatus = ResumeScoreStatus.PENDING;
 
     // CONSTRUCTOR
     public Application() {
@@ -147,5 +163,46 @@ public class Application {
     public void setJoiningDate(LocalDate joiningDate) {
         this.joiningDate = joiningDate;
     }
+
+	public Integer getResumeScore() {
+		return resumeScore;
+	}
+
+	public void setResumeScore(Integer resumeScore) {
+		this.resumeScore = resumeScore;
+	}
+
+	public String getResumeScoreSummary() {
+		return resumeScoreSummary;
+	}
+
+	public void setResumeScoreSummary(String resumeScoreSummary) {
+		this.resumeScoreSummary = resumeScoreSummary;
+	}
+
+	public String getMatchedSkills() {
+		return matchedSkills;
+	}
+
+	public void setMatchedSkills(String matchedSkills) {
+		this.matchedSkills = matchedSkills;
+	}
+
+	public String getMissingSkills() {
+		return missingSkills;
+	}
+
+	public void setMissingSkills(String missingSkills) {
+		this.missingSkills = missingSkills;
+	}
+
+	public ResumeScoreStatus getResumeScoreStatus() {
+		return resumeScoreStatus;
+	}
+
+	public void setResumeScoreStatus(ResumeScoreStatus resumeScoreStatus) {
+		this.resumeScoreStatus = resumeScoreStatus;
+	}
+    
 
 }

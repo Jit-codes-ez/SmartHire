@@ -9,6 +9,7 @@ import com.smarthire.entity.User;
 import com.smarthire.enums.ApplicationStatus;
 import com.smarthire.enums.InterviewType;
 import com.smarthire.enums.JobStatus;
+import com.smarthire.enums.ResumeScoreStatus;
 import com.smarthire.repository.ApplicationRepository;
 import com.smarthire.repository.JobRepository;
 import com.smarthire.repository.StudentRepository;
@@ -31,19 +32,22 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final EmailService emailService;
+    private final ApplicationResumeScoringService applicationResumeScoringService;
 
     public ApplicationServiceImpl(
             ApplicationRepository applicationRepository,
             JobRepository jobRepository,
             UserRepository userRepository,
             StudentRepository studentRepository,
-            EmailService emailService) {
+            EmailService emailService,
+            ApplicationResumeScoringService applicationResumeScoringService) {
 
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.emailService = emailService;
+        this.applicationResumeScoringService = applicationResumeScoringService;
     }
 
     // APPLY FOR JOB
@@ -91,8 +95,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        Application application =
-                new Application();
+        Application application = new Application();
 
         application.setStudent(student);
         application.setJob(job);
@@ -105,11 +108,21 @@ public class ApplicationServiceImpl implements ApplicationService {
                 LocalDateTime.now()
         );
 
-        return applicationRepository.save(
-                application
-        );
-    }
+        // AI RESUME SCORING
+        application.setResumeScore(null);
 
+        application.setResumeScoreStatus(
+                ResumeScoreStatus.PENDING
+        );
+
+        Application savedApplication =
+                applicationRepository.save(application);
+
+        applicationResumeScoringService
+                .scoreApplicationAsync(savedApplication.getId());
+
+        return savedApplication;
+    }
     // CHECK WHETHER STUDENT APPLIED
     @Override
     public boolean hasApplied(
@@ -246,7 +259,20 @@ public class ApplicationServiceImpl implements ApplicationService {
                             student.getCgpa(),
                             student.getResumeUrl(),
                             application.getStatus().name(),
-                            application.getAppliedAt()
+                            application.getAppliedAt(),
+
+                            // AI RESUME SCORE
+                            application.getResumeScore(),
+
+                            application.getResumeScoreStatus() != null
+                                    ? application.getResumeScoreStatus().name()
+                                    : null,
+
+                            application.getResumeScoreSummary(),
+
+                            application.getMatchedSkills(),
+
+                            application.getMissingSkills()
                     );
                 })
                 .toList();

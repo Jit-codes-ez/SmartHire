@@ -25,6 +25,16 @@ public class RecruiterApplicantResponse {
     private String status;
 
     private LocalDateTime appliedAt;
+    
+    private Integer resumeScore;
+
+    private String resumeScoreStatus;
+
+    private String resumeScoreSummary;
+
+    private String matchedSkills;
+
+    private String missingSkills;
 
     public RecruiterApplicantResponse() {
     }
@@ -40,7 +50,12 @@ public class RecruiterApplicantResponse {
             Double cgpa,
             String resumeUrl,
             String status,
-            LocalDateTime appliedAt
+            LocalDateTime appliedAt,
+            Integer resumeScore,
+            String resumeScoreStatus,
+            String resumeScoreSummary,
+            String matchedSkills,
+            String missingSkills
     ) {
         this.applicationId = applicationId;
         this.studentId = studentId;
@@ -53,6 +68,13 @@ public class RecruiterApplicantResponse {
         this.resumeUrl = resumeUrl;
         this.status = status;
         this.appliedAt = appliedAt;
+
+        // AI RESUME SCORE
+        this.resumeScore = resumeScore;
+        this.resumeScoreStatus = resumeScoreStatus;
+        this.resumeScoreSummary = resumeScoreSummary;
+        this.matchedSkills = matchedSkills;
+        this.missingSkills = missingSkills;
     }
 
     public Long getApplicationId() {
@@ -142,4 +164,45 @@ public class RecruiterApplicantResponse {
     public void setAppliedAt(LocalDateTime appliedAt) {
         this.appliedAt = appliedAt;
     }
+
+	public Integer getResumeScore() {
+		return resumeScore;
+	}
+
+	public void setResumeScore(Integer resumeScore) {
+		this.resumeScore = resumeScore;
+	}
+
+	public String getResumeScoreStatus() {
+		return resumeScoreStatus;
+	}
+
+	public void setResumeScoreStatus(String resumeScoreStatus) {
+		this.resumeScoreStatus = resumeScoreStatus;
+	}
+
+	public String getResumeScoreSummary() {
+		return resumeScoreSummary;
+	}
+
+	public void setResumeScoreSummary(String resumeScoreSummary) {
+		this.resumeScoreSummary = resumeScoreSummary;
+	}
+
+	public String getMatchedSkills() {
+		return matchedSkills;
+	}
+
+	public void setMatchedSkills(String matchedSkills) {
+		this.matchedSkills = matchedSkills;
+	}
+
+	public String getMissingSkills() {
+		return missingSkills;
+	}
+
+	public void setMissingSkills(String missingSkills) {
+		this.missingSkills = missingSkills;
+	}
+    
 }

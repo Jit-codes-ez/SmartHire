@@ -195,6 +195,47 @@ export default function Applicants() {
     applicant?.application?.id ||
     null;
 
+// =========================================================
+// RESUME SCORE HELPERS
+// =========================================================
+
+const getResumeScore = (applicant) =>
+  applicant?.resumeScore ??
+  applicant?.resume_score ??
+  applicant?.application?.resumeScore ??
+  applicant?.application?.resume_score ??
+  null;
+
+const getResumeScoreStatus = (applicant) =>
+  (
+    applicant?.resumeScoreStatus ||
+    applicant?.resume_score_status ||
+    applicant?.application?.resumeScoreStatus ||
+    applicant?.application?.resume_score_status ||
+    ""
+  ).toUpperCase();
+
+const getResumeScoreSummary = (applicant) =>
+  applicant?.resumeScoreSummary ||
+  applicant?.resume_score_summary ||
+  applicant?.application?.resumeScoreSummary ||
+  applicant?.application?.resume_score_summary ||
+  "";
+
+const getMatchedSkills = (applicant) =>
+  applicant?.matchedSkills ||
+  applicant?.matched_skills ||
+  applicant?.application?.matchedSkills ||
+  applicant?.application?.matched_skills ||
+  "";
+
+const getMissingSkills = (applicant) =>
+  applicant?.missingSkills ||
+  applicant?.missing_skills ||
+  applicant?.application?.missingSkills ||
+  applicant?.application?.missing_skills ||
+  "";
+
   // =========================================================
   // FRIENDLY ACTION ERROR HANDLER
   // =========================================================
@@ -803,6 +844,25 @@ export default function Applicants() {
   return (
     <DashboardLayout>
       <div className="mx-auto w-full max-w-7xl">
+      
+      <style>{`
+              @keyframes shFadeInUp {
+                from { opacity: 0; transform: translateY(8px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              @keyframes shPulseSoft {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.55; }
+              }
+              .sh-fade-in-up {
+                animation: shFadeInUp 0.4s ease-out both;
+              }
+              .sh-pulse {
+                animation: shPulseSoft 1.6s ease-in-out infinite;
+              }
+            `}</style>
+
+            <div className="mx-auto w-full max-w-7xl"></div>
 
         {/* ACTION MESSAGE */}
         {actionMessage && (
@@ -892,6 +952,8 @@ export default function Applicants() {
           </div>
         </div>
 
+        
+
         {/* STATS */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
 
@@ -968,8 +1030,8 @@ export default function Applicants() {
                   Shortlisted
                 </option>
 
-                <option value="APPROVED">
-                  Approved
+                <option value="SELECTED">
+                  Selected
                 </option>
 
                 <option value="REJECTED">
@@ -1468,6 +1530,156 @@ export default function Applicants() {
               />
 
             </div>
+
+{/* =====================================================
+    RESUME SCORE
+===================================================== */}
+
+<div
+  key={selectedApplicant?.id}
+  className="sh-fade-in-up rounded-2xl border border-slate-200 bg-slate-50 p-5"
+>
+
+  <div className="mb-4 flex items-center justify-between">
+
+    <div>
+      <p className="text-sm font-semibold text-slate-700">
+        Resume Score
+      </p>
+
+      <p className="mt-1 text-xs text-slate-500">
+        AI-based resume matching against this job
+      </p>
+    </div>
+
+    {getResumeScoreStatus(selectedApplicant) && (
+      <span
+        className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+          getResumeScoreStatus(selectedApplicant) === "COMPLETED"
+            ? "bg-green-100 text-green-700"
+            : getResumeScoreStatus(selectedApplicant) === "FAILED"
+              ? "bg-red-100 text-red-700"
+              : "sh-pulse bg-yellow-100 text-yellow-700"
+        }`}
+      >
+        {getResumeScoreStatus(selectedApplicant) === "PENDING"
+          ? "Scoring…"
+          : getResumeScoreStatus(selectedApplicant)}
+      </span>
+    )}
+
+  </div>
+
+  {getResumeScore(selectedApplicant) !== null ? (
+
+    <div className="space-y-5">
+
+      {/* SCORE */}
+
+      <div className="flex items-center gap-5">
+
+        <AnimatedScoreRing score={getResumeScore(selectedApplicant)} />
+
+        <div>
+          <p className="text-base font-semibold text-slate-800">
+            Resume Match Score
+          </p>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Based on the candidate's resume and
+            the requirements of this job.
+          </p>
+        </div>
+
+      </div>
+
+      {/* MATCHED SKILLS */}
+
+      {getMatchedSkills(selectedApplicant) && (
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Matched Skills
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {getMatchedSkills(selectedApplicant)
+              .split(",")
+              .map((skill) => skill.trim())
+              .filter(Boolean)
+              .map((skill, index) => (
+                <span
+                  key={`${skill}-${index}`}
+                  className="sh-fade-in-up rounded-full bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700"
+                  style={{ animationDelay: `${150 + index * 60}ms` }}
+                >
+                  {skill}
+                </span>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* MISSING SKILLS */}
+
+      {getMissingSkills(selectedApplicant) && (
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Missing Skills
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {getMissingSkills(selectedApplicant)
+              .split(",")
+              .map((skill) => skill.trim())
+              .filter(Boolean)
+              .map((skill, index) => (
+                <span
+                  key={`${skill}-${index}`}
+                  className="sh-fade-in-up rounded-full bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-700"
+                  style={{ animationDelay: `${250 + index * 60}ms` }}
+                >
+                  {skill}
+                </span>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* AI SUMMARY */}
+
+      {getResumeScoreSummary(selectedApplicant) && (
+        <div
+          className="sh-fade-in-up"
+          style={{ animationDelay: "350ms" }}
+        >
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            AI Assessment
+          </p>
+
+          <div className="rounded-xl border border-slate-200 bg-blue-50 p-4">
+            <p className="text-sm leading-6 text-slate-600">
+              {getResumeScoreSummary(selectedApplicant)}
+            </p>
+          </div>
+        </div>
+      )}
+
+    </div>
+
+  ) : (
+
+    <div className="sh-fade-in-up rounded-xl border border-dashed border-slate-300 bg-white p-5 text-center">
+      <p className="text-sm font-medium text-slate-600">
+        Resume score is not available yet.
+      </p>
+      <p className="mt-1 text-xs text-slate-400">
+        The resume may still be waiting for AI analysis.
+      </p>
+    </div>
+
+  )}
+
+</div>
 
             {getResumeUrl(
               selectedApplicant
@@ -1969,6 +2181,71 @@ function InfoItem({
         {value}
       </p>
 
+    </div>
+  );
+}
+
+// =========================================================
+// ANIMATED SCORE RING
+// =========================================================
+
+function AnimatedScoreRing({ score }) {
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    setAnimatedScore(0);
+
+    const duration = 900;
+    const startTime = performance.now();
+
+    function tick(now) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+
+      setAnimatedScore(Math.round(eased * score));
+
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      }
+    }
+
+    const raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [score]);
+
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (animatedScore / 100) * circumference;
+
+  const ringColor =
+    score >= 75 ? "#16A34A" : score >= 50 ? "#CA8A04" : "#DC2626";
+
+  return (
+    <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
+      <svg width="96" height="96" viewBox="0 0 96 96" className="-rotate-90">
+        <circle cx="48" cy="48" r={radius} fill="none" stroke="#E2E8F0" strokeWidth="8" />
+        <circle
+          cx="48"
+          cy="48"
+          r={radius}
+          fill="none"
+          stroke={ringColor}
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.1s linear" }}
+        />
+      </svg>
+
+      <div className="absolute flex flex-col items-center">
+        <p className="text-2xl font-bold" style={{ color: ringColor }}>
+          {animatedScore}
+        </p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+          / 100
+        </p>
+      </div>
     </div>
   );
 }
