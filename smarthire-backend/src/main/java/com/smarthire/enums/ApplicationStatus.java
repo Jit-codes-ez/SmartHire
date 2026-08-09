@@ -5,6 +5,6 @@ public enum ApplicationStatus {
     APPLIED,
     SHORTLISTED,
     INTERVIEW,
-    SELECTED,
+    APPROVED,
     REJECTED
 }

@@ -1,5 +1,6 @@
 package com.smarthire.controller;
 
+import com.smarthire.dto.recruiter.RecruiterApplicantResponse;
 import com.smarthire.entity.Application;
 import com.smarthire.service.ApplicationService;
 
@@ -123,4 +124,33 @@ public class ApplicationController {
                     );
         }
     }
+ // ==========================================
+ // RECRUITER - GET APPLICANTS FOR JOB
+ // GET /api/recruiter/drives/{jobId}/applicants
+ // ==========================================
+
+ @GetMapping("/recruiter/drives/{jobId}/applicants")
+ public ResponseEntity<?> getApplicantsByJob(
+         @PathVariable Long jobId) {
+
+     try {
+
+         List<RecruiterApplicantResponse> applicants =
+                 applicationService.getApplicantsByJob(jobId);
+
+         return ResponseEntity.ok(applicants);
+
+     } catch (RuntimeException e) {
+
+         return ResponseEntity
+                 .badRequest()
+                 .body(
+                         Map.of(
+                                 "message",
+                                 e.getMessage()
+                         )
+                 );
+     }
+ }
+    
 }

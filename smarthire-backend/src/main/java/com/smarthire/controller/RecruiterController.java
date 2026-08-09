@@ -17,6 +17,10 @@ import com.smarthire.entity.Job;
 import com.smarthire.enums.JobStatus;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import com.smarthire.service.ApplicationService;
 
 @RestController
 @RequestMapping("/api/recruiter")
@@ -25,13 +29,16 @@ public class RecruiterController {
 
     private final RecruiterService recruiterService;
     private final JobService jobService;
+    private final ApplicationService applicationService;
 
     public RecruiterController(
             RecruiterService recruiterService,
-            JobService jobService) {
+            JobService jobService,
+            ApplicationService applicationService) {
 
         this.recruiterService = recruiterService;
         this.jobService = jobService;
+        this.applicationService = applicationService;
     }
 
     @PostMapping("/register")
@@ -112,6 +119,128 @@ public class RecruiterController {
         jobService.deleteJob(id, email);
 
         return ResponseEntity.ok("Job deleted successfully");
+    }
+    @PutMapping("/applications/{applicationId}/shortlist")
+    public ResponseEntity<?> shortlistApplication(
+            @PathVariable Long applicationId,
+            @RequestBody Map<String, String> request) {
+
+        try {
+
+            LocalDate interviewDate =
+                    LocalDate.parse(
+                            request.get("interviewDate")
+                    );
+
+            LocalTime interviewTime =
+                    LocalTime.parse(
+                            request.get("interviewTime")
+                    );
+
+            String interviewLocation =
+                    request.get("interviewLocation");
+
+            applicationService.shortlistApplication(
+                    applicationId,
+                    interviewDate,
+                    interviewTime,
+                    interviewLocation
+            );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message",
+                            "Applicant shortlisted successfully"
+                    )
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    e.getMessage() != null
+                                            ? e.getMessage()
+                                            : "Failed to shortlist applicant"
+                            )
+                    );
+        }
+    }
+    @PutMapping("/applications/{applicationId}/approve")
+    public ResponseEntity<?> approveApplication(
+            @PathVariable Long applicationId,
+            @RequestBody Map<String, String> request) {
+
+        try {
+
+            LocalDate joiningDate =
+                    LocalDate.parse(
+                            request.get("joiningDate")
+                    );
+
+            applicationService.approveApplication(
+                    applicationId,
+                    joiningDate
+            );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message",
+                            "Applicant approved successfully"
+                    )
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    e.getMessage() != null
+                                            ? e.getMessage()
+                                            : "Failed to approve applicant"
+                            )
+                    );
+        }
+    }@PutMapping("/applications/{applicationId}/reject")
+    public ResponseEntity<?> rejectApplication(
+            @PathVariable Long applicationId) {
+
+        try {
+
+            applicationService.rejectApplication(
+                    applicationId
+            );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message",
+                            "Applicant rejected successfully"
+                    )
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    e.getMessage() != null
+                                            ? e.getMessage()
+                                            : "Failed to reject applicant"
+                            )
+                    );
+        }
     }
 
 }

@@ -3,16 +3,21 @@ package com.smarthire.entity;
 import com.smarthire.enums.ApplicationStatus;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(
-    name = "applications",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            columnNames = {"student_id", "job_id"}
-        )
-    }
+        name = "applications",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {
+                                "student_id",
+                                "job_id"
+                        }
+                )
+        }
 )
 public class Application {
 
@@ -22,15 +27,15 @@ public class Application {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-        name = "student_id",
-        nullable = false
+            name = "student_id",
+            nullable = false
     )
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-        name = "job_id",
-        nullable = false
+            name = "job_id",
+            nullable = false
     )
     private Job job;
 
@@ -41,10 +46,32 @@ public class Application {
     @Column(nullable = false)
     private LocalDateTime appliedAt;
 
+    // =====================================================
+    // INTERVIEW DETAILS
+    // =====================================================
+
+    private LocalDate interviewDate;
+
+    private LocalTime interviewTime;
+
+    private String interviewLocation;
+
+    // =====================================================
+    // JOINING DETAILS
+    // =====================================================
+
+    private LocalDate joiningDate;
+
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
 
     public Application() {
     }
 
+    // =====================================================
+    // GETTERS / SETTERS
+    // =====================================================
 
     public Long getId() {
         return id;
@@ -54,7 +81,6 @@ public class Application {
         this.id = id;
     }
 
-
     public Student getStudent() {
         return student;
     }
@@ -62,7 +88,6 @@ public class Application {
     public void setStudent(Student student) {
         this.student = student;
     }
-
 
     public Job getJob() {
         return job;
@@ -72,7 +97,6 @@ public class Application {
         this.job = job;
     }
 
-
     public ApplicationStatus getStatus() {
         return status;
     }
@@ -81,12 +105,43 @@ public class Application {
         this.status = status;
     }
 
-
     public LocalDateTime getAppliedAt() {
         return appliedAt;
     }
 
     public void setAppliedAt(LocalDateTime appliedAt) {
         this.appliedAt = appliedAt;
+    }
+
+    public LocalDate getInterviewDate() {
+        return interviewDate;
+    }
+
+    public void setInterviewDate(LocalDate interviewDate) {
+        this.interviewDate = interviewDate;
+    }
+
+    public LocalTime getInterviewTime() {
+        return interviewTime;
+    }
+
+    public void setInterviewTime(LocalTime interviewTime) {
+        this.interviewTime = interviewTime;
+    }
+
+    public String getInterviewLocation() {
+        return interviewLocation;
+    }
+
+    public void setInterviewLocation(String interviewLocation) {
+        this.interviewLocation = interviewLocation;
+    }
+
+    public LocalDate getJoiningDate() {
+        return joiningDate;
+    }
+
+    public void setJoiningDate(LocalDate joiningDate) {
+        this.joiningDate = joiningDate;
     }
 }

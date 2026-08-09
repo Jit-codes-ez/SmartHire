@@ -1,392 +1,2008 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-import FullWidthListLayout from "../../layouts/FullWidthListLayout.jsx";
-import DataTable from "../../components/DataTable.jsx";
-import ScoreBadge from "../../components/ScoreBadge.jsx";
-import StatusPill from "../../components/StatusPill.jsx";
-import AvatarInitials from "../../components/AvatarInitials.jsx";
+import {
+  FaArrowLeft,
+  FaSearch,
+  FaUsers,
+  FaEye,
+  FaCheck,
+  FaTimes,
+  FaCalendarAlt,
+  FaClock,
+  FaMapMarkerAlt,
+  FaFilePdf,
+  FaEnvelope,
+  FaPhone,
+  FaGraduationCap,
+  FaTimesCircle,
+} from "react-icons/fa";
+
+import DashboardLayout from "../../layouts/DashboardLayout.jsx";
+import Card from "../../components/Card.jsx";
 import Button from "../../components/Button.jsx";
-
-import { useToast } from "../../context/ToastContext.jsx";
+import StatusPill from "../../components/StatusPill.jsx";
 import { authFetch } from "../../lib/authFetch.js";
-
-// ─── SVG Icons ────────────────────────────────────────────────────────────────
-
-function IconUsers({ className }) {
-  return (
-                <svg
-                  className="w-10 h-10 text-st-muted mx-auto mb-3"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 0 2-2h2a2 2 0 0 0 2 2"
-                  />
-                </svg>
-  );
-}
-
-function IconBriefcase({ className }) {
-  return (
-    <svg
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.193.163-.43.295-.69.395m-14.61-8.4a48.114 48.114 0 0 0-3.413.387c-1.07.16-1.837 1.094-1.837 2.175v3.783c0 .63.325 1.218.85 1.561m16.5-8.006V7.5a2.25 2.25 0 0 0-2.25-2.25h-15A2.25 2.25 0 0 0 3 7.5v.006m16.5 0V7.5m0 0H3m13.5-3.75h-3v3.75h3V3.75Z"
-      />
-    </svg>
-  );
-}
 
 export default function Applicants() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
+  // =========================================================
+  // STATE
+  // =========================================================
+
+  const [applicants, setApplicants] = useState([]);
   const [drive, setDrive] = useState(null);
-  const [rows, setRows] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState(null);
+  const [error, setError] = useState("");
 
-  // ─────────────────────────────────────────────────────────────
-  // Load job + applicants
-  // ─────────────────────────────────────────────────────────────
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  // Modals
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [shortlistApplicant, setShortlistApplicant] = useState(null);
+  const [approveApplicant, setApproveApplicant] = useState(null);
+  const [rejectApplicant, setRejectApplicant] = useState(null);
+
+  // Action loading
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Action message
+  const [actionMessage, setActionMessage] = useState("");
+  const [actionMessageType, setActionMessageType] = useState("");
+
+  // Shortlist form
+  const [interviewDate, setInterviewDate] = useState("");
+  const [interviewTime, setInterviewTime] = useState("");
+  const [interviewLocation, setInterviewLocation] = useState("");
+
+  // Approve form
+  const [joiningDate, setJoiningDate] = useState("");
+
+  // =========================================================
+  // LOAD APPLICANTS
+  // =========================================================
 
   useEffect(() => {
-    const loadApplicants = async () => {
-      try {
-        setLoading(true);
+    fetchApplicants();
+  }, [id]);
 
-        const storedRecruiter = localStorage.getItem("recruiter");
-
-        if (!storedRecruiter) {
-          navigate("/login");
-          return;
-        }
-
-        let recruiter;
-
-        try {
-          recruiter = JSON.parse(storedRecruiter);
-        } catch (error) {
-          console.error("Invalid recruiter data:", error);
-          localStorage.removeItem("recruiter");
-          navigate("/login");
-          return;
-        }
-
-        if (!recruiter?.email) {
-          localStorage.removeItem("recruiter");
-          navigate("/login");
-          return;
-        }
-
-        // 1. Load the selected job/drive
-        const jobResponse = await authFetch(
-          `http://localhost:8080/api/recruiter/jobs/${id}/${encodeURIComponent(
-            recruiter.email
-          )}`
-        );
-
-        if (!jobResponse.ok) {
-          const errorText = await jobResponse.text();
-          console.error("Load job error:", errorText);
-          throw new Error("Failed to load job");
-        }
-
-        const jobData = await jobResponse.json();
-        setDrive(jobData);
-
-        // 2. Load applicants for this job
-        const applicantsResponse = await authFetch(
-          `http://localhost:8080/api/recruiter/jobs/${id}/applicants`
-        );
-
-        if (!applicantsResponse.ok) {
-          const errorText = await applicantsResponse.text();
-          console.error("Load applicants error:", errorText);
-          throw new Error("Failed to load applicants");
-        }
-
-        const applicantsData = await applicantsResponse.json();
-        setRows(Array.isArray(applicantsData) ? applicantsData : []);
-      } catch (error) {
-        console.error("Applicants loading error:", error);
-        showToast("Unable to load applicants.", "error");
-        setDrive(null);
-        setRows([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      loadApplicants();
-    }
-  }, [id, navigate, showToast]);
-
-  // ─────────────────────────────────────────────────────────────
-  // Ranked applicants
-  // ─────────────────────────────────────────────────────────────
-
-  const ranked = useMemo(() => {
-    return [...rows].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-  }, [rows]);
-
-  // ─────────────────────────────────────────────────────────────
-  // Applicant status
-  // ─────────────────────────────────────────────────────────────
-
-  const setStatus = async (row, status) => {
+  async function fetchApplicants() {
     try {
-      setUpdatingId(row.id);
+      setLoading(true);
+      setError("");
 
       const response = await authFetch(
-        `http://localhost:8080/api/recruiter/applications/${row.id}/status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
+        `http://localhost:8080/api/recruiter/drives/${id}/applicants`
+      );
+
+      const responseText = await response.text();
+
+      console.log("Applicants API status:", response.status);
+
+      if (!response.ok) {
+        console.error(
+          "Applicants API failed:",
+          response.status,
+          responseText
+        );
+
+        throw new Error("Unable to load applicants.");
+      }
+
+      let data = [];
+
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error(
+            "Unable to parse applicants response:",
+            parseError
+          );
+
+          throw new Error("Unable to load applicants.");
         }
+      }
+
+      if (Array.isArray(data)) {
+        setApplicants(data);
+        setDrive(null);
+      } else {
+        setApplicants(data?.applicants || []);
+        setDrive(data?.drive || null);
+      }
+    } catch (err) {
+      console.error("Applicants loading error:", err);
+
+      setError("Unable to load applicants. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // =========================================================
+  // HELPER FUNCTIONS
+  // =========================================================
+
+  const getName = (applicant) =>
+    applicant?.fullName ||
+    applicant?.studentName ||
+    applicant?.name ||
+    applicant?.student?.fullName ||
+    "Unknown Applicant";
+
+  const getEmail = (applicant) =>
+    applicant?.email ||
+    applicant?.student?.email ||
+    "No email available";
+
+  const getSkills = (applicant) => {
+    if (Array.isArray(applicant?.skills)) {
+      return applicant.skills.join(", ");
+    }
+
+    return (
+      applicant?.skills ||
+      applicant?.student?.skills ||
+      "Not provided"
+    );
+  };
+
+  const getStatus = (applicant) =>
+    (
+      applicant?.status ||
+      applicant?.applicationStatus ||
+      "APPLIED"
+    ).toUpperCase();
+
+  const getAppliedDate = (applicant) => {
+    const value =
+      applicant?.appliedAt ||
+      applicant?.applicationDate ||
+      applicant?.createdAt;
+
+    if (!value) {
+      return "—";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "—";
+    }
+
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const getResumeUrl = (applicant) =>
+    applicant?.resumeUrl ||
+    applicant?.resume ||
+    applicant?.student?.resumeUrl ||
+    null;
+
+  const getApplicationId = (applicant) =>
+    applicant?.id ||
+    applicant?.applicationId ||
+    applicant?.application?.id ||
+    null;
+
+  // =========================================================
+  // FRIENDLY ACTION ERROR HANDLER
+  // =========================================================
+
+  function getFriendlyActionMessage(action, status) {
+    if (status === 401) {
+      return "Your session has expired. Please login again.";
+    }
+
+    if (status === 403) {
+      return "You are not allowed to perform this action.";
+    }
+
+    if (status === 404) {
+      return "The application could not be found.";
+    }
+
+    if (status === 409) {
+      if (action === "shortlist") {
+        return "This applicant cannot be shortlisted in the current status.";
+      }
+
+      if (action === "approve") {
+        return "This applicant cannot be approved in the current status.";
+      }
+
+      if (action === "reject") {
+        return "This applicant cannot be rejected in the current status.";
+      }
+    }
+
+    if (status >= 500) {
+      return "The server is temporarily unavailable. Please try again.";
+    }
+
+    if (action === "shortlist") {
+      return "Unable to shortlist this applicant right now.";
+    }
+
+    if (action === "approve") {
+      return "Unable to approve this applicant right now.";
+    }
+
+    if (action === "reject") {
+      return "Unable to reject this applicant right now.";
+    }
+
+    return "Something went wrong. Please try again.";
+  }
+
+  // =========================================================
+  // HANDLE ACTION RESPONSE
+  // =========================================================
+
+  async function handleActionResponse(
+    response,
+    action
+  ) {
+    let responseData = null;
+    let responseText = "";
+
+    try {
+      responseText = await response.text();
+    } catch (error) {
+      console.error(
+        "Unable to read action response:",
+        error
+      );
+    }
+
+    if (responseText) {
+      try {
+        responseData = JSON.parse(responseText);
+      } catch {
+        responseData = null;
+      }
+    }
+
+    console.log(
+      `${action} API status:`,
+      response.status
+    );
+
+    if (!response.ok) {
+      /*
+       * Technical information stays in console.
+       * The user only gets a friendly message.
+       */
+      console.error("Recruiter action failed:", {
+        action,
+        status: response.status,
+        response: responseData || responseText,
+      });
+
+      throw new Error(
+        getFriendlyActionMessage(
+          action,
+          response.status
+        )
+      );
+    }
+
+    return responseData;
+  }
+
+  // =========================================================
+  // SHOW ACTION MESSAGE
+  // =========================================================
+
+  function showActionMessage(message, type = "success") {
+    setActionMessage(message);
+    setActionMessageType(type);
+
+    setTimeout(() => {
+      setActionMessage("");
+      setActionMessageType("");
+    }, 3500);
+  }
+
+  // =========================================================
+  // VIEW RESUME
+  // =========================================================
+
+  async function handleViewResume(applicant) {
+    const resumeUrl = getResumeUrl(applicant);
+
+    if (!resumeUrl) {
+      showActionMessage(
+        "Resume is not available.",
+        "error"
+      );
+      return;
+    }
+
+    console.log("Opening resume:", resumeUrl);
+
+    const newTab = window.open("", "_blank");
+
+    if (!newTab) {
+      showActionMessage(
+        "Please allow pop-ups for this site.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      newTab.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Loading Resume...</title>
+
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+                background: #f8fafc;
+                color: #64748b;
+              }
+
+              .loader {
+                text-align: center;
+              }
+
+              .spinner {
+                width: 36px;
+                height: 36px;
+                margin: 0 auto 15px;
+                border: 4px solid #e2e8f0;
+                border-top-color: #2563eb;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+              }
+
+              @keyframes spin {
+                to {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+          </head>
+
+          <body>
+            <div class="loader">
+              <div class="spinner"></div>
+              <div>Loading resume...</div>
+            </div>
+          </body>
+        </html>
+      `);
+
+      const response = await authFetch(resumeUrl);
+
+      console.log(
+        "Resume response status:",
+        response.status
       );
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Applicant status update error:", errorText);
-        throw new Error("Failed to update applicant status");
+        const technicalMessage =
+          await response.text();
+
+        console.error(
+          "Resume API error:",
+          technicalMessage
+        );
+
+        newTab.close();
+
+        throw new Error(
+          "Unable to open resume."
+        );
       }
 
-      setRows((prev) =>
-        prev.map((r) => (r.id === row.id ? { ...r, status } : r))
+      const blob = await response.blob();
+
+      console.log(
+        "Resume blob type:",
+        blob.type
       );
 
-      showToast(
-        `${row.name || "Applicant"} marked as ${status}.`,
+      console.log(
+        "Resume blob size:",
+        blob.size
+      );
+
+      if (!blob || blob.size === 0) {
+        newTab.close();
+
+        throw new Error(
+          "Resume file is empty."
+        );
+      }
+
+      const blobUrl =
+        window.URL.createObjectURL(blob);
+
+      newTab.location.href = blobUrl;
+
+      setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+      }, 60000);
+    } catch (err) {
+      console.error(
+        "Resume loading error:",
+        err
+      );
+
+      try {
+        newTab.close();
+      } catch {
+        // Ignore
+      }
+
+      showActionMessage(
+        "Unable to open resume. Please try again.",
+        "error"
+      );
+    }
+  }
+
+  // =========================================================
+  // FILTER
+  // =========================================================
+
+  const filteredApplicants = useMemo(() => {
+    return applicants.filter((applicant) => {
+      const text = `
+        ${getName(applicant)}
+        ${getEmail(applicant)}
+        ${getSkills(applicant)}
+      `.toLowerCase();
+
+      const matchesSearch =
+        text.includes(search.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "ALL" ||
+        getStatus(applicant) === statusFilter;
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+    });
+  }, [
+    applicants,
+    search,
+    statusFilter,
+  ]);
+
+  // =========================================================
+  // STATS
+  // =========================================================
+
+  const shortlistedCount =
+    applicants.filter(
+      (a) =>
+        getStatus(a) === "SHORTLISTED"
+    ).length;
+
+  const approvedCount =
+    applicants.filter(
+      (a) =>
+        getStatus(a) === "APPROVED"
+    ).length;
+
+  const rejectedCount =
+    applicants.filter(
+      (a) =>
+        getStatus(a) === "REJECTED"
+    ).length;
+
+  // =========================================================
+  // SHORTLIST
+  // =========================================================
+
+  function openShortlistModal(applicant) {
+    setShortlistApplicant(applicant);
+
+    setInterviewDate(
+      applicant?.interviewDate
+        ? String(
+            applicant.interviewDate
+          ).substring(0, 10)
+        : ""
+    );
+
+    setInterviewTime(
+      applicant?.interviewTime || ""
+    );
+
+    setInterviewLocation(
+      applicant?.interviewLocation || ""
+    );
+
+    setActionMessage("");
+  }
+
+  async function handleShortlist() {
+    if (!interviewDate) {
+      showActionMessage(
+        "Please select an interview date.",
+        "error"
+      );
+      return;
+    }
+
+    if (!interviewTime) {
+      showActionMessage(
+        "Please select an interview time.",
+        "error"
+      );
+      return;
+    }
+
+    if (!interviewLocation.trim()) {
+      showActionMessage(
+        "Please enter the interview location.",
+        "error"
+      );
+      return;
+    }
+
+    const applicationId =
+      getApplicationId(
+        shortlistApplicant
+      );
+
+    if (!applicationId) {
+      console.error(
+        "Application ID not found:",
+        shortlistApplicant
+      );
+
+      showActionMessage(
+        "Unable to identify this application.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+
+      const response = await authFetch(
+        `http://localhost:8080/api/recruiter/applications/${applicationId}/shortlist`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            interviewDate,
+            interviewTime,
+            interviewLocation:
+              interviewLocation.trim(),
+          }),
+        }
+      );
+
+      await handleActionResponse(
+        response,
+        "shortlist"
+      );
+
+      closeAllModals();
+
+      showActionMessage(
+        "Applicant shortlisted successfully.",
         "success"
       );
-    } catch (error) {
-      console.error("Applicant status error:", error);
-      showToast("Failed to update applicant status.", "error");
+
+      await fetchApplicants();
+    } catch (err) {
+      console.error(
+        "Shortlist action error:",
+        err
+      );
+
+      showActionMessage(
+        err.message ||
+          "Unable to shortlist this applicant right now.",
+        "error"
+      );
     } finally {
-      setUpdatingId(null);
+      setActionLoading(false);
     }
-  };
-
-  // ─────────────────────────────────────────────────────────────
-  // Loading
-  // ─────────────────────────────────────────────────────────────
-
-  if (loading) {
-    return (
-      <FullWidthListLayout
-        role="recruiter"
-        userName="Recruiter"
-        onLogout={() => navigate("/login")}
-        title="Applicants"
-        subtitle="Loading applicants..."
-      >
-        <div className="p-10 text-center">
-          <p className="text-st-muted">Loading applicants...</p>
-        </div>
-      </FullWidthListLayout>
-    );
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Job not found
-  // ─────────────────────────────────────────────────────────────
+  // =========================================================
+  // APPROVE
+  // =========================================================
 
-  if (!drive) {
-    return (
-      <FullWidthListLayout
-        role="recruiter"
-        userName="Recruiter"
-        onLogout={() => navigate("/login")}
-        title="Applicants"
-        subtitle="Job not found"
-      >
-        <div className="py-16 text-center">
-          <IconBriefcase className="w-10 h-10 text-st-muted mx-auto mb-3" />
-          <p className="text-st-text font-semibold">
-            Unable to find this job drive.
-          </p>
-          <p className="text-sm text-st-muted mt-1">
-            The job may have been deleted or you may not have permission to view it.
-          </p>
-          <Button
-            className="mt-5"
-            onClick={() => navigate("/recruiter/drives")}
-          >
-            Back to My Drives
-          </Button>
-        </div>
-      </FullWidthListLayout>
+  function openApproveModal(applicant) {
+    setApproveApplicant(applicant);
+
+    setJoiningDate(
+      applicant?.joiningDate
+        ? String(
+            applicant.joiningDate
+          ).substring(0, 10)
+        : ""
     );
+
+    setActionMessage("");
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Table columns
-  // ─────────────────────────────────────────────────────────────
+  async function handleApprove() {
+    if (!joiningDate) {
+      showActionMessage(
+        "Please select a joining date.",
+        "error"
+      );
+      return;
+    }
 
-  const columns = [
-    {
-      key: "name",
-      label: "Applicant",
-      sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <AvatarInitials name={row.name || row.fullName || "Applicant"} />
-          <div>
-            <p className="font-semibold text-st-text">
-              {row.name || row.fullName || "Unknown Applicant"}
-            </p>
-            {(row.college || row.degree) && (
-              <p className="text-xs text-st-muted mt-0.5">
-                {row.college || "—"}
-                {row.college && row.degree ? " · " : ""}
-                {row.degree || ""}
-              </p>
-            )}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "score",
-      label: "Score",
-      sortable: true,
-      render: (row) => <ScoreBadge score={row.score ?? row.aiScore ?? 0} />,
-    },
-    {
-      key: "cgpa",
-      label: "CGPA",
-      sortable: true,
-      render: (row) =>
-        row.cgpa !== null && row.cgpa !== undefined ? row.cgpa : "—",
-    },
-    {
-      key: "appliedOn",
-      label: "Applied",
-      render: (row) =>
-        row.appliedOn || row.applicationDate || row.createdAt || "—",
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (row) => <StatusPill status={row.status || "Applied"} />,
-    },
-    {
-      key: "actions",
-      label: "",
-      render: (row) => {
-        const isUpdating = updatingId === row.id;
-        const currentStatus = String(row.status || "").toUpperCase();
+    const applicationId =
+      getApplicationId(
+        approveApplicant
+      );
 
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              className="!px-2 !py-1 text-xs"
-              disabled={isUpdating}
-              onClick={() => setStatus(row, "SHORTLISTED")}
-            >
-              {isUpdating && currentStatus !== "SHORTLISTED" ? "..." : "Shortlist"}
-            </Button>
-            <Button
-              variant="danger"
-              className="!px-2 !py-1 text-xs"
-              disabled={isUpdating}
-              onClick={() => setStatus(row, "REJECTED")}
-            >
-              {isUpdating && currentStatus !== "REJECTED" ? "..." : "Reject"}
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
+    if (!applicationId) {
+      console.error(
+        "Application ID not found:",
+        approveApplicant
+      );
 
-  // ─────────────────────────────────────────────────────────────
-  // Main page
-  // ─────────────────────────────────────────────────────────────
+      showActionMessage(
+        "Unable to identify this application.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+
+      const response = await authFetch(
+        `http://localhost:8080/api/recruiter/applications/${applicationId}/approve`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            joiningDate,
+          }),
+        }
+      );
+
+      await handleActionResponse(
+        response,
+        "approve"
+      );
+
+      closeAllModals();
+
+      showActionMessage(
+        "Applicant approved successfully.",
+        "success"
+      );
+
+      await fetchApplicants();
+    } catch (err) {
+      console.error(
+        "Approve action error:",
+        err
+      );
+
+      showActionMessage(
+        err.message ||
+          "Unable to approve this applicant right now.",
+        "error"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  // =========================================================
+  // REJECT
+  // =========================================================
+
+  async function handleReject() {
+    const applicationId =
+      getApplicationId(
+        rejectApplicant
+      );
+
+    if (!applicationId) {
+      console.error(
+        "Application ID not found:",
+        rejectApplicant
+      );
+
+      showActionMessage(
+        "Unable to identify this application.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+
+      const response = await authFetch(
+        `http://localhost:8080/api/recruiter/applications/${applicationId}/reject`,
+        {
+          method: "PUT",
+        }
+      );
+
+      await handleActionResponse(
+        response,
+        "reject"
+      );
+
+      closeAllModals();
+
+      showActionMessage(
+        "Applicant rejected successfully.",
+        "success"
+      );
+
+      await fetchApplicants();
+    } catch (err) {
+      console.error(
+        "Reject action error:",
+        err
+      );
+
+      showActionMessage(
+        err.message ||
+          "Unable to reject this applicant right now.",
+        "error"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  // =========================================================
+  // CLOSE MODALS
+  // =========================================================
+
+  function closeAllModals() {
+    setSelectedApplicant(null);
+    setShortlistApplicant(null);
+    setApproveApplicant(null);
+    setRejectApplicant(null);
+
+    setInterviewDate("");
+    setInterviewTime("");
+    setInterviewLocation("");
+    setJoiningDate("");
+  }
+
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
-    <FullWidthListLayout
-      role="recruiter"
-      userName="Recruiter"
-      onLogout={() => {
-        localStorage.removeItem("recruiter");
-        window.dispatchEvent(new Event("authChange"));
-        navigate("/login");
-      }}
-      title={`Applicants — ${drive.title}`}
-      subtitle={
-        <Link to="/recruiter/drives" style={{ color: "var(--primary)" }}>
-          ← Back to My Drives
-        </Link>
-      }
-      action={
-        <Button variant="secondary" onClick={() => navigate("/recruiter/drives")}>
-          Back
-        </Button>
-      }
-    >
-      {/* ── Job summary ─────────────────────────────────────────────────────── */}
-      <div className="mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-st-text">{drive.title}</h2>
-            <p className="text-sm text-st-muted mt-1">
-              {drive.location || "Location not specified"}
-              {drive.employmentType ? ` · ${drive.employmentType}` : ""}
-            </p>
-          </div>
+    <DashboardLayout>
+      <div className="mx-auto w-full max-w-7xl">
 
-          <div className="flex items-center gap-6">
-            <div className="text-right">
-              <p className="text-xs text-st-muted">Applicants</p>
-              <p className="text-xl font-bold text-st-text">{rows.length}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-st-muted">Shortlisted</p>
-              <p className="text-xl font-bold text-green-600">
-                {
-                  rows.filter(
-                    (r) => String(r.status || "").toUpperCase() === "SHORTLISTED"
-                  ).length
-                }
+        {/* ACTION MESSAGE */}
+        {actionMessage && (
+          <div
+            className={`fixed right-5 top-5 z-[100] max-w-sm rounded-xl border px-5 py-4 text-sm font-medium shadow-xl ${
+              actionMessageType === "error"
+                ? "border-red-200 bg-red-50 text-red-700"
+                : "border-green-200 bg-green-50 text-green-700"
+            }`}
+          >
+            {actionMessage}
+          </div>
+        )}
+
+        {/* BACK */}
+        <button
+          type="button"
+          onClick={() =>
+            navigate(
+              "/recruiter/drives"
+            )
+          }
+          className="mb-5 flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-blue-600"
+        >
+          <FaArrowLeft />
+          Back to My Drives
+        </button>
+
+        {/* HEADER */}
+        <div className="mb-7">
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
+
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">
+                Applicants
+              </h1>
+
+              <p className="mt-1 text-slate-500">
+                Manage candidates who applied
+                for this job drive.
               </p>
+
+              {drive && (
+                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-600">
+
+                  {drive.jobTitle && (
+                    <span className="font-medium">
+                      {drive.jobTitle}
+                    </span>
+                  )}
+
+                  {drive.location && (
+                    <span className="flex items-center gap-1">
+                      <FaMapMarkerAlt />
+                      {drive.location}
+                    </span>
+                  )}
+
+                  {drive.type && (
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">
+                      {drive.type}
+                    </span>
+                  )}
+
+                </div>
+              )}
             </div>
+
+            <div className="flex items-center gap-3 rounded-xl bg-white px-5 py-4 shadow-sm">
+
+              <div className="rounded-lg bg-blue-50 p-3">
+                <FaUsers className="text-blue-600" />
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-500">
+                  Total Applicants
+                </p>
+
+                <p className="text-2xl font-bold text-slate-900">
+                  {applicants.length}
+                </p>
+              </div>
+
+            </div>
+
           </div>
         </div>
+
+        {/* STATS */}
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
+
+          <StatCard
+            label="Total"
+            value={applicants.length}
+            icon={<FaUsers />}
+          />
+
+          <StatCard
+            label="Shortlisted"
+            value={shortlistedCount}
+            icon={<FaCheck />}
+          />
+
+          <StatCard
+            label="Approved"
+            value={approvedCount}
+            icon={<FaCheck />}
+          />
+
+          <StatCard
+            label="Rejected"
+            value={rejectedCount}
+            icon={<FaTimes />}
+          />
+
+        </div>
+
+        {/* TABLE */}
+        <Card className="overflow-hidden p-0">
+
+          {/* SEARCH */}
+          <div className="border-b border-slate-200 p-5">
+
+            <div className="flex flex-col gap-3 md:flex-row">
+
+              <div className="relative flex-1">
+
+                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) =>
+                    setSearch(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Search applicants by name, email or skills..."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                />
+
+              </div>
+
+              <select
+                value={statusFilter}
+                onChange={(e) =>
+                  setStatusFilter(
+                    e.target.value
+                  )
+                }
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="ALL">
+                  All Status
+                </option>
+
+                <option value="APPLIED">
+                  Applied
+                </option>
+
+                <option value="SHORTLISTED">
+                  Shortlisted
+                </option>
+
+                <option value="APPROVED">
+                  Approved
+                </option>
+
+                <option value="REJECTED">
+                  Rejected
+                </option>
+              </select>
+
+            </div>
+
+          </div>
+
+          {/* LOADING */}
+          {loading && (
+            <div className="flex min-h-[300px] items-center justify-center">
+
+              <div className="text-center">
+
+                <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+
+                <p className="text-sm text-slate-500">
+                  Loading applicants...
+                </p>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* ERROR */}
+          {!loading && error && (
+            <div className="p-10 text-center">
+
+              <p className="mb-4 text-red-500">
+                {error}
+              </p>
+
+              <Button onClick={fetchApplicants}>
+                Try Again
+              </Button>
+
+            </div>
+          )}
+
+          {/* EMPTY */}
+          {!loading &&
+            !error &&
+            filteredApplicants.length === 0 && (
+              <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
+
+                <div className="mb-4 rounded-full bg-slate-100 p-5">
+                  <FaUsers className="text-3xl text-slate-400" />
+                </div>
+
+                <h3 className="text-lg font-semibold text-slate-800">
+                  No applicants found
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  {applicants.length === 0
+                    ? "No students have applied for this drive yet."
+                    : "Try changing your search or filter."}
+                </p>
+
+              </div>
+            )}
+
+          {/* DESKTOP TABLE */}
+          {!loading &&
+            !error &&
+            filteredApplicants.length > 0 && (
+              <div className="hidden overflow-x-auto md:block">
+
+                <table className="w-full">
+
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50 text-left">
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Applicant
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Skills
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Applied On
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Status
+                      </th>
+
+                      <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Actions
+                      </th>
+
+                    </tr>
+                  </thead>
+
+                  <tbody>
+
+                    {filteredApplicants.map(
+                      (applicant, index) => {
+                        const status =
+                          getStatus(
+                            applicant
+                          );
+
+                        const applicationId =
+                          getApplicationId(
+                            applicant
+                          );
+
+                        return (
+                          <tr
+                            key={
+                              applicationId ||
+                              index
+                            }
+                            className="border-b border-slate-100 transition hover:bg-slate-50"
+                          >
+
+                            {/* APPLICANT */}
+                            <td className="px-5 py-5">
+
+                              <div className="flex items-center gap-3">
+
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 font-semibold text-white">
+                                  {getName(
+                                    applicant
+                                  )
+                                    .charAt(0)
+                                    .toUpperCase()}
+                                </div>
+
+                                <div>
+
+                                  <p className="font-semibold text-slate-800">
+                                    {getName(
+                                      applicant
+                                    )}
+                                  </p>
+
+                                  <p className="mt-1 flex items-center gap-1 text-sm text-slate-500">
+                                    <FaEnvelope />
+                                    {getEmail(
+                                      applicant
+                                    )}
+                                  </p>
+
+                                </div>
+
+                              </div>
+
+                            </td>
+
+                            {/* SKILLS */}
+                            <td className="max-w-xs px-5 py-5">
+
+                              <p className="truncate text-sm text-slate-600">
+                                {getSkills(
+                                  applicant
+                                )}
+                              </p>
+
+                            </td>
+
+                            {/* DATE */}
+                            <td className="px-5 py-5">
+
+                              <div className="flex items-center gap-2 text-sm text-slate-600">
+                                <FaCalendarAlt />
+                                {getAppliedDate(
+                                  applicant
+                                )}
+                              </div>
+
+                            </td>
+
+                            {/* STATUS */}
+                            <td className="px-5 py-5">
+                              <StatusPill
+                                status={status}
+                              />
+                            </td>
+
+                            {/* ACTIONS */}
+                            <td className="px-5 py-5">
+
+                              <div className="flex justify-end gap-2">
+
+                                <ActionButton
+                                  title="View"
+                                  onClick={() =>
+                                    setSelectedApplicant(
+                                      applicant
+                                    )
+                                  }
+                                  icon={
+                                    <FaEye />
+                                  }
+                                />
+
+                                {status !==
+                                  "APPROVED" &&
+                                  status !==
+                                    "REJECTED" && (
+                                    <ActionButton
+                                      title="Shortlist"
+                                      onClick={() =>
+                                        openShortlistModal(
+                                          applicant
+                                        )
+                                      }
+                                      icon={
+                                        <FaCheck />
+                                      }
+                                      variant="blue"
+                                      disabled={
+                                        actionLoading
+                                      }
+                                    />
+                                  )}
+
+                                {status !==
+                                  "APPROVED" &&
+                                  status !==
+                                    "REJECTED" && (
+                                    <ActionButton
+                                      title="Approve"
+                                      onClick={() =>
+                                        openApproveModal(
+                                          applicant
+                                        )
+                                      }
+                                      icon={
+                                        <FaCheck />
+                                      }
+                                      variant="green"
+                                      disabled={
+                                        actionLoading
+                                      }
+                                    />
+                                  )}
+
+                                {status !==
+                                  "REJECTED" &&
+                                  status !==
+                                    "APPROVED" && (
+                                    <ActionButton
+                                      title="Reject"
+                                      onClick={() =>
+                                        setRejectApplicant(
+                                          applicant
+                                        )
+                                      }
+                                      icon={
+                                        <FaTimes />
+                                      }
+                                      variant="red"
+                                      disabled={
+                                        actionLoading
+                                      }
+                                    />
+                                  )}
+
+                              </div>
+
+                            </td>
+
+                          </tr>
+                        );
+                      }
+                    )}
+
+                  </tbody>
+
+                </table>
+
+              </div>
+            )}
+
+          {/* MOBILE */}
+          {!loading &&
+            !error &&
+            filteredApplicants.length > 0 && (
+              <div className="space-y-4 p-4 md:hidden">
+
+                {filteredApplicants.map(
+                  (applicant, index) => {
+                    const status =
+                      getStatus(
+                        applicant
+                      );
+
+                    return (
+                      <div
+                        key={
+                          getApplicationId(
+                            applicant
+                          ) || index
+                        }
+                        className="rounded-xl border border-slate-200 bg-white p-4"
+                      >
+
+                        <div className="flex items-start justify-between gap-3">
+
+                          <div className="flex items-center gap-3">
+
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 font-semibold text-white">
+                              {getName(
+                                applicant
+                              )
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+
+                            <div>
+
+                              <p className="font-semibold text-slate-800">
+                                {getName(
+                                  applicant
+                                )}
+                              </p>
+
+                              <p className="text-xs text-slate-500">
+                                {getEmail(
+                                  applicant
+                                )}
+                              </p>
+
+                            </div>
+
+                          </div>
+
+                          <StatusPill
+                            status={status}
+                          />
+
+                        </div>
+
+                        <p className="mt-4 text-sm text-slate-600">
+                          <strong>
+                            Skills:
+                          </strong>{" "}
+                          {getSkills(
+                            applicant
+                          )}
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+
+                          <ActionButton
+                            title="View"
+                            onClick={() =>
+                              setSelectedApplicant(
+                                applicant
+                              )
+                            }
+                            icon={
+                              <FaEye />
+                            }
+                          />
+
+                          {status !==
+                            "APPROVED" &&
+                            status !==
+                              "REJECTED" && (
+                              <>
+                                <ActionButton
+                                  title="Shortlist"
+                                  onClick={() =>
+                                    openShortlistModal(
+                                      applicant
+                                    )
+                                  }
+                                  icon={
+                                    <FaCheck />
+                                  }
+                                  variant="blue"
+                                  disabled={
+                                    actionLoading
+                                  }
+                                />
+
+                                <ActionButton
+                                  title="Approve"
+                                  onClick={() =>
+                                    openApproveModal(
+                                      applicant
+                                    )
+                                  }
+                                  icon={
+                                    <FaCheck />
+                                  }
+                                  variant="green"
+                                  disabled={
+                                    actionLoading
+                                  }
+                                />
+
+                                <ActionButton
+                                  title="Reject"
+                                  onClick={() =>
+                                    setRejectApplicant(
+                                      applicant
+                                    )
+                                  }
+                                  icon={
+                                    <FaTimes />
+                                  }
+                                  variant="red"
+                                  disabled={
+                                    actionLoading
+                                  }
+                                />
+                              </>
+                            )}
+
+                        </div>
+
+                      </div>
+                    );
+                  }
+                )}
+
+              </div>
+            )}
+
+        </Card>
       </div>
 
-      {/* ── Applicants table / empty state ──────────────────────────────────── */}
-      {rows.length === 0 ? (
-        <div className="py-16 text-center border border-st-border rounded-input">
-          <IconUsers className="w-10 h-10 text-st-muted mx-auto mb-3" />
-          <p className="font-semibold text-st-text">No applicants yet</p>
-          <p className="text-sm text-st-muted mt-1">
-            No students have applied to this job drive.
-          </p>
-        </div>
-      ) : (
-        <DataTable columns={columns} data={ranked} />
+      {/* =====================================================
+          VIEW APPLICANT MODAL
+      ===================================================== */}
+
+      {selectedApplicant && (
+        <Modal onClose={closeAllModals}>
+
+          <ModalHeader
+            title="Applicant Details"
+            onClose={closeAllModals}
+          />
+
+          <div className="space-y-6 p-6">
+
+            <div className="flex items-center gap-4">
+
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-2xl font-bold text-white">
+                {getName(
+                  selectedApplicant
+                )
+                  .charAt(0)
+                  .toUpperCase()}
+              </div>
+
+              <div>
+
+                <h2 className="text-xl font-bold text-slate-900">
+                  {getName(
+                    selectedApplicant
+                  )}
+                </h2>
+
+                <p className="text-sm text-slate-500">
+                  {getEmail(
+                    selectedApplicant
+                  )}
+                </p>
+
+              </div>
+
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+              <InfoItem
+                icon={<FaEnvelope />}
+                label="Email"
+                value={getEmail(
+                  selectedApplicant
+                )}
+              />
+
+              <InfoItem
+                icon={<FaPhone />}
+                label="Mobile"
+                value={
+                  selectedApplicant?.mobileNumber ||
+                  selectedApplicant?.student
+                    ?.mobileNumber ||
+                  "Not provided"
+                }
+              />
+
+              <InfoItem
+                icon={<FaGraduationCap />}
+                label="CGPA"
+                value={
+                  selectedApplicant?.cgpa ||
+                  selectedApplicant?.student
+                    ?.cgpa ||
+                  "Not provided"
+                }
+              />
+
+              <InfoItem
+                icon={<FaGraduationCap />}
+                label="Branch"
+                value={
+                  selectedApplicant?.branch ||
+                  selectedApplicant?.student
+                    ?.branch ||
+                  "Not provided"
+                }
+              />
+
+            </div>
+
+            <div>
+
+              <p className="mb-2 text-sm font-semibold text-slate-700">
+                Skills
+              </p>
+
+              <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                {getSkills(
+                  selectedApplicant
+                )}
+              </div>
+
+            </div>
+
+            <div>
+
+              <p className="mb-2 text-sm font-semibold text-slate-700">
+                Application Status
+              </p>
+
+              <StatusPill
+                status={getStatus(
+                  selectedApplicant
+                )}
+              />
+
+            </div>
+
+            {getResumeUrl(
+              selectedApplicant
+            ) ? (
+              <button
+                type="button"
+                onClick={() =>
+                  handleViewResume(
+                    selectedApplicant
+                  )
+                }
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+              >
+                <FaFilePdf />
+                View Resume
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-5 py-3 text-sm font-medium text-slate-500">
+                <FaFilePdf />
+                Resume Not Available
+              </div>
+            )}
+
+          </div>
+
+        </Modal>
       )}
-    </FullWidthListLayout>
+
+      {/* =====================================================
+          SHORTLIST MODAL
+      ===================================================== */}
+
+      {shortlistApplicant && (
+        <Modal onClose={closeAllModals}>
+
+          <ModalHeader
+            title="Shortlist Applicant"
+            onClose={closeAllModals}
+          />
+
+          <div className="space-y-5 p-6">
+
+            <div className="rounded-xl bg-blue-50 p-4">
+
+              <p className="font-semibold text-blue-900">
+                {getName(
+                  shortlistApplicant
+                )}
+              </p>
+
+              <p className="mt-1 text-sm text-blue-700">
+                {getEmail(
+                  shortlistApplicant
+                )}
+              </p>
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Interview Date
+              </label>
+
+              <div className="relative">
+
+                <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                <input
+                  type="date"
+                  value={interviewDate}
+                  onChange={(e) =>
+                    setInterviewDate(
+                      e.target.value
+                    )
+                  }
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+
+              </div>
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Interview Time
+              </label>
+
+              <div className="relative">
+
+                <FaClock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                <input
+                  type="time"
+                  value={interviewTime}
+                  onChange={(e) =>
+                    setInterviewTime(
+                      e.target.value
+                    )
+                  }
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+
+              </div>
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Interview Location
+              </label>
+
+              <div className="relative">
+
+                <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                <input
+                  type="text"
+                  value={interviewLocation}
+                  onChange={(e) =>
+                    setInterviewLocation(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Example: SmartHire Office, Kolkata"
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+
+              </div>
+
+            </div>
+
+            <p className="text-xs text-slate-500">
+              The interview details will be
+              included in the notification sent
+              to the candidate.
+            </p>
+
+          </div>
+
+          <ModalFooter>
+
+            <button
+              type="button"
+              onClick={closeAllModals}
+              disabled={actionLoading}
+              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleShortlist}
+              disabled={actionLoading}
+              className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {actionLoading
+                ? "Shortlisting..."
+                : "Shortlist Applicant"}
+            </button>
+
+          </ModalFooter>
+
+        </Modal>
+      )}
+
+      {/* =====================================================
+          APPROVE MODAL
+      ===================================================== */}
+
+      {approveApplicant && (
+        <Modal onClose={closeAllModals}>
+
+          <ModalHeader
+            title="Approve Applicant"
+            onClose={closeAllModals}
+          />
+
+          <div className="space-y-5 p-6">
+
+            <div className="rounded-xl bg-green-50 p-4">
+
+              <p className="font-semibold text-green-900">
+                {getName(
+                  approveApplicant
+                )}
+              </p>
+
+              <p className="mt-1 text-sm text-green-700">
+                {getEmail(
+                  approveApplicant
+                )}
+              </p>
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Joining Date
+              </label>
+
+              <div className="relative">
+
+                <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                <input
+                  type="date"
+                  value={joiningDate}
+                  onChange={(e) =>
+                    setJoiningDate(
+                      e.target.value
+                    )
+                  }
+                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100"
+                />
+
+              </div>
+
+            </div>
+
+            <p className="text-xs text-slate-500">
+              The candidate will receive a
+              confirmation notification containing
+              the joining date.
+            </p>
+
+          </div>
+
+          <ModalFooter>
+
+            <button
+              type="button"
+              onClick={closeAllModals}
+              disabled={actionLoading}
+              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleApprove}
+              disabled={actionLoading}
+              className="rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {actionLoading
+                ? "Approving..."
+                : "Approve Applicant"}
+            </button>
+
+          </ModalFooter>
+
+        </Modal>
+      )}
+
+      {/* =====================================================
+          REJECT MODAL
+      ===================================================== */}
+
+      {rejectApplicant && (
+        <Modal onClose={closeAllModals}>
+
+          <ModalHeader
+            title="Reject Applicant"
+            onClose={closeAllModals}
+          />
+
+          <div className="p-6">
+
+            <div className="flex flex-col items-center text-center">
+
+              <div className="mb-4 rounded-full bg-red-50 p-4">
+                <FaTimesCircle className="text-3xl text-red-500" />
+              </div>
+
+              <h3 className="text-lg font-semibold text-slate-900">
+                Reject{" "}
+                {getName(
+                  rejectApplicant
+                )}
+                ?
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-500">
+                This applicant will be marked as
+                rejected.
+              </p>
+
+            </div>
+
+          </div>
+
+          <ModalFooter>
+
+            <button
+              type="button"
+              onClick={closeAllModals}
+              disabled={actionLoading}
+              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleReject}
+              disabled={actionLoading}
+              className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {actionLoading
+                ? "Rejecting..."
+                : "Reject Application"}
+            </button>
+
+          </ModalFooter>
+
+        </Modal>
+      )}
+
+    </DashboardLayout>
+  );
+}
+
+// =========================================================
+// STAT CARD
+// =========================================================
+
+function StatCard({
+  label,
+  value,
+  icon,
+}) {
+  return (
+    <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
+
+      <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
+        {icon}
+      </div>
+
+      <div>
+        <p className="text-sm text-slate-500">
+          {label}
+        </p>
+
+        <p className="mt-1 text-2xl font-bold text-slate-900">
+          {value}
+        </p>
+      </div>
+
+    </div>
+  );
+}
+
+// =========================================================
+// ACTION BUTTON
+// =========================================================
+
+function ActionButton({
+  title,
+  icon,
+  onClick,
+  variant = "default",
+  disabled = false,
+}) {
+  const styles = {
+    default:
+      "border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600",
+
+    blue:
+      "border-blue-200 text-blue-600 hover:bg-blue-50",
+
+    green:
+      "border-green-200 text-green-600 hover:bg-green-50",
+
+    red:
+      "border-red-200 text-red-600 hover:bg-red-50",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      disabled={disabled}
+      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${styles[variant]}`}
+    >
+      {icon}
+      {title}
+    </button>
+  );
+}
+
+// =========================================================
+// MODAL
+// =========================================================
+
+function Modal({
+  children,
+  onClose,
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
+        onClick={(e) =>
+          e.stopPropagation()
+        }
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// =========================================================
+// MODAL HEADER
+// =========================================================
+
+function ModalHeader({
+  title,
+  onClose,
+}) {
+  return (
+    <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+
+      <h2 className="text-xl font-bold text-slate-900">
+        {title}
+      </h2>
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+      >
+        <FaTimes />
+      </button>
+
+    </div>
+  );
+}
+
+// =========================================================
+// MODAL FOOTER
+// =========================================================
+
+function ModalFooter({
+  children,
+}) {
+  return (
+    <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+      {children}
+    </div>
+  );
+}
+
+// =========================================================
+// INFO ITEM
+// =========================================================
+
+function InfoItem({
+  icon,
+  label,
+  value,
+}) {
+  return (
+    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+
+      <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-slate-500">
+        {icon}
+        {label}
+      </div>
+
+      <p className="break-words text-sm font-medium text-slate-800">
+        {value}
+      </p>
+
+    </div>
   );
 }
