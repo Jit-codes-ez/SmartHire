@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Reveal from "../../components/Reveal";
+import Reveal from "../../components/Reveal.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 
 export default function ForgotPassword() {

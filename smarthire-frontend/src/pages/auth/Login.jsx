@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext.jsx';
-import Reveal from '../../components/Reveal';
+import Reveal from '../../components/Reveal.jsx';
 
 const ROLE_DASHBOARDS = {
   STUDENT: '/student/dashboard',

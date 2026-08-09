@@ -13,6 +13,44 @@ import Button from "../../components/Button.jsx";
 import StatusPill from "../../components/StatusPill.jsx";
 import EmptyState from "../../components/EmptyState.jsx";
 
+// ─── Company Logo ─────────────────────────────────────────────────────────────
+
+function CompanyLogo({ companyName }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!companyName) return null;
+
+  const domain = companyName
+    .toLowerCase()
+    .replace(/\b(technologies|technology|solutions|services|systems|software|consulting|india|pvt|ltd|limited|inc|corp|group|co)\b\.?/g, "")
+    .trim()
+    .replace(/\s+/g, "") + ".com";
+
+  const initials = companyName
+    .split(" ").filter(Boolean).slice(0, 2)
+    .map((w) => w[0]).join("").toUpperCase();
+
+  const colors = ["bg-blue-100 text-blue-700","bg-violet-100 text-violet-700","bg-emerald-100 text-emerald-700","bg-orange-100 text-orange-700"];
+  const colorClass = colors[companyName.charCodeAt(0) % colors.length];
+
+  if (failed) {
+    return (
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${colorClass}`}>
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={`https://cdn.brandfetch.io/${domain}?c=${import.meta.env.VITE_BRANDFETCH_CLIENT_ID}`}
+      alt={companyName}
+      className="h-10 w-10 rounded-lg object-contain border border-gray-100 bg-white p-1 shrink-0"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export default function BrowseJobs() {
   const navigate = useNavigate();
 
@@ -61,15 +99,6 @@ export default function BrowseJobs() {
     loadJobs();
   }, [navigate]);
 
-  /*
-   * Backend currently returns:
-   *
-   * "skills": "Java, React, SQL"
-   *
-   * Convert it into:
-   *
-   * ["Java", "React", "SQL"]
-   */
   const getSkills = (skills) => {
     if (!skills) {
       return [];
@@ -103,7 +132,7 @@ export default function BrowseJobs() {
 
       const searchableText = `
         ${job.title || ""}
-        ${job.company || ""}
+        ${job.recruiter?.companyName || job.companyName || ""}
         ${job.location || ""}
         ${job.employmentType || ""}
         ${job.experienceRequired || ""}
@@ -279,9 +308,14 @@ export default function BrowseJobs() {
                 ------------------------------------------ */}
                 <div className="mb-5 flex items-start gap-3">
 
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
-                    <Briefcase size={21} />
-                  </div>
+                      <CompanyLogo
+                        companyName={
+                          job.recruiter?.companyName ||
+                          job.companyName ||
+                          job.companyName ||
+                          null
+                        }
+                      />
 
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate text-lg font-bold text-gray-800">
@@ -293,11 +327,21 @@ export default function BrowseJobs() {
                     </p>
                   </div>
 
-                  <StatusPill
-                    status={job.status}
-                    size="sm"
-                  />
-                </div>
+                  {/* Status pill */}
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${
+                        job.status === "ACTIVE" || job.status === "OPEN"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        job.status === "ACTIVE" || job.status === "OPEN"
+                          ? "bg-green-500" : "bg-red-500"
+                      }`} />
+                      {job.status || "ACTIVE"}
+                    </span>
+                  </div>
 
                 {/* -----------------------------------------
                     SHORT DESCRIPTION
@@ -359,8 +403,7 @@ export default function BrowseJobs() {
                       </p>
 
                       <p className="truncate text-sm font-medium text-gray-700">
-                        {job.experienceRequired ||
-                          "Not specified"}
+                        {job.experienceRequired + " yrs" ||"Not specified"}
                       </p>
                     </div>
                   </div>

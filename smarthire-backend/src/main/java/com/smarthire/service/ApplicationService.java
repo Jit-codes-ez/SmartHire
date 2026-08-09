@@ -1,6 +1,6 @@
 package com.smarthire.service;
 
-import com.smarthire.dto.application.ApplicationResponse;
+import com.smarthire.dto.job_application.JobApplicationResponse;
 import com.smarthire.entity.Application;
 
 import java.util.List;
@@ -11,5 +11,5 @@ public interface ApplicationService {
 
     boolean hasApplied(String email, Long jobId);
 
-    List<ApplicationResponse> getMyApplications(String email);
+    List<JobApplicationResponse> getMyApplications(String email);
 }

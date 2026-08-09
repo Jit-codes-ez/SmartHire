@@ -493,8 +493,7 @@ export default function JobDetail() {
                     </p>
 
                     <p className="mt-1 text-sm font-semibold text-gray-700">
-                      {job.experienceRequired ||
-                        "Not specified"}
+                      {job.experienceRequired + " yrs"||"Not specified"}
                     </p>
                   </div>
                 </div>
@@ -512,7 +511,7 @@ export default function JobDetail() {
                     </p>
 
                     <p className="mt-1 text-sm font-semibold text-gray-700">
-                      {job.salary || "Not specified"}
+                      {job.salary + " LPA" || "Not specified"}
                     </p>
                   </div>
                 </div>

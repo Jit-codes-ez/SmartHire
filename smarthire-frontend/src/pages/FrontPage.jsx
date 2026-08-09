@@ -17,7 +17,7 @@ import ScoreBadge, { AnimatedScoreBadge } from '../components/ScoreBadge.jsx'
 import Reveal from '../components/Reveal.jsx'
 
 export const ROUTES = {
-  studentLogin: "/login",
+  login: "/login",
   studentDashboard: "/student/dashboard",
   browseJobs: "/student/jobs",
   myApplications: "/student/applications",
@@ -259,14 +259,14 @@ export default function FrontPage() {
             clear status and recruiters open a ranked shortlist instead of a stack.
           </p>
           <div className="sh-rise flex flex-wrap gap-3" style={{ animationDelay: "1.1s" }}>
-            <Link
-              to={ROUTES.browseJobs}
-              className="text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5 transition-transform duration-150 hover:-translate-y-0.5"
-              style={{ background: "#2563EB" }}
-            >
-              Browse open drives <ArrowRight size={14} />
-            </Link>
-          </div>
+  <button
+    onClick={() => document.getElementById("roles")?.scrollIntoView({ behavior: "smooth" })}
+    className="text-sm font-medium px-5 py-2.5 rounded-md text-white flex items-center gap-1.5 transition-transform duration-150 hover:-translate-y-0.5"
+    style={{ background: "#2563EB" }}
+  >
+   Get Started <ArrowRight size={14} />
+  </button>
+</div>
         </div>
 
         {/* Data as hero — a generic scoring demo, clearly labeled as an example */}
@@ -274,6 +274,7 @@ export default function FrontPage() {
       </section>
 
       {/* Roles */}
+      <div id="roles">
 <Reveal as="section" id="roles" className="max-w-6xl mx-auto px-6 py-14" style={{ borderTop: "1px solid #E2E8F0" }}>
   <style>{`
     @keyframes sh-role-fade {
@@ -408,6 +409,7 @@ export default function FrontPage() {
     </div>
   </div>
 </Reveal>
+</div>
     </div>
   );
 }

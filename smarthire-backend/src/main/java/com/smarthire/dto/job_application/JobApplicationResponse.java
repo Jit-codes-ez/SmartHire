@@ -1,8 +1,8 @@
-package com.smarthire.dto.application;
+package com.smarthire.dto.job_application;
 
 import java.time.LocalDateTime;
 
-public class ApplicationResponse {
+public class JobApplicationResponse {
 
     private Long applicationId;
     private Long jobId;
@@ -14,10 +14,10 @@ public class ApplicationResponse {
     private String status;
     private LocalDateTime appliedAt;
 
-    public ApplicationResponse() {
+    public JobApplicationResponse() {
     }
 
-    public ApplicationResponse(
+    public JobApplicationResponse(
             Long applicationId,
             Long jobId,
             String jobTitle,

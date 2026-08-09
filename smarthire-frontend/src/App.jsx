@@ -9,7 +9,7 @@ import FrontPage from './pages/FrontPage.jsx'
 import About from "./pages/About";
 
 
-import StudentLogin from './pages/student/Login.jsx'
+// import StudentLogin from './pages/auth/Login.jsx'
 import StudentRegistration from './pages/student/Registration.jsx'
 import StudentDashboard from './pages/student/Dashboard.jsx'
 import BrowseJobs from './pages/student/BrowseJobs.jsx'
@@ -33,10 +33,14 @@ import TermsConditions from "./pages/TermsConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import HelpCenter from "./pages/HelpCenter";
 import Contact from "./pages/Contact";
-import ForgotPassword from "./pages/student/ForgotPassword.jsx";
-import VerifyResetOtp from "./pages/student/VerifyResetOtp";
-import ResetPassword from "./pages/student/ResetPassword";
+// import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
+// import VerifyResetOtp from "./pages/auth/VerifyResetOtp.jsx";
+// import ResetPassword from "./pages/auth/ResetPassword.jsx";
 
+import Login from "./pages/auth/Login.jsx"
+import ForgotPassword from "./pages/auth/ForgotPassword.jsx"
+import ResetPassword from "./pages/auth/ResetPassword.jsx"
+import VerifyResetOtp from "./pages/auth/VerifyResetOtp.jsx"
 
 // Maps a URL prefix to the design-system theme it should render in.
 function themeForPath(pathname) {
@@ -60,7 +64,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/Home" replace />} />
         <Route path="/Home" element={<FrontPage />} />
-        <Route path="/login" element={<StudentLogin />} />
+        <Route path="/login" element={<Login />} />
 
         <Route path="/about" element={<About />} />
         <Route path="/student/register" element={<StudentRegistration />} />
@@ -86,6 +90,8 @@ export default function App() {
         <Route path="/admin/manage-admins" element={<ManageAdmins />} />
         <Route path="/admin/manage-students" element={<ManageStudent />} />
         <Route path="/admin/manage-recruiters" element={<ManageRecruiters />} />
+
+        
 
         <Route path="*" element={<Navigate to="/login" replace />} />
         <Route path="/student/profile/edit" element={<UpdateProfile />} />

@@ -1,6 +1,6 @@
 package com.smarthire.service.impl;
 
-import com.smarthire.dto.application.ApplicationResponse;
+import com.smarthire.dto.job_application.JobApplicationResponse;
 import com.smarthire.entity.Application;
 import com.smarthire.entity.Job;
 import com.smarthire.entity.Student;
@@ -184,7 +184,7 @@ public class ApplicationServiceImpl
 
 
     @Override
-    public List<ApplicationResponse> getMyApplications(String email) {
+    public List<JobApplicationResponse> getMyApplications(String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
@@ -209,7 +209,7 @@ public class ApplicationServiceImpl
                                 job.getRecruiter().getCompanyName();
                     }
 
-                    return new ApplicationResponse(
+                    return new JobApplicationResponse(
                             application.getId(),
                             job.getId(),
                             job.getTitle(),

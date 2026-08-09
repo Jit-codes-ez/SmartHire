@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Reveal from "../../components/Reveal";
+import Reveal from "../../components/Reveal.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
 
 export default function VerifyResetOtp() {
