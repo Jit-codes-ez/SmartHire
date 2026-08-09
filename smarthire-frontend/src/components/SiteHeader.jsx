@@ -49,7 +49,7 @@ function getNavLinks(user) {
   return [
     { to: "/Home", label: "Home" },
     { to: "/student/dashboard", label: "Dashboard" },
-    { to: "/student/jobs", label: "Jobs" },
+    { to: "/student/applications", label: "My Applications" },
   ];
 }
 

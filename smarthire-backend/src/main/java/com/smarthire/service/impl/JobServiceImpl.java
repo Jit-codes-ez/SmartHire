@@ -154,4 +154,20 @@ public class JobServiceImpl implements JobService {
 
         jobRepository.delete(job);
     }
+    @Override
+    public List<Job> getOpenJobs() {
+
+        return jobRepository.findByStatus(
+                JobStatus.ACTIVE
+        );
+    }
+
+    @Override
+    public Job getJobById(Long id) {
+
+        return jobRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Job not found")
+                );
+    }
 }

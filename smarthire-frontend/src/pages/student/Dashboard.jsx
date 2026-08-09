@@ -12,7 +12,13 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const loginData = JSON.parse(localStorage.getItem("student"));
+  const loginData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("student"));
+    } catch {
+      return null;
+    }
+  })();
 
   const [student, setStudent] = useState(null);
   const [applications, setApplications] = useState([]);
@@ -20,83 +26,307 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loginData) {
+    if (!loginData?.email) {
       navigate("/login");
       return;
     }
 
     const loadDashboard = async () => {
       try {
-        const [profileRes, applicationsRes, jobsRes] = await Promise.all([
-          authFetch(
-            `http://localhost:8080/api/student/profile/${encodeURIComponent(loginData.email)}`
-          ),
-          authFetch(
-            `http://localhost:8080/api/student/applications/${encodeURIComponent(loginData.email)}`
-          ),
-          authFetch(`http://localhost:8080/api/student/jobs/recommended`),
-        ]);
+        setLoading(true);
 
-        if (!profileRes.ok) throw new Error("Failed to load profile");
+        /*
+         * Load profile, applications and open jobs.
+         *
+         * IMPORTANT:
+         * Applications use /api/applications/my
+         * because that is the endpoint from your
+         * ApplicationController.
+         */
+        const [profileRes, applicationsRes, jobsRes] =
+          await Promise.all([
+            authFetch(
+              `http://localhost:8080/api/student/profile/${encodeURIComponent(
+                loginData.email
+              )}`
+            ),
 
-        const profile = await profileRes.json();
-        setStudent(profile);
+            authFetch(
+              `http://localhost:8080/api/applications/my?email=${encodeURIComponent(
+                loginData.email
+              )}`
+            ),
+
+            authFetch(
+              "http://localhost:8080/api/jobs/open"
+            ),
+          ]);
+
+        // ==========================================
+        // PROFILE
+        // ==========================================
+
+        if (!profileRes.ok) {
+          throw new Error("Failed to load profile");
+        }
+
+        const profileData = await profileRes.json();
+
+        console.log(
+          "Dashboard profile:",
+          profileData
+        );
+
+        setStudent(profileData);
+
+        // ==========================================
+        // APPLICATIONS
+        // ==========================================
+
+        let applicationData = [];
 
         if (applicationsRes.ok) {
-          setApplications(await applicationsRes.json());
+          const data = await applicationsRes.json();
+
+          console.log(
+            "Dashboard applications:",
+            data
+          );
+
+          applicationData = Array.isArray(data)
+            ? data
+            : [];
+
+          setApplications(applicationData);
+        } else {
+          console.error(
+            "Applications API error:",
+            applicationsRes.status
+          );
+
+          setApplications([]);
         }
 
+        // ==========================================
+        // OPEN JOBS
+        // ==========================================
+
+        let openJobs = [];
+
         if (jobsRes.ok) {
-          setJobs(await jobsRes.json());
+          const data = await jobsRes.json();
+
+          console.log(
+            "Dashboard open jobs:",
+            data
+          );
+
+          openJobs = Array.isArray(data)
+            ? data
+            : [];
+        } else {
+          console.error(
+            "Jobs API error:",
+            jobsRes.status
+          );
         }
+
+        // ==========================================
+        // REMOVE ALREADY APPLIED JOBS
+        // ==========================================
+
+        /*
+         * Application entity:
+         *
+         * application.id
+         * application.student
+         * application.job
+         *
+         * Therefore the applied job ID is:
+         *
+         * application.job.id
+         */
+
+        const appliedJobIds = new Set(
+          applicationData
+            .map((application) => {
+              return (
+                application?.job?.id ??
+                application?.jobId ??
+                application?.job?.jobId
+              );
+            })
+            .filter(
+              (jobId) =>
+                jobId !== null &&
+                jobId !== undefined
+            )
+            .map((jobId) => String(jobId))
+        );
+
+        console.log(
+          "Applied job IDs:",
+          [...appliedJobIds]
+        );
+
+        /*
+         * Only show open jobs which the student
+         * has NOT already applied for.
+         */
+        const recommendedJobs = openJobs.filter(
+          (job) =>
+            !appliedJobIds.has(String(job.id))
+        );
+
+        console.log(
+          "Recommended drives:",
+          recommendedJobs
+        );
+
+        setJobs(recommendedJobs);
       } catch (error) {
-        console.log("Dashboard error:", error);
-        showToast("Unable to load dashboard data.", "error");
+        console.error(
+          "Dashboard error:",
+          error
+        );
+
+        showToast(
+          "Unable to load dashboard data.",
+          "error"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     loadDashboard();
-  }, []);
+  }, [navigate]);
+
+  // ==========================================
+  // LOGOUT
+  // ==========================================
 
   const handleLogout = () => {
     localStorage.removeItem("student");
-    window.dispatchEvent(new Event("authChange"));
+
+    window.dispatchEvent(
+      new Event("authChange")
+    );
+
     navigate("/login");
   };
 
+  // ==========================================
+  // LOADING
+  // ==========================================
+
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-st-muted text-sm">Loading dashboard…</p>
-      </div>
+      <DashboardLayout
+        role="student"
+        userName="Student"
+      >
+        <div className="flex min-h-[400px] items-center justify-center">
+          <p className="text-sm text-gray-500">
+            Loading dashboard...
+          </p>
+        </div>
+      </DashboardLayout>
     );
   }
+
+  // ==========================================
+  // STUDENT NOT FOUND
+  // ==========================================
 
   if (!student) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-st-muted text-sm">Unable to load student data.</p>
-      </div>
+      <DashboardLayout
+        role="student"
+        userName="Student"
+      >
+        <Card>
+          <div className="py-8 text-center">
+            <p className="font-medium text-gray-700">
+              Unable to load student data.
+            </p>
+          </div>
+        </Card>
+      </DashboardLayout>
     );
   }
 
+  // ==========================================
+  // STATISTICS
+  // ==========================================
+
   const stats = [
-    { label: "Applied", value: applications.length },
+    {
+      label: "Applied",
+      value: applications.length,
+    },
     {
       label: "Shortlisted",
-      value: applications.filter((item) => item.status === "SHORTLISTED").length,
+      value: applications.filter(
+        (item) =>
+          String(item.status).toUpperCase() ===
+          "SHORTLISTED"
+      ).length,
     },
     {
       label: "Interview",
-      value: applications.filter((item) => item.status === "INTERVIEW").length,
+      value: applications.filter(
+        (item) =>
+          String(item.status).toUpperCase() ===
+          "INTERVIEW"
+      ).length,
     },
     {
       label: "Selected",
-      value: applications.filter((item) => item.status === "SELECTED").length,
+      value: applications.filter(
+        (item) =>
+          String(item.status).toUpperCase() ===
+          "SELECTED"
+      ).length,
     },
   ];
+
+  // ==========================================
+  // HELPERS
+  // ==========================================
+
+  const getApplicationJobTitle = (application) => {
+    return (
+      application?.job?.title ||
+      application?.jobTitle ||
+      "Job"
+    );
+  };
+
+  const getApplicationCompany = (application) => {
+    return (
+      application?.job?.recruiter?.companyName ||
+      application?.job?.companyName ||
+      application?.job?.company ||
+      application?.recruiter?.companyName ||
+      application?.companyName ||
+      application?.company ||
+      "Company"
+    );
+  };
+
+  const getJobCompany = (job) => {
+    return (
+      job?.recruiter?.companyName ||
+      job?.companyName ||
+      job?.company ||
+      "Company"
+    );
+  };
+
+  // ==========================================
+  // RENDER
+  // ==========================================
 
   return (
     <DashboardLayout
@@ -106,97 +336,279 @@ export default function Dashboard() {
       title={`Welcome back, ${student.fullName}!`}
       subtitle="Here's what's happening with your placement journey."
     >
-      {/* Profile Section */}
+      {/* ======================================
+          PROFILE
+      ====================================== */}
+
       <Card className="mb-8">
-        <h2 className="text-2xl font-bold text-st-text">{student.fullName}</h2>
-        <p className="text-st-muted mt-1">{student.email}</p>
+        <div>
+          <h2 className="text-xl font-bold text-st-text">
+            {student.fullName}
+          </h2>
 
-        <span className="inline-block mt-3 px-4 py-1 rounded-full bg-st-primary/10 text-st-primary text-sm font-medium">
-          STUDENT
-        </span>
+          <p className="mt-1 text-sm text-st-muted">
+            {student.email}
+          </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-          <div className="border border-st-border rounded-input p-4">
-            <p className="text-xs text-st-muted">Student ID</p>
-            <h3 className="font-bold text-st-text">{student.id}</h3>
+          <span className="mt-3 inline-block rounded-full bg-st-primary/10 px-4 py-1 text-sm font-medium text-st-primary">
+            STUDENT
+          </span>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="rounded-input border border-st-border p-4">
+            <p className="text-xs text-st-muted">
+              Student ID
+            </p>
+
+            <h3 className="font-bold text-st-text">
+              {student.id}
+            </h3>
           </div>
 
-          <div className="border border-st-border rounded-input p-4">
-            <p className="text-xs text-st-muted">Course</p>
-            <h3 className="font-bold text-st-text">{student.course}</h3>
+          <div className="rounded-input border border-st-border p-4">
+            <p className="text-xs text-st-muted">
+              Course
+            </p>
+
+            <h3 className="font-bold text-st-text">
+              {student.course || "Not specified"}
+            </h3>
           </div>
 
-          <div className="border border-st-border rounded-input p-4">
-            <p className="text-xs text-st-muted">Branch</p>
-            <h3 className="font-bold text-st-text">{student.branch}</h3>
+          <div className="rounded-input border border-st-border p-4">
+            <p className="text-xs text-st-muted">
+              Branch
+            </p>
+
+            <h3 className="font-bold text-st-text">
+              {student.branch || "Not specified"}
+            </h3>
           </div>
 
-          <div className="border border-st-border rounded-input p-4">
-            <p className="text-xs text-st-muted">CGPA</p>
-            <h3 className="font-bold text-st-text">{student.cgpa}</h3>
+          <div className="rounded-input border border-st-border p-4">
+            <p className="text-xs text-st-muted">
+              CGPA
+            </p>
+
+            <h3 className="font-bold text-st-text">
+              {student.cgpa ?? "Not specified"}
+            </h3>
           </div>
         </div>
 
-        <div className="flex gap-4 mt-6">
-          <Button onClick={() => navigate("/student/profile/edit")}>
+        <div className="mt-6 flex gap-4">
+          <Button
+            onClick={() =>
+              navigate("/student/profile/edit")
+            }
+          >
             Update Profile
           </Button>
-          <Button onClick={() => navigate("/student/jobs")}>Browse Drives</Button>
+
+          <Button
+            onClick={() =>
+              navigate("/student/jobs")
+            }
+          >
+            Browse Drives
+          </Button>
         </div>
       </Card>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      {/* ======================================
+          STATISTICS
+      ====================================== */}
+
+      <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label}>
-            <p className="text-st-muted text-sm">{stat.label}</p>
-            <h2 className="text-3xl font-bold text-st-primary">{stat.value}</h2>
+            <p className="text-sm text-st-muted">
+              {stat.label}
+            </p>
+
+            <h2 className="mt-1 text-3xl font-bold text-st-primary">
+              {stat.value}
+            </h2>
           </Card>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Applications */}
+      {/* ======================================
+          APPLICATIONS + RECOMMENDED DRIVES
+      ====================================== */}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* ====================================
+            RECENT APPLICATIONS
+        ==================================== */}
+
         <section>
-          <h2 className="text-lg font-semibold mb-4 text-st-text">
-            Recent Applications
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-st-text">
+                Recent Applications
+              </h2>
+
+              <p className="mt-1 text-xs text-st-muted">
+                Your latest placement applications
+              </p>
+            </div>
+
+            {applications.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    "/student/applications"
+                  )
+                }
+                className="text-sm font-semibold text-blue-600 transition hover:text-blue-700"
+              >
+                View All
+              </button>
+            )}
+          </div>
 
           {applications.length === 0 ? (
             <Card>
-              <p className="text-st-muted">No applications yet</p>
+              <div className="py-8 text-center">
+                <p className="font-medium text-gray-700">
+                  No applications yet
+                </p>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Apply to a placement drive and
+                  it will appear here.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate("/student/jobs")
+                  }
+                  className="mt-4 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                >
+                  Browse Drives →
+                </button>
+              </div>
             </Card>
           ) : (
-            applications.map((app) => (
-              <Card key={app.id} className="mb-3">
-                <h3 className="font-semibold text-st-text">{app.jobTitle}</h3>
-                <p className="text-st-muted">{app.company}</p>
-                <StatusPill status={app.status} />
-              </Card>
-            ))
+            applications
+              .slice(0, 4)
+              .map((application) => (
+                <Card
+                  key={application.id}
+                  className="mb-3 transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold text-st-text">
+                        {getApplicationJobTitle(
+                          application
+                        )}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-st-muted">
+                        {getApplicationCompany(
+                          application
+                        )}
+                      </p>
+
+                      {application.appliedAt && (
+                        <p className="mt-2 text-xs text-gray-400">
+                          Applied on{" "}
+                          {new Date(
+                            application.appliedAt
+                          ).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+
+                    <StatusPill
+                      status={
+                        application.status ||
+                        "APPLIED"
+                      }
+                    />
+                  </div>
+                </Card>
+              ))
           )}
         </section>
 
-        {/* Jobs */}
+        {/* ====================================
+            RECOMMENDED DRIVES
+        ==================================== */}
+
         <section>
-          <h2 className="text-lg font-semibold mb-4 text-st-text">
-            Recommended Drives
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-st-text">
+                Recommended Drives
+              </h2>
+
+              <p className="mt-1 text-xs text-st-muted">
+                Drives you haven't applied to yet
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/student/jobs")
+              }
+              className="text-sm font-semibold text-blue-600 transition hover:text-blue-700"
+            >
+              View All
+            </button>
+          </div>
 
           {jobs.length === 0 ? (
             <Card>
-              <p className="text-st-muted">No drives available</p>
+              <div className="py-8 text-center">
+                <p className="font-medium text-gray-700">
+                  No new drives
+                </p>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  You've already applied to all
+                  currently available drives.
+                </p>
+              </div>
             </Card>
           ) : (
-            jobs.map((job) => (
+            jobs.slice(0, 4).map((job) => (
               <Card
                 key={job.id}
-                className="mb-3 cursor-pointer hover:shadow-lg"
-                onClick={() => navigate(`/student/jobs/${job.id}`)}
+                className="mb-3 cursor-pointer transition hover:-translate-y-0.5 hover:shadow-md"
+                onClick={() =>
+                  navigate(
+                    `/student/jobs/${job.id}`
+                  )
+                }
               >
-                <h3 className="font-semibold text-st-text">{job.title}</h3>
-                <p className="text-st-muted">{job.company}</p>
-                <StatusPill status={job.status} />
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <h3 className="truncate font-semibold text-st-text">
+                      {job.title}
+                    </h3>
+
+                    <p className="mt-1 text-sm text-st-muted">
+                      {getJobCompany(job)}
+                    </p>
+
+                    {job.location && (
+                      <p className="mt-2 text-xs text-gray-400">
+                        {job.location}
+                      </p>
+                    )}
+                  </div>
+
+                  <StatusPill
+                    status={job.status}
+                  />
+                </div>
               </Card>
             ))
           )}
