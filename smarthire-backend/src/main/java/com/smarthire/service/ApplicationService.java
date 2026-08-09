@@ -3,6 +3,7 @@ package com.smarthire.service;
 import com.smarthire.dto.job_application.JobApplicationResponse;
 import com.smarthire.dto.recruiter.RecruiterApplicantResponse;
 import com.smarthire.entity.Application;
+import com.smarthire.enums.InterviewType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -34,6 +35,7 @@ public interface ApplicationService {
             Long applicationId,
             LocalDate interviewDate,
             LocalTime interviewTime,
+            InterviewType interviewType,
             String interviewLocation
     );
 

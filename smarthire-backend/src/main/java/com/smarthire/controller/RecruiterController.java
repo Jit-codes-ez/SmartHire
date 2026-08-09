@@ -14,6 +14,7 @@ import com.smarthire.service.JobService;
 import com.smarthire.service.RecruiterService;
 import com.smarthire.dto.recruiter.PostJobRequest;
 import com.smarthire.entity.Job;
+import com.smarthire.enums.InterviewType;
 import com.smarthire.enums.JobStatus;
 
 import jakarta.validation.Valid;
@@ -136,6 +137,12 @@ public class RecruiterController {
                     LocalTime.parse(
                             request.get("interviewTime")
                     );
+            
+            InterviewType interviewType =
+                    InterviewType.valueOf(
+                            request.get("interviewType")
+                                    .toUpperCase()
+                    );
 
             String interviewLocation =
                     request.get("interviewLocation");
@@ -144,6 +151,7 @@ public class RecruiterController {
                     applicationId,
                     interviewDate,
                     interviewTime,
+                    interviewType,
                     interviewLocation
             );
 

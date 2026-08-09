@@ -7,12 +7,14 @@ import com.smarthire.entity.Job;
 import com.smarthire.entity.Student;
 import com.smarthire.entity.User;
 import com.smarthire.enums.ApplicationStatus;
+import com.smarthire.enums.InterviewType;
 import com.smarthire.enums.JobStatus;
 import com.smarthire.repository.ApplicationRepository;
 import com.smarthire.repository.JobRepository;
 import com.smarthire.repository.StudentRepository;
 import com.smarthire.repository.UserRepository;
 import com.smarthire.service.ApplicationService;
+import com.smarthire.service.EmailService;
 
 import org.springframework.stereotype.Service;
 
@@ -28,23 +30,23 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
+    private final EmailService emailService;
 
     public ApplicationServiceImpl(
             ApplicationRepository applicationRepository,
             JobRepository jobRepository,
             UserRepository userRepository,
-            StudentRepository studentRepository) {
+            StudentRepository studentRepository,
+            EmailService emailService) {
 
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
+        this.emailService = emailService;
     }
 
-    // =====================================================
     // APPLY FOR JOB
-    // =====================================================
-
     @Override
     public Application applyForJob(
             String email,
@@ -108,10 +110,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         );
     }
 
-    // =====================================================
     // CHECK WHETHER STUDENT APPLIED
-    // =====================================================
-
     @Override
     public boolean hasApplied(
             String email,
@@ -148,10 +147,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 );
     }
 
-    // =====================================================
     // GET MY APPLICATIONS
-    // =====================================================
-
     @Override
     public List<JobApplicationResponse> getMyApplications(
             String email) {
@@ -206,10 +202,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .toList();
     }
 
-    // =====================================================
     // GET APPLICANTS BY JOB
-    // =====================================================
-
     @Override
     public List<RecruiterApplicantResponse> getApplicantsByJob(
             Long jobId) {
@@ -259,15 +252,13 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .toList();
     }
 
-    // =====================================================
     // SHORTLIST APPLICATION
-    // =====================================================
-
     @Override
     public Application shortlistApplication(
             Long applicationId,
             LocalDate interviewDate,
             LocalTime interviewTime,
+            InterviewType interviewType,
             String interviewLocation) {
 
         Application application =
@@ -279,12 +270,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                                 )
                         );
 
-        // -----------------------------------------
         // Validate current status
-        // -----------------------------------------
-
         if (application.getStatus()
-                == ApplicationStatus.APPROVED) {
+                == ApplicationStatus.SELECTED) {
 
             throw new RuntimeException(
                     "Approved application cannot be shortlisted"
@@ -299,10 +287,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // -----------------------------------------
         // Validate interview date
-        // -----------------------------------------
-
         if (interviewDate == null) {
 
             throw new RuntimeException(
@@ -310,10 +295,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // -----------------------------------------
         // Validate interview time
-        // -----------------------------------------
-
         if (interviewTime == null) {
 
             throw new RuntimeException(
@@ -321,10 +303,15 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // -----------------------------------------
-        // Validate location
-        // -----------------------------------------
+        // Validate interview type
+        if (interviewType == null) {
 
+            throw new RuntimeException(
+                    "Interview type is required"
+            );
+        }
+
+        // Validate location
         if (interviewLocation == null
                 || interviewLocation.trim().isEmpty()) {
 
@@ -333,10 +320,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // -----------------------------------------
         // Update
-        // -----------------------------------------
-
         application.setStatus(
                 ApplicationStatus.SHORTLISTED
         );
@@ -348,24 +332,43 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setInterviewTime(
                 interviewTime
         );
+        
+        application.setInterviewType(
+                interviewType
+        );
 
         application.setInterviewLocation(
                 interviewLocation.trim()
         );
 
-        // -----------------------------------------
         // Save
-        // -----------------------------------------
+        Application savedApplication =
+                applicationRepository.save(application);
 
-        return applicationRepository.save(
-                application
-        );
+        Student student =
+                application.getStudent();
+
+        User user =
+                student.getUser();
+
+        if (user != null && user.getEmail() != null) {
+
+            Job job = application.getJob();
+
+            emailService.sendStudentShortlistEmail(
+                    user.getEmail(),
+                    student.getFullName(),
+                    job.getTitle(),
+                    interviewDate,
+                    interviewTime,
+                    interviewType,
+                    interviewLocation.trim()
+            );
+        }
+        return savedApplication;
     }
 
-    // =====================================================
-    // APPROVE APPLICATION
-    // =====================================================
-
+ // APPROVE APPLICATION
     @Override
     public Application approveApplication(
             Long applicationId,
@@ -380,12 +383,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                                 )
                         );
 
-        // -----------------------------------------
         // Validate current status
-        // -----------------------------------------
-
         if (application.getStatus()
-                == ApplicationStatus.APPROVED) {
+                == ApplicationStatus.SELECTED) {
 
             throw new RuntimeException(
                     "Application is already approved"
@@ -400,10 +400,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // -----------------------------------------
         // Validate joining date
-        // -----------------------------------------
-
         if (joiningDate == null) {
 
             throw new RuntimeException(
@@ -411,78 +408,73 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // -----------------------------------------
-        // Update
-        // -----------------------------------------
-
+        // Update application
         application.setStatus(
-                ApplicationStatus.APPROVED
+                ApplicationStatus.SELECTED
         );
 
         application.setJoiningDate(
                 joiningDate
         );
 
-        // -----------------------------------------
-        // Save
-        // -----------------------------------------
+        // Save application
+        Application savedApplication =
+                applicationRepository.save(application);
 
-        return applicationRepository.save(
-                application
-        );
+        // Send approval email
+        Student student =
+                application.getStudent();
+
+        User user =
+                student.getUser();
+
+        if (user != null
+                && user.getEmail() != null) {
+
+            Job job =
+                    application.getJob();
+
+            emailService.sendStudentApprovalEmail(
+                    user.getEmail(),
+                    student.getFullName(),
+                    job.getTitle(),
+                    joiningDate
+            );
+        }
+
+        return savedApplication;
     }
 
-    // =====================================================
-    // REJECT APPLICATION
-    // =====================================================
-
+ // REJECT APPLICATION
     @Override
-    public Application rejectApplication(
-            Long applicationId) {
+    public Application rejectApplication(Long applicationId) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        Application application =
-                applicationRepository
-                        .findById(applicationId)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Application not found"
-                                )
-                        );
-
-        // -----------------------------------------
         // Validate current status
-        // -----------------------------------------
-
-        if (application.getStatus()
-                == ApplicationStatus.APPROVED) {
-
-            throw new RuntimeException(
-                    "Approved application cannot be rejected"
-            );
+        if (application.getStatus() == ApplicationStatus.SELECTED) {
+            throw new RuntimeException("Approved application cannot be rejected");
         }
 
-        if (application.getStatus()
-                == ApplicationStatus.REJECTED) {
-
-            throw new RuntimeException(
-                    "Application is already rejected"
-            );
+        if (application.getStatus() == ApplicationStatus.REJECTED) {
+            throw new RuntimeException("Application is already rejected");
         }
 
-        // -----------------------------------------
         // Update status
-        // -----------------------------------------
+        application.setStatus(ApplicationStatus.REJECTED);
 
-        application.setStatus(
-                ApplicationStatus.REJECTED
-        );
-
-        // -----------------------------------------
         // Save
-        // -----------------------------------------
+        Application savedApplication = applicationRepository.save(application);
 
-        return applicationRepository.save(
-                application
-        );
+        // Send rejection email
+        Student student = application.getStudent();
+        User user = student.getUser();
+
+        if (user != null && user.getEmail() != null) {
+            Job job = application.getJob();
+            emailService.sendStudentRejectionEmail(user.getEmail(), student.getFullName(), job.getTitle());
+        }
+
+        return savedApplication;
     }
 }

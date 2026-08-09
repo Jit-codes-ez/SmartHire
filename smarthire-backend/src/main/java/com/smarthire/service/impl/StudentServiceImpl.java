@@ -13,12 +13,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.smarthire.enums.Role;
 import com.smarthire.exception.EmailAlreadyExistsException;
 import com.smarthire.exception.EmailNotVerifiedException;
+import com.smarthire.exception.MobileAlreadyExistsException;
 import com.smarthire.repository.RecruiterRequestRepository;
 import com.smarthire.repository.StudentRepository;
 import com.smarthire.repository.UserRepository;
 import com.smarthire.service.CloudinaryService;
 import com.smarthire.service.OtpService;
 import com.smarthire.service.StudentService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 
@@ -41,29 +43,48 @@ public class StudentServiceImpl implements StudentService {
 	private RecruiterRequestRepository recruiterRequestRepository; 
 
 	@Override
-	public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request){
-	    // Check if email already exists as a user OR has a pending/rejected recruiter request
+	@Transactional
+	public StudentRegistrationResponse registerStudent(StudentRegistrationRequest request) {
+
+	    // 1. Check if email already exists
 	    if (urepo.existsByEmail(request.getEmail())
 	            || recruiterRequestRepository.existsByEmail(request.getEmail())) {
+
 	        throw new EmailAlreadyExistsException("Email already exists.");
 	    }
 
-	    // Block registration unless the email was OTP-verified first
-	    if (!otpService.isEmailVerified(request.getEmail(), OtpPurpose.REGISTRATION)) {
-	        throw new EmailNotVerifiedException("Please verify your email before registering.");
-	    }
+	    // 2. Check OTP verification
+	    if (!otpService.isEmailVerified(
+	            request.getEmail(),
+	            OtpPurpose.REGISTRATION
+	    )) {
 
-	    // Create User
+	        throw new EmailNotVerifiedException(
+	                "Please verify your email before registering."
+	        );
+	    }
+	    
+	    if (srepo.existsByMobileNumber(request.getMobileNumber())) {
+	        throw new MobileAlreadyExistsException(
+	                "Mobile number already registered."
+	        );
+	    }
+	    
+	    // 3. Create User
 	    User user = new User();
+
 	    user.setEmail(request.getEmail());
-	    user.setPassword(passwordEncoder.encode(request.getPassword()));
+	    user.setPassword(
+	            passwordEncoder.encode(request.getPassword())
+	    );
 	    user.setRole(Role.STUDENT);
 
-	    // Save User
+	    // 4. Save User
 	    User savedUser = urepo.save(user);
 
-	    // Create Student
+	    // 5. Create Student
 	    Student student = new Student();
+
 	    student.setFullName(request.getFullName());
 	    student.setMobileNumber(request.getMobileNumber());
 	    student.setCourse(request.getCourse());
@@ -73,31 +94,50 @@ public class StudentServiceImpl implements StudentService {
 	    student.setSkills(request.getSkills());
 	    student.setLinkedinUrl(request.getLinkedinUrl());
 
-	 // Saving Resume.pdf in Cloudinary Cloud Server
-	    String folderName = request.getEmail().replace("@", "_").replace(".", "_").toLowerCase();
-	    CloudinaryUploadResponse uploadResponse = cloudinaryService.upload(request.getResume(), folderName);
-	    student.setResumeUrl(uploadResponse.getUrl());
-	    student.setResumePublicId(uploadResponse.getPublicId());
+	    // 6. Upload resume
+	    String folderName = request.getEmail()
+	            .replace("@", "_")
+	            .replace(".", "_")
+	            .toLowerCase();
 
-	    // Link Student with User
+	    CloudinaryUploadResponse uploadResponse =
+	            cloudinaryService.upload(
+	                    request.getResume(),
+	                    folderName
+	            );
+
+	    student.setResumeUrl(uploadResponse.getUrl());
+	    student.setResumePublicId(
+	            uploadResponse.getPublicId()
+	    );
+
+	    // 7. Link Student -> User
 	    student.setUser(savedUser);
 
-	    // Save Student
+	    // 8. Save Student
+	    // If this fails, @Transactional rolls back the User insert too.
 	    Student savedStudent = srepo.save(student);
 
-	 // Prepare Response
-	    StudentRegistrationResponse response = new StudentRegistrationResponse();
+	    // 9. Prepare response
+	    StudentRegistrationResponse response =
+	            new StudentRegistrationResponse();
+
 	    response.setStudentId(savedStudent.getId());
 	    response.setEmail(savedUser.getEmail());
 	    response.setRole(savedUser.getRole());
-	    response.setMessage("Student registered successfully.");
+	    response.setMessage(
+	            "Student registered successfully."
+	    );
+
 	    return response;
 	}
+	
 	@Override
 	public Student getStudentByEmail(String email) {
 	    return srepo.findByUserEmail(email)
 	            .orElseThrow(() -> new RuntimeException("Student not found"));
 	}
+	
 	@Override
 	public Student updateProfile(String email, Student student) {
 

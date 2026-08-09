@@ -1,6 +1,8 @@
 package com.smarthire.entity;
 
 import com.smarthire.enums.ApplicationStatus;
+import com.smarthire.enums.InterviewType;
+
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -46,32 +48,25 @@ public class Application {
     @Column(nullable = false)
     private LocalDateTime appliedAt;
 
-    // =====================================================
     // INTERVIEW DETAILS
-    // =====================================================
-
     private LocalDate interviewDate;
 
     private LocalTime interviewTime;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "interview_type")
+    private InterviewType interviewType;
 
     private String interviewLocation;
-
-    // =====================================================
+    
     // JOINING DETAILS
-    // =====================================================
-
     private LocalDate joiningDate;
 
-    // =====================================================
     // CONSTRUCTOR
-    // =====================================================
-
     public Application() {
     }
 
-    // =====================================================
     // GETTERS / SETTERS
-    // =====================================================
 
     public Long getId() {
         return id;
@@ -128,6 +123,14 @@ public class Application {
     public void setInterviewTime(LocalTime interviewTime) {
         this.interviewTime = interviewTime;
     }
+    
+	public InterviewType getInterviewType() {
+		return interviewType;
+	}
+
+	public void setInterviewType(InterviewType interviewType) {
+		this.interviewType = interviewType;
+	}
 
     public String getInterviewLocation() {
         return interviewLocation;
@@ -144,4 +147,5 @@ public class Application {
     public void setJoiningDate(LocalDate joiningDate) {
         this.joiningDate = joiningDate;
     }
+
 }

@@ -122,7 +122,7 @@ function EditJobModal({ job, saving, onClose, onSave }) {
                 name="experienceRequired"
                 className="modal-input"
                 placeholder="0-2 years"
-                value={form.experienceRequired || ""}
+                value={form.experienceRequired|| ""}
                 onChange={handleChange}
                 required
                 disabled={saving}
@@ -560,12 +560,10 @@ const handleDelete = async (job) => {
   (job) => job.status === "ACTIVE" || job.status === "OPEN"
 ).length;
 
-  const stats = [
-    { label: "Jobs Posted", value: jobs.length },
-    { label: "Active Jobs", value: activeJobs },
-    { label: "Applicants", value: 0 },
-    { label: "Shortlisted", value: 0 },
-  ];
+const stats = [
+  { label: "Jobs Posted", value: jobs.length },
+  { label: "Active Jobs", value: activeJobs },
+];
 
   return (
     <DashboardLayout
@@ -621,7 +619,7 @@ const handleDelete = async (job) => {
       </div>
 
       {/* ── Stats ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-8">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <p className="text-st-muted text-sm">{stat.label}</p>
@@ -676,7 +674,6 @@ const handleDelete = async (job) => {
                       "Type / Mode",
                       "Experience",
                       "Salary",
-                      "Applicants",
                       "Status",
                       "Actions",
                     ].map((col) => (
@@ -735,24 +732,12 @@ const handleDelete = async (job) => {
 
                         {/* Experience */}
                         <td className="py-4 px-3 text-st-muted whitespace-nowrap">
-                          {job.experienceRequired || job.experienceLevel || "—"}
+                          {job.experienceRequired + " yrs"|| "—"}
                         </td>
 
                         {/* Salary */}
                         <td className="py-4 px-3 text-st-muted whitespace-nowrap">
                           {job.salary ? `${job.salary} LPA` : "—"}
-                        </td>
-
-                        {/* Applicants */}
-                        <td className="py-4 px-3">
-                          <p className="font-semibold text-st-text">
-                            {job.applicantCount ?? 0}
-                          </p>
-                          {job.shortlistedCount > 0 && (
-                            <p className="text-xs text-green-600 mt-0.5">
-                              {job.shortlistedCount} shortlisted
-                            </p>
-                          )}
                         </td>
 
                           {/* Status */}

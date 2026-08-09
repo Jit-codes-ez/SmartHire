@@ -57,6 +57,7 @@ export default function Applicants() {
   // Shortlist form
   const [interviewDate, setInterviewDate] = useState("");
   const [interviewTime, setInterviewTime] = useState("");
+  const [interviewType, setInterviewType] = useState("Online");
   const [interviewLocation, setInterviewLocation] = useState("");
 
   // Approve form
@@ -503,7 +504,7 @@ export default function Applicants() {
   const approvedCount =
     applicants.filter(
       (a) =>
-        getStatus(a) === "APPROVED"
+        getStatus(a) === "SELECTED"
     ).length;
 
   const rejectedCount =
@@ -516,25 +517,13 @@ export default function Applicants() {
   // SHORTLIST
   // =========================================================
 
+
   function openShortlistModal(applicant) {
     setShortlistApplicant(applicant);
-
-    setInterviewDate(
-      applicant?.interviewDate
-        ? String(
-            applicant.interviewDate
-          ).substring(0, 10)
-        : ""
-    );
-
-    setInterviewTime(
-      applicant?.interviewTime || ""
-    );
-
-    setInterviewLocation(
-      applicant?.interviewLocation || ""
-    );
-
+    setInterviewDate(applicant?.interviewDate ? String(applicant.interviewDate).substring(0, 10) : "");
+    setInterviewTime(applicant?.interviewTime || "");
+    setInterviewLocation(applicant?.interviewLocation || "");
+    setInterviewType(applicant?.interviewType || "Online");
     setActionMessage("");
   }
 
@@ -555,9 +544,15 @@ export default function Applicants() {
       return;
     }
 
+    if (!interviewType) {
+      showActionMessage("Please select an interview type.", "error");
+      return;
+    }
     if (!interviewLocation.trim()) {
       showActionMessage(
-        "Please enter the interview location.",
+        interviewType === "Online"
+          ? "Please enter the meeting link."
+          : "Please enter the interview location.",
         "error"
       );
       return;
@@ -595,6 +590,7 @@ export default function Applicants() {
           body: JSON.stringify({
             interviewDate,
             interviewTime,
+            interviewType,
             interviewLocation:
               interviewLocation.trim(),
           }),
@@ -787,17 +783,18 @@ export default function Applicants() {
   // CLOSE MODALS
   // =========================================================
 
-  function closeAllModals() {
-    setSelectedApplicant(null);
-    setShortlistApplicant(null);
-    setApproveApplicant(null);
-    setRejectApplicant(null);
+    function closeAllModals() {
+      setSelectedApplicant(null);
+      setShortlistApplicant(null);
+      setApproveApplicant(null);
+      setRejectApplicant(null);
 
-    setInterviewDate("");
-    setInterviewTime("");
-    setInterviewLocation("");
-    setJoiningDate("");
-  }
+      setInterviewDate("");
+      setInterviewTime("");
+      setInterviewLocation("");
+      setInterviewType("Online");
+      setJoiningDate("");
+    }
 
   // =========================================================
   // UI
@@ -911,7 +908,7 @@ export default function Applicants() {
           />
 
           <StatCard
-            label="Approved"
+            label="Selected"
             value={approvedCount}
             icon={<FaCheck />}
           />
@@ -1177,68 +1174,42 @@ export default function Applicants() {
                                   }
                                 />
 
-                                {status !==
-                                  "APPROVED" &&
-                                  status !==
-                                    "REJECTED" && (
-                                    <ActionButton
-                                      title="Shortlist"
-                                      onClick={() =>
-                                        openShortlistModal(
-                                          applicant
-                                        )
-                                      }
-                                      icon={
-                                        <FaCheck />
-                                      }
-                                      variant="blue"
-                                      disabled={
-                                        actionLoading
-                                      }
-                                    />
-                                  )}
+                                  {status !== "APPROVED" &&
+                                    status !== "SELECTED" &&
+                                    status !== "REJECTED" &&
+                                    status !== "SHORTLISTED" && (
+                                      <ActionButton
+                                        title="Shortlist"
+                                        onClick={() => openShortlistModal(applicant)}
+                                        icon={<FaCheck />}
+                                        variant="blue"
+                                        disabled={actionLoading}
+                                      />
+                                    )}
 
-                                {status !==
-                                  "APPROVED" &&
-                                  status !==
-                                    "REJECTED" && (
-                                    <ActionButton
-                                      title="Approve"
-                                      onClick={() =>
-                                        openApproveModal(
-                                          applicant
-                                        )
-                                      }
-                                      icon={
-                                        <FaCheck />
-                                      }
-                                      variant="green"
-                                      disabled={
-                                        actionLoading
-                                      }
-                                    />
-                                  )}
+                                  {status !== "APPROVED" &&
+                                    status !== "SELECTED" &&
+                                    status !== "REJECTED" && (
+                                      <ActionButton
+                                        title="Approve"
+                                        onClick={() => openApproveModal(applicant)}
+                                        icon={<FaCheck />}
+                                        variant="green"
+                                        disabled={actionLoading}
+                                      />
+                                    )}
 
-                                {status !==
-                                  "REJECTED" &&
-                                  status !==
-                                    "APPROVED" && (
-                                    <ActionButton
-                                      title="Reject"
-                                      onClick={() =>
-                                        setRejectApplicant(
-                                          applicant
-                                        )
-                                      }
-                                      icon={
-                                        <FaTimes />
-                                      }
-                                      variant="red"
-                                      disabled={
-                                        actionLoading
-                                      }
-                                    />
-                                  )}
+                                  {status !== "REJECTED" &&
+                                    status !== "APPROVED" &&
+                                    status !== "SELECTED" && (
+                                      <ActionButton
+                                        title="Reject"
+                                        onClick={() => setRejectApplicant(applicant)}
+                                        icon={<FaTimes />}
+                                        variant="red"
+                                        disabled={actionLoading}
+                                      />
+                                    )}
 
                               </div>
 
@@ -1338,60 +1309,37 @@ export default function Applicants() {
                             }
                           />
 
-                          {status !==
-                            "APPROVED" &&
-                            status !==
-                              "REJECTED" && (
-                              <>
-                                <ActionButton
-                                  title="Shortlist"
-                                  onClick={() =>
-                                    openShortlistModal(
-                                      applicant
-                                    )
-                                  }
-                                  icon={
-                                    <FaCheck />
-                                  }
-                                  variant="blue"
-                                  disabled={
-                                    actionLoading
-                                  }
-                                />
+                          {status !== "APPROVED" &&
+                                status !== "SELECTED" &&
+                                status !== "REJECTED" && (
+                                  <>
+                                    {status !== "SHORTLISTED" && (
+                                      <ActionButton
+                                        title="Shortlist"
+                                        onClick={() => openShortlistModal(applicant)}
+                                        icon={<FaCheck />}
+                                        variant="blue"
+                                        disabled={actionLoading}
+                                      />
+                                    )}
 
-                                <ActionButton
-                                  title="Approve"
-                                  onClick={() =>
-                                    openApproveModal(
-                                      applicant
-                                    )
-                                  }
-                                  icon={
-                                    <FaCheck />
-                                  }
-                                  variant="green"
-                                  disabled={
-                                    actionLoading
-                                  }
-                                />
+                                    <ActionButton
+                                      title="Approve"
+                                      onClick={() => openApproveModal(applicant)}
+                                      icon={<FaCheck />}
+                                      variant="green"
+                                      disabled={actionLoading}
+                                    />
 
-                                <ActionButton
-                                  title="Reject"
-                                  onClick={() =>
-                                    setRejectApplicant(
-                                      applicant
-                                    )
-                                  }
-                                  icon={
-                                    <FaTimes />
-                                  }
-                                  variant="red"
-                                  disabled={
-                                    actionLoading
-                                  }
-                                />
-                              </>
-                            )}
+                                    <ActionButton
+                                      title="Reject"
+                                      onClick={() => setRejectApplicant(applicant)}
+                                      icon={<FaTimes />}
+                                      variant="red"
+                                      disabled={actionLoading}
+                                    />
+                                  </>
+                                )}
 
                         </div>
 
@@ -1552,142 +1500,160 @@ export default function Applicants() {
           SHORTLIST MODAL
       ===================================================== */}
 
-      {shortlistApplicant && (
-        <Modal onClose={closeAllModals}>
+{shortlistApplicant && (
+  <Modal onClose={closeAllModals}>
+    <ModalHeader
+      title="Shortlist Applicant"
+      onClose={closeAllModals}
+    />
 
-          <ModalHeader
-            title="Shortlist Applicant"
-            onClose={closeAllModals}
+    <div className="space-y-5 p-6">
+
+      {/* Applicant info */}
+      <div className="rounded-xl bg-blue-50 p-4">
+        <p className="font-semibold text-blue-900">
+          {getName(shortlistApplicant)}
+        </p>
+        <p className="mt-1 text-sm text-blue-700">
+          {getEmail(shortlistApplicant)}
+        </p>
+      </div>
+
+      {/* Interview Date */}
+      <div>
+        <label className="mb-2 block text-sm font-semibold text-slate-700">
+          Interview Date
+        </label>
+        <div className="relative">
+          <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="date"
+            value={interviewDate}
+            onChange={(e) => setInterviewDate(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
+        </div>
+      </div>
 
-          <div className="space-y-5 p-6">
+      {/* Interview Time */}
+      <div>
+        <label className="mb-2 block text-sm font-semibold text-slate-700">
+          Interview Time
+        </label>
+        <div className="relative">
+          <FaClock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="time"
+            value={interviewTime}
+            onChange={(e) => setInterviewTime(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
+      </div>
 
-            <div className="rounded-xl bg-blue-50 p-4">
-
-              <p className="font-semibold text-blue-900">
-                {getName(
-                  shortlistApplicant
-                )}
-              </p>
-
-              <p className="mt-1 text-sm text-blue-700">
-                {getEmail(
-                  shortlistApplicant
-                )}
-              </p>
-
-            </div>
-
-            <div>
-
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Interview Date
-              </label>
-
-              <div className="relative">
-
-                <FaCalendarAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-
-                <input
-                  type="date"
-                  value={interviewDate}
-                  onChange={(e) =>
-                    setInterviewDate(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-
-              </div>
-
-            </div>
-
-            <div>
-
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Interview Time
-              </label>
-
-              <div className="relative">
-
-                <FaClock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-
-                <input
-                  type="time"
-                  value={interviewTime}
-                  onChange={(e) =>
-                    setInterviewTime(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-
-              </div>
-
-            </div>
-
-            <div>
-
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Interview Location
-              </label>
-
-              <div className="relative">
-
-                <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-
-                <input
-                  type="text"
-                  value={interviewLocation}
-                  onChange={(e) =>
-                    setInterviewLocation(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Example: SmartHire Office, Kolkata"
-                  className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-
-              </div>
-
-            </div>
-
-            <p className="text-xs text-slate-500">
-              The interview details will be
-              included in the notification sent
-              to the candidate.
-            </p>
-
-          </div>
-
-          <ModalFooter>
-
+      {/* Interview Type */}
+      <div>
+        <label className="mb-2 block text-sm font-semibold text-slate-700">
+          Interview Type
+        </label>
+        <div className="flex gap-3">
+          {["Online", "Offline"].map((type) => (
             <button
+              key={type}
               type="button"
-              onClick={closeAllModals}
-              disabled={actionLoading}
-              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              onClick={() => {
+                setInterviewType(type);
+                setInterviewLocation("");
+              }}
+              className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-colors ${
+                interviewType === type
+                  ? type === "Online"
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : "bg-slate-700 border-slate-700 text-white"
+                  : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
             >
-              Cancel
+              <span className="inline-flex items-center justify-center gap-1.5">
+                {type === "Online" ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                  </svg>
+                )}
+                {type}
+              </span>
             </button>
+          ))}
+        </div>
+      </div>
 
-            <button
-              type="button"
-              onClick={handleShortlist}
-              disabled={actionLoading}
-              className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {actionLoading
-                ? "Shortlisting..."
-                : "Shortlist Applicant"}
-            </button>
-
-          </ModalFooter>
-
-        </Modal>
+      {/* Online — meeting link */}
+      {interviewType === "Online" && (
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Meeting Link (Google Meet / Zoom)
+          </label>
+          <input
+            type="url"
+            value={interviewLocation}
+            onChange={(e) => setInterviewLocation(e.target.value)}
+            placeholder="https://meet.google.com/xxx-xxxx-xxx"
+            className="w-full rounded-xl border border-slate-200 py-3 px-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          />
+        </div>
       )}
+
+      {/* Offline — location */}
+      {interviewType === "Offline" && (
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Interview Location
+          </label>
+          <div className="relative">
+            <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={interviewLocation}
+              onChange={(e) => setInterviewLocation(e.target.value)}
+              placeholder="e.g. SmartHire Office, Kolkata"
+              className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+      )}
+
+      <p className="text-xs text-slate-500">
+        The interview details will be included in the
+        notification sent to the candidate.
+      </p>
+
+    </div>
+
+    <ModalFooter>
+      <button
+        type="button"
+        onClick={closeAllModals}
+        disabled={actionLoading}
+        className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        onClick={handleShortlist}
+        disabled={actionLoading}
+        className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {actionLoading ? "Shortlisting..." : "Shortlist Applicant"}
+      </button>
+    </ModalFooter>
+
+  </Modal>
+)}
 
       {/* =====================================================
           APPROVE MODAL

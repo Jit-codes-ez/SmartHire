@@ -58,8 +58,6 @@ export default function MyDrives() {
 
   // ── Derived counts ─────────────────────────────────────────────────────────
   const totalDrives   = drives.length
-  const activeDrives  = drives.filter((d) => d.status === 'ACTIVE' || d.status === 'OPEN').length
-  const totalApplicants = drives.reduce((sum, d) => sum + (d.applicantCount ?? 0), 0)
 
   // ── Filtered list ──────────────────────────────────────────────────────────
   const filtered = drives.filter((d) => {
@@ -179,7 +177,6 @@ export default function MyDrives() {
                     'Experience',
                     'Salary',
                     'Deadline',
-                    'Applicants',
                     'Status',
                     'Actions',
                   ].map((col) => (
@@ -223,7 +220,7 @@ export default function MyDrives() {
 
                       {/* Experience */}
                       <td className="py-4 px-3 text-st-muted whitespace-nowrap">
-                        {d.experienceRequired || d.experienceLevel || '—'}
+                        {d.experienceRequired + " yrs" || d.experienceLevel + " yrs" || '—'}
                       </td>
 
                       {/* Salary */}
@@ -250,16 +247,6 @@ export default function MyDrives() {
                           </span>
                         ) : (
                           <span className="text-st-muted">—</span>
-                        )}
-                      </td>
-
-                      {/* Applicants */}
-                      <td className="py-4 px-3">
-                        <p className="font-semibold text-st-text">{d.applicantCount ?? 0}</p>
-                        {d.shortlistedCount > 0 && (
-                          <p className="text-xs text-green-600 mt-0.5">
-                            {d.shortlistedCount} shortlisted
-                          </p>
                         )}
                       </td>
 

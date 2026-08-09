@@ -1,5 +1,6 @@
 package com.smarthire.service.impl;
 
+import com.smarthire.enums.InterviewType;
 import com.smarthire.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
@@ -11,6 +12,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -98,6 +101,51 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to send recruiter deletion email",e);
+        }
+    }
+    
+    @Override
+    public void sendStudentShortlistEmail(String toEmail, String fullName, String jobTitle, LocalDate interviewDate, LocalTime interviewTime, InterviewType interviewType, String interviewLocation) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
+            helper.setTo(toEmail);
+            helper.setSubject("SmartHire — You have been shortlisted");
+            helper.setText(buildStudentShortlistEmailHtml(fullName, jobTitle, interviewDate, interviewTime, interviewType, interviewLocation), true);
+            mailSender.send(message);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException("Failed to send student shortlist email", e);
+        }
+    }
+    
+    @Override
+    public void sendStudentApprovalEmail(String toEmail, String fullName, String jobTitle, LocalDate joiningDate) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
+            helper.setTo(toEmail);
+            helper.setSubject("SmartHire — Congratulations! Your application is approved");
+            helper.setText(buildStudentApprovalEmailHtml(fullName, jobTitle, joiningDate), true);
+            mailSender.send(message);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException("Failed to send student approval email", e);
+        }
+    }
+    
+    @Override
+    public void sendStudentRejectionEmail(String toEmail, String fullName, String jobTitle) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
+            helper.setTo(toEmail);
+            helper.setSubject("SmartHire — Application Update");
+            helper.setText(buildStudentRejectionEmailHtml(fullName, jobTitle), true);
+            mailSender.send(message);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException("Failed to send student rejection email", e);
         }
     }
 
@@ -536,5 +584,795 @@ public class EmailServiceImpl implements EmailService {
             </body>
             </html>
             """.formatted(logoUrl, fullName, reason);
+    }
+    
+    private String buildStudentShortlistEmailHtml(String fullName, String jobTitle, LocalDate interviewDate, LocalTime interviewTime, InterviewType interviewType, String interviewLocation) {
+
+        String logoUrl = "https://raw.githubusercontent.com/Jit-codes-ez/SmartHire/main/Assets/Logo.png";
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport"
+                    content="width=device-width, initial-scale=1.0">
+            </head>
+
+            <body style="margin:0;padding:0;background:#EEF1F6;font-family:Helvetica,Arial,sans-serif;">
+
+              <table width="100%%"
+                     cellpadding="0"
+                     cellspacing="0"
+                     style="padding:48px 16px;">
+
+                <tr>
+                  <td align="center">
+
+                    <table width="480"
+                           cellpadding="0"
+                           cellspacing="0"
+                           style="width:480px;
+                                  max-width:480px;
+                                  background:#FFFFFF;
+                                  border-radius:16px;
+                                  overflow:hidden;
+                                  border:1px solid #E2E8F0;">
+
+                      <!-- Header -->
+                      <tr>
+                        <td style="background:linear-gradient(135deg,#4F46E5 0%%,#6366F1 100%%);
+                                   padding:32px;">
+
+                          <table cellpadding="0" cellspacing="0">
+
+                            <tr>
+
+                              <td style="width:40px;height:40px;padding:3px;">
+
+                                <img src="%s"
+                                     width="34"
+                                     height="34"
+                                     alt="SmartHire"
+                                     style="display:block;
+                                            width:34px;
+                                            height:34px;
+                                            object-fit:contain;
+                                            border-radius:8px;
+                                            background:#FFFFFF;">
+
+                              </td>
+
+                              <td style="padding-left:10px;">
+
+                                <span style="color:#FFFFFF;
+                                             font-size:19px;
+                                             font-weight:bold;">
+                                  SmartHire
+                                </span>
+
+                              </td>
+
+                            </tr>
+
+                          </table>
+
+                        </td>
+                      </tr>
+
+                      <!-- Body -->
+                      <tr>
+
+                        <td style="padding:36px 32px 30px;">
+
+                          <div style="display:inline-block;
+                                      background:#DCFCE7;
+                                      color:#15803D;
+                                      font-size:11px;
+                                      font-weight:bold;
+                                      padding:4px 10px;
+                                      border-radius:20px;
+                                      margin-bottom:14px;">
+
+                            APPLICATION SHORTLISTED
+
+                          </div>
+
+                          <h2 style="margin:0 0 10px;
+                                     color:#0F172A;
+                                     font-size:21px;">
+
+                            Congratulations, %s!
+
+                          </h2>
+
+                          <p style="margin:0 0 18px;
+                                    color:#64748B;
+                                    font-size:14px;
+                                    line-height:21px;">
+
+                            You have been shortlisted for an interview
+                            through SmartHire.
+
+                          </p>
+
+                          <!-- Interview Details -->
+
+                          <div style="background:#F8FAFC;
+                                      border:1px solid #E2E8F0;
+                                      border-radius:12px;
+                                      padding:20px;
+                                      margin-bottom:24px;">
+
+                            <strong style="color:#0F172A;
+                                           font-size:15px;">
+
+                              Interview Details
+
+                            </strong>
+
+                            <table width="100%%"
+                                   cellpadding="0"
+                                   cellspacing="0"
+                                   style="margin-top:14px;">
+
+                              <tr>
+                                <td style="padding:6px 0;
+                                           color:#64748B;
+                                           font-size:13px;">
+                                  Date
+                                </td>
+
+                                <td style="padding:6px 0;
+                                           color:#0F172A;
+                                           font-size:13px;
+                                           font-weight:600;
+                                           text-align:right;">
+                                  %s
+                                </td>
+                              </tr>
+
+                              <tr>
+                                <td style="padding:6px 0;
+                                           color:#64748B;
+                                           font-size:13px;">
+                                  Time
+                                </td>
+
+                                <td style="padding:6px 0;
+                                           color:#0F172A;
+                                           font-size:13px;
+                                           font-weight:600;
+                                           text-align:right;">
+                                  %s
+                                </td>
+                              </tr>
+
+                              <tr>
+                                <td style="padding:6px 0;
+                                           color:#64748B;
+                                           font-size:13px;">
+                                  Interview Type
+                                </td>
+
+                                <td style="padding:6px 0;
+                                           color:#0F172A;
+                                           font-size:13px;
+                                           font-weight:600;
+                                           text-align:right;">
+                                  %s
+                                </td>
+                              </tr>
+
+                              <tr>
+                                <td style="padding:6px 0;
+                                           color:#64748B;
+                                           font-size:13px;">
+                                  Location / Link
+                                </td>
+
+                                <td style="padding:6px 0;
+                                           color:#0F172A;
+                                           font-size:13px;
+                                           font-weight:600;
+                                           text-align:right;">
+                                  %s
+                                </td>
+                              </tr>
+
+                            </table>
+
+                          </div>
+
+                          <p style="margin:0 0 24px;
+                                    color:#64748B;
+                                    font-size:14px;
+                                    line-height:21px;">
+
+                            Please make sure you are available at the
+                            scheduled time. We wish you the very best
+                            for your interview!
+
+                          </p>
+
+                          <hr style="border:none;
+                                     border-top:1px solid #E2E8F0;
+                                     margin:0 0 20px;">
+
+                          <p style="margin:0;
+                                    color:#94A3B8;
+                                    font-size:12px;
+                                    text-align:center;">
+
+                            Need help?
+
+                            <a href="mailto:smarthire.js@gmail.com"
+                               style="color:#4F46E5;
+                                      text-decoration:none;">
+
+                              SmartHire Support
+
+                            </a>
+
+                          </p>
+
+                        </td>
+
+                      </tr>
+
+                      <!-- Footer -->
+
+                      <tr>
+
+                        <td style="background:#F8FAFC;
+                                   padding:18px 32px;
+                                   border-top:1px solid #E2E8F0;
+                                   text-align:center;">
+
+                          <span style="color:#94A3B8;
+                                       font-size:11px;">
+
+                            © 2026 SmartHire. All rights reserved.
+
+                          </span>
+
+                        </td>
+
+                      </tr>
+
+                    </table>
+
+                  </td>
+                </tr>
+
+              </table>
+
+            </body>
+            </html>
+            """
+            .formatted(logoUrl, fullName, interviewDate, interviewTime, interviewType, interviewLocation);
+    }
+    
+    private String buildStudentApprovalEmailHtml(String fullName, String jobTitle, LocalDate joiningDate) {
+
+        String logoUrl = "https://raw.githubusercontent.com/Jit-codes-ez/SmartHire/main/Assets/Logo.png";
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport"
+                    content="width=device-width, initial-scale=1.0">
+            </head>
+
+            <body style="margin:0;padding:0;background:#EEF1F6;font-family:Helvetica,Arial,sans-serif;">
+
+              <table width="100%%"
+                     cellpadding="0"
+                     cellspacing="0"
+                     style="padding:48px 16px;">
+
+                <tr>
+                  <td align="center">
+
+                    <table width="480"
+                           cellpadding="0"
+                           cellspacing="0"
+                           style="width:480px;
+                                  max-width:480px;
+                                  background:#FFFFFF;
+                                  border-radius:16px;
+                                  overflow:hidden;
+                                  border:1px solid #E2E8F0;">
+
+                      <!-- Header -->
+                      <tr>
+                        <td style="background:linear-gradient(135deg,#4F46E5 0%%,#6366F1 100%%);
+                                   padding:32px;">
+
+                          <table cellpadding="0" cellspacing="0">
+
+                            <tr>
+
+                              <td style="width:40px;height:40px;padding:3px;">
+
+                                <img src="%s"
+                                     width="34"
+                                     height="34"
+                                     alt="SmartHire"
+                                     style="display:block;
+                                            width:34px;
+                                            height:34px;
+                                            object-fit:contain;
+                                            border-radius:8px;
+                                            background:#FFFFFF;">
+
+                              </td>
+
+                              <td style="padding-left:10px;">
+
+                                <span style="color:#FFFFFF;
+                                             font-size:19px;
+                                             font-weight:bold;">
+                                  SmartHire
+                                </span>
+
+                              </td>
+
+                            </tr>
+
+                          </table>
+
+                        </td>
+                      </tr>
+
+                      <!-- Body -->
+                      <tr>
+
+                        <td style="padding:36px 32px 30px;">
+
+                          <div style="display:inline-block;
+                                      background:#DCFCE7;
+                                      color:#15803D;
+                                      font-size:11px;
+                                      font-weight:bold;
+                                      padding:4px 10px;
+                                      border-radius:20px;
+                                      margin-bottom:14px;">
+
+                            APPLICATION APPROVED
+
+                          </div>
+
+                          <h2 style="margin:0 0 10px;
+                                     color:#0F172A;
+                                     font-size:21px;">
+
+                            Congratulations, %s!
+
+                          </h2>
+
+                          <p style="margin:0 0 18px;
+                                    color:#64748B;
+                                    font-size:14px;
+                                    line-height:21px;">
+
+                            We are pleased to inform you that your application
+                            has been approved. You have been selected for the
+                            position of <strong>%s</strong>.
+
+                          </p>
+
+                          <!-- Joining Details -->
+
+                          <div style="background:#F8FAFC;
+                                      border:1px solid #E2E8F0;
+                                      border-radius:12px;
+                                      padding:20px;
+                                      margin-bottom:24px;">
+
+                            <strong style="color:#0F172A;
+                                           font-size:15px;">
+
+                              Joining Details
+
+                            </strong>
+
+                            <table width="100%%"
+                                   cellpadding="0"
+                                   cellspacing="0"
+                                   style="margin-top:14px;">
+
+                              <tr>
+                                <td style="padding:6px 0;
+                                           color:#64748B;
+                                           font-size:13px;">
+                                  Joining Date - 
+                                </td>
+
+                                <td style="padding:6px 0;
+                                           color:#0F172A;
+                                           font-size:13px;
+                                           font-weight:600;
+                                           text-align:right;">
+                                  %s
+                                </td>
+                              </tr>
+
+                            </table>
+
+                          </div>
+
+                          <p style="margin:0 0 24px;
+                                    color:#64748B;
+                                    font-size:14px;
+                                    line-height:21px;">
+
+                            Please make sure you are available on the
+                            scheduled joining date. We look forward to
+                            having you on board.
+
+                          </p>
+
+                          <hr style="border:none;
+                                     border-top:1px solid #E2E8F0;
+                                     margin:0 0 20px;">
+
+                          <p style="margin:0;
+                                    color:#94A3B8;
+                                    font-size:12px;
+                                    text-align:center;">
+
+                            Need help?
+
+                            <a href="mailto:smarthire.js@gmail.com"
+                               style="color:#4F46E5;
+                                      text-decoration:none;">
+
+                              SmartHire Support
+
+                            </a>
+
+                          </p>
+
+                        </td>
+
+                      </tr>
+
+                      <!-- Footer -->
+
+                      <tr>
+
+                        <td style="background:#F8FAFC;
+                                   padding:18px 32px;
+                                   border-top:1px solid #E2E8F0;
+                                   text-align:center;">
+
+                          <span style="color:#94A3B8;
+                                       font-size:11px;">
+
+                            © 2026 SmartHire. All rights reserved.
+
+                          </span>
+
+                        </td>
+
+                      </tr>
+
+                    </table>
+
+                  </td>
+                </tr>
+
+              </table>
+
+            </body>
+            </html>
+            """
+            .formatted(logoUrl, fullName, jobTitle, joiningDate);
+    }
+    
+    private String buildStudentRejectionEmailHtml(String fullName, String jobTitle) {
+
+        String logoUrl = "https://raw.githubusercontent.com/Jit-codes-ez/SmartHire/main/Assets/Logo.png";
+
+        return """
+            <!DOCTYPE html>
+            <html>
+
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport"
+                    content="width=device-width, initial-scale=1.0">
+            </head>
+
+            <body style="
+              margin:0;
+              padding:0;
+              background:#EEF1F6;
+              font-family:Helvetica,Arial,sans-serif;
+            ">
+
+              <table
+                width="100%%"
+                cellpadding="0"
+                cellspacing="0"
+                style="padding:48px 16px;"
+              >
+
+                <tr>
+                  <td align="center">
+
+                    <!-- Main Card -->
+                    <table
+                      width="480"
+                      cellpadding="0"
+                      cellspacing="0"
+                      style="
+                        width:480px;
+                        max-width:480px;
+                        background:#FFFFFF;
+                        border-radius:16px;
+                        overflow:hidden;
+                        border:1px solid #E2E8F0;
+                      "
+                    >
+
+                      <!-- Header -->
+                      <tr>
+
+                        <td
+                          style="
+                            background:linear-gradient(
+                              135deg,
+                              #4F46E5 0%%,
+                              #6366F1 100%%
+                            );
+                            padding:32px;
+                          "
+                        >
+
+                          <table
+                            cellpadding="0"
+                            cellspacing="0"
+                          >
+
+                            <tr>
+
+                              <!-- Logo -->
+                              <td
+                                style="
+                                  width:40px;
+                                  height:40px;
+                                  padding:3px;
+                                "
+                              >
+
+                                <img
+                                  src="%s"
+                                  width="34"
+                                  height="34"
+                                  alt="SmartHire"
+                                  style="
+                                    display:block;
+                                    width:34px;
+                                    height:34px;
+                                    object-fit:contain;
+                                    border-radius:8px;
+                                    background:#FFFFFF;
+                                  "
+                                >
+
+                              </td>
+
+                              <!-- Brand -->
+                              <td style="padding-left:10px;">
+
+                                <span
+                                  style="
+                                    color:#FFFFFF;
+                                    font-size:19px;
+                                    font-weight:bold;
+                                    letter-spacing:-0.3px;
+                                  "
+                                >
+                                  SmartHire
+                                </span>
+
+                              </td>
+
+                            </tr>
+
+                          </table>
+
+                        </td>
+
+                      </tr>
+
+
+                      <!-- Body -->
+                      <tr>
+
+                        <td
+                          style="
+                            padding:36px 32px 30px;
+                          "
+                        >
+
+                          <!-- Status Badge -->
+                          <div
+                            style="
+                              display:inline-block;
+                              background:#FEF2F2;
+                              color:#B91C1C;
+                              font-size:11px;
+                              font-weight:bold;
+                              letter-spacing:0.3px;
+                              padding:4px 10px;
+                              border-radius:20px;
+                              margin-bottom:14px;
+                            "
+                          >
+                            APPLICATION UPDATE
+                          </div>
+
+
+                          <!-- Greeting -->
+                          <h2
+                            style="
+                              margin:0 0 10px;
+                              color:#0F172A;
+                              font-size:21px;
+                              font-weight:bold;
+                            "
+                          >
+                            Hello, %s
+                          </h2>
+
+
+                          <!-- Introduction -->
+                          <p
+                            style="
+                              margin:0 0 18px;
+                              color:#64748B;
+                              font-size:14px;
+                              line-height:21px;
+                            "
+                          >
+                            Thank you for your interest in the
+                            <strong style="color:#334155;">
+                              %s
+                            </strong>
+                            position through SmartHire.
+                          </p>
+
+
+                          <!-- Rejection Notice -->
+                          <div
+                            style="
+                              background:#FFF7ED;
+                              border:1px solid #FED7AA;
+                              border-radius:12px;
+                              padding:20px;
+                              margin-bottom:24px;
+                            "
+                          >
+
+                            <strong
+                              style="
+                                color:#9A3412;
+                                font-size:15px;
+                              "
+                            >
+                              Application not selected
+                            </strong>
+
+                            <p
+                              style="
+                                color:#64748B;
+                                font-size:13px;
+                                line-height:20px;
+                                margin:8px 0 0;
+                              "
+                            >
+                              After careful consideration, the recruiter
+                              has decided not to move forward with your
+                              application for this position.
+                            </p>
+
+                          </div>
+
+
+                          <!-- Closing -->
+                          <p
+                            style="
+                              margin:0 0 24px;
+                              color:#64748B;
+                              font-size:14px;
+                              line-height:21px;
+                            "
+                          >
+                            We appreciate the time and effort you put
+                            into your application. We encourage you to
+                            continue exploring opportunities on SmartHire
+                            that match your skills and career goals.
+                          </p>
+
+
+                          <!-- Divider -->
+                          <hr
+                            style="
+                              border:none;
+                              border-top:1px solid #E2E8F0;
+                              margin:0 0 20px;
+                            "
+                          >
+
+
+                          <!-- Support -->
+                          <p
+                            style="
+                              margin:0;
+                              color:#94A3B8;
+                              font-size:12px;
+                              line-height:18px;
+                              text-align:center;
+                            "
+                          >
+
+                            Need help?
+
+                            
+							<a href="mailto:smarthire.js@gmail.com"
+							                               style="color:#4F46E5;
+							                                      text-decoration:none;">
+                              SmartHire Support
+                            </a>
+
+                          </p>
+
+                        </td>
+
+                      </tr>
+
+
+                      <!-- Footer -->
+                      <tr>
+
+                        <td
+                          style="
+                            background:#F8FAFC;
+                            padding:18px 32px;
+                            border-top:1px solid #E2E8F0;
+                            text-align:center;
+                          "
+                        >
+
+                          <span
+                            style="
+                              color:#94A3B8;
+                              font-size:11px;
+                            "
+                          >
+                            © 2026 SmartHire. All rights reserved.
+                          </span>
+
+                        </td>
+
+                      </tr>
+
+                    </table>
+
+                  </td>
+                </tr>
+
+              </table>
+
+            </body>
+
+            </html>
+            """
+            .formatted(logoUrl, fullName, jobTitle);
     }
 }
