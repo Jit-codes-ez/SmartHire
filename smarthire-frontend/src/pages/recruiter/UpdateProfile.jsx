@@ -80,7 +80,7 @@ export default function ProfileEdit() {
     const loadProfile = async () => {
       try {
         const response = await authFetch(
-          `http://localhost:8080/api/recruiter/profile/${encodeURIComponent(
+          `/api/recruiter/profile/${encodeURIComponent(
             loginData.email
           )}`
         );
@@ -161,7 +161,7 @@ const handleSubmit = async (e) => {
     };
 
     const response = await authFetch(
-      `http://localhost:8080/api/recruiter/profile/${encodeURIComponent(loginData.email)}`,
+      `/api/recruiter/profile/${encodeURIComponent(loginData.email)}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

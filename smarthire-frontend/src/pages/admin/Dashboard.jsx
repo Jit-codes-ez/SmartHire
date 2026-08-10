@@ -210,9 +210,9 @@ export default function AdminDashboard() {
 const fetchAll = async () => {
   try {
     const [dashRes, pendingRes, adminsRes] = await Promise.all([
-      authFetch("http://localhost:8080/api/admin/dashboard"),
-      authFetch("http://localhost:8080/api/admin/recruiters/pending"),
-      authFetch("http://localhost:8080/api/admin/admins?limit=3"),
+      authFetch("/api/admin/dashboard"),
+      authFetch("/api/admin/recruiters/pending"),
+      authFetch("/api/admin/admins?limit=3"),
     ]);
 
     if (!dashRes.ok) {
@@ -244,7 +244,7 @@ const fetchAll = async () => {
     setActioningId(recruiter.id);
     try {
       const res = await authFetch(
-        `http://localhost:8080/api/admin/recruiters/${recruiter.id}/approve`,
+        `/api/admin/recruiters/${recruiter.id}/approve`,
         { method: "PUT" }
       );
       if (!res.ok) throw new Error();
@@ -262,7 +262,7 @@ const fetchAll = async () => {
     setActioningId(recruiter.id);
     try {
       const res = await authFetch(
-        `http://localhost:8080/api/admin/recruiters/${recruiter.id}/reject`,
+        `/api/admin/recruiters/${recruiter.id}/reject`,
         { method: "PUT" }
       );
       if (!res.ok) throw new Error();

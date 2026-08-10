@@ -77,7 +77,7 @@ const handleSubmit = async (e) => {
     const token = localStorage.getItem("token");
 
     const response = await fetch(
-      "http://localhost:8080/api/admin/addAdmin",
+      "/api/admin/addAdmin",
       {
         method: "POST",
         headers: {

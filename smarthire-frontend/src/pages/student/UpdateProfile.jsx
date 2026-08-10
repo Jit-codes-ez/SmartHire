@@ -87,7 +87,7 @@ export default function UpdateProfile() {
     }
 
     authFetch(
-      `http://localhost:8080/api/student/profile/${encodeURIComponent(loginData.email)}`
+      `/api/student/profile/${encodeURIComponent(loginData.email)}`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Profile not found");
@@ -156,7 +156,7 @@ export default function UpdateProfile() {
       };
 
       const response = await authFetch(
-        `http://localhost:8080/api/student/profile/${encodeURIComponent(loginData.email)}`,
+        `/api/student/profile/${encodeURIComponent(loginData.email)}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

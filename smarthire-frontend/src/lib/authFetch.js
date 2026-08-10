@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL;
+
 /**
  * Reads the auth token from localStorage.
  *
@@ -35,7 +37,15 @@ function getAuthToken() {
 export function authFetch(url, options = {}) {
   const token = getAuthToken();
 
-  return fetch(url, {
+  // If a relative path (e.g. "/api/jobs/open") is passed, prefix it
+  // with the backend base URL. Absolute URLs (e.g. Cloudinary resume
+  // links, or anything already starting with http/https) pass through
+  // unchanged.
+  const resolvedUrl = /^https?:\/\//i.test(url)
+    ? url
+    : `${API_URL}${url.startsWith("/") ? url : `/${url}`}`;
+
+  return fetch(resolvedUrl, {
     ...options,
     headers: {
       "Content-Type": "application/json",

@@ -339,10 +339,10 @@ export default function Dashboard() {
 
         const [profileRes, jobsRes] = await Promise.all([
           authFetch(
-            `http://localhost:8080/api/recruiter/profile/${encodeURIComponent(loginData.email)}`
+            `/api/recruiter/profile/${encodeURIComponent(loginData.email)}`
           ),
           authFetch(
-            `http://localhost:8080/api/recruiter/jobs/${encodeURIComponent(loginData.email)}`
+            `/api/recruiter/jobs/${encodeURIComponent(loginData.email)}`
           ),
         ]);
 
@@ -393,7 +393,7 @@ export default function Dashboard() {
     }
 
     const response = await authFetch(
-      `http://localhost:8080/api/recruiter/jobs/${job.id}/${encodeURIComponent(
+      `/api/recruiter/jobs/${job.id}/${encodeURIComponent(
         recruiter.email
       )}/status?status=${newStatus}`,
       {
@@ -443,7 +443,7 @@ export default function Dashboard() {
     };
 
     const res = await authFetch(
-      `http://localhost:8080/api/recruiter/jobs/${updatedJob.id}/${encodeURIComponent(loginData.email)}`,
+      `/api/recruiter/jobs/${updatedJob.id}/${encodeURIComponent(loginData.email)}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -480,7 +480,7 @@ const handleDelete = async (job) => {
 
   try {
     const response = await authFetch(
-      `http://localhost:8080/api/recruiter/jobs/${job.id}/${encodeURIComponent(
+      `/api/recruiter/jobs/${job.id}/${encodeURIComponent(
         loginData.email
       )}`,
       {

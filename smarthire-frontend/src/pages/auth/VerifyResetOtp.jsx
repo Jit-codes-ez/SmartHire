@@ -49,7 +49,7 @@ export default function VerifyResetOtp() {
     try {
 
       const response = await fetch(
-        "http://localhost:8080/api/auth/verify-reset-otp",
+        "/api/auth/verify-reset-otp",
         {
           method: "POST",
           headers: {
@@ -111,7 +111,7 @@ export default function VerifyResetOtp() {
     try{
 
       const response = await fetch(
-        "http://localhost:8080/api/auth/forgot-password",
+        "/api/auth/forgot-password",
         {
           method:"POST",
           headers:{

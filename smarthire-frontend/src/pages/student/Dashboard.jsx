@@ -46,19 +46,19 @@ export default function Dashboard() {
         const [profileRes, applicationsRes, jobsRes] =
           await Promise.all([
             authFetch(
-              `http://localhost:8080/api/student/profile/${encodeURIComponent(
+              `/api/student/profile/${encodeURIComponent(
                 loginData.email
               )}`
             ),
 
             authFetch(
-              `http://localhost:8080/api/applications/my?email=${encodeURIComponent(
+              `/api/applications/my?email=${encodeURIComponent(
                 loginData.email
               )}`
             ),
 
             authFetch(
-              "http://localhost:8080/api/jobs/open"
+              "/api/jobs/open"
             ),
           ]);
 

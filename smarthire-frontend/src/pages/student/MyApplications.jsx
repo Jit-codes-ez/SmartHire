@@ -81,7 +81,7 @@ export default function MyApplications() {
         setLoading(true);
         setError("");
 
-        const url = `http://localhost:8080/api/applications/my?email=${encodeURIComponent(
+        const url = `/api/applications/my?email=${encodeURIComponent(
           loginData.email
         )}`;
 

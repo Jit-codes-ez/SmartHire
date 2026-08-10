@@ -77,7 +77,7 @@ export default function Applicants() {
       setError("");
 
       const response = await authFetch(
-        `http://localhost:8080/api/recruiter/drives/${id}/applicants`
+        `/api/recruiter/drives/${id}/applicants`
       );
 
       const responseText = await response.text();
@@ -621,7 +621,7 @@ const getMissingSkills = (applicant) =>
       setActionLoading(true);
 
       const response = await authFetch(
-        `http://localhost:8080/api/recruiter/applications/${applicationId}/shortlist`,
+        `/api/recruiter/applications/${applicationId}/shortlist`,
         {
           method: "PUT",
           headers: {
@@ -716,7 +716,7 @@ const getMissingSkills = (applicant) =>
       setActionLoading(true);
 
       const response = await authFetch(
-        `http://localhost:8080/api/recruiter/applications/${applicationId}/approve`,
+        `/api/recruiter/applications/${applicationId}/approve`,
         {
           method: "PUT",
           headers: {
@@ -785,7 +785,7 @@ const getMissingSkills = (applicant) =>
       setActionLoading(true);
 
       const response = await authFetch(
-        `http://localhost:8080/api/recruiter/applications/${applicationId}/reject`,
+        `/api/recruiter/applications/${applicationId}/reject`,
         {
           method: "PUT",
         }

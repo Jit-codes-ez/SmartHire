@@ -136,7 +136,7 @@ export default function ManageRecruiters() {
   const loadRecruiters = async () => {
     try {
       setLoading(true);
-      const response = await authFetch("http://localhost:8080/api/admin/recruiters");
+      const response = await authFetch("/api/admin/recruiters");
       if (!response.ok) throw new Error("Failed to load recruiters");
       setRecruiters(await response.json());
     } catch (error) {
@@ -160,7 +160,7 @@ const deleteRecruiter = async () => {
   setDeleting(true);
   try {
     const response = await authFetch(
-      `http://localhost:8080/api/admin/recruiters/${deleteTarget.id}`,
+      `/api/admin/recruiters/${deleteTarget.id}`,
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },

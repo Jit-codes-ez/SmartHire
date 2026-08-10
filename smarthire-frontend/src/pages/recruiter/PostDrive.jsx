@@ -57,7 +57,7 @@ export default function PostDrive() {
     }
 
     const response = await authFetch(
-      `http://localhost:8080/api/recruiter/drives/${encodeURIComponent(loginData.email)}`,
+      `/api/recruiter/drives/${encodeURIComponent(loginData.email)}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

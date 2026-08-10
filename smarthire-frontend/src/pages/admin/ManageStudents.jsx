@@ -184,7 +184,7 @@ export default function ManageStudents() {
   const loadStudents = async () => {
     try {
       setLoading(true);
-      const response = await authFetch("http://localhost:8080/api/admin/students");
+      const response = await authFetch("/api/admin/students");
       if (!response.ok) throw new Error("Failed to load students");
       setStudents(await response.json());
     } catch (error) {
@@ -206,7 +206,7 @@ return;
 }
 setDeleting(true);
 try {
-const response = await authFetch(`http://localhost:8080/api/admin/students/${deleteTarget.id}`,{
+const response = await authFetch(`/api/admin/students/${deleteTarget.id}`,{
 method:"DELETE",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({reason:deleteReason.trim()})

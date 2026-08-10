@@ -34,7 +34,7 @@ export default function MyDrives() {
       try {
         setLoading(true)
         const res = await authFetch(
-          `http://localhost:8080/api/recruiter/jobs/${encodeURIComponent(loginData.email)}`
+          `/api/recruiter/jobs/${encodeURIComponent(loginData.email)}`
         )
         if (!res.ok) throw new Error('Failed to load drives')
         const data = await res.json()

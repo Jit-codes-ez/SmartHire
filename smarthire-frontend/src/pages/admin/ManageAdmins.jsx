@@ -41,7 +41,7 @@ const [deleting, setDeleting] = useState(false);
       setLoading(true);
 
       const response = await authFetch(
-        "http://localhost:8080/api/admin/admins"
+        "/api/admin/admins"
       );
 
       if (!response.ok) {
@@ -67,7 +67,7 @@ const [deleting, setDeleting] = useState(false);
   setDeleting(true);
   try {
     const response = await authFetch(
-      `http://localhost:8080/api/admin/admins/${deleteTarget.id}`,
+      `/api/admin/admins/${deleteTarget.id}`,
       { method: "DELETE" }
     );
     const message = await response.text();

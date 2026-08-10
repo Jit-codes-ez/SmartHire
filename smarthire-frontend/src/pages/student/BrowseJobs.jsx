@@ -78,7 +78,7 @@ export default function BrowseJobs() {
         setLoading(true);
 
         const response = await fetch(
-          "http://localhost:8080/api/jobs/open"
+          "/api/jobs/open"
         );
 
         if (!response.ok) {

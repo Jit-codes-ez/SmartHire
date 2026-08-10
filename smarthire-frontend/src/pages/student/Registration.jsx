@@ -76,7 +76,7 @@ const handleSendOtp = async () => {
   setSendingOtp(true);
   setEmailOtpError('');
   try {
-    await axios.post('http://localhost:8080/api/auth/register/send-otp', { email: watchedEmail });
+    await axios.post('/api/auth/register/send-otp', { email: watchedEmail });
     setOtpSent(true);
     setOtpStatus(null);
     setOtpValue('');
@@ -95,7 +95,7 @@ const handleVerifyOtp = async () => {
   if (otpValue.length !== 6) return;
   setVerifyingOtp(true);
   try {
-    await axios.post('http://localhost:8080/api/auth/register/verify-otp', {
+    await axios.post('/api/auth/register/verify-otp', {
       email: watchedEmail,
       otp: otpValue,
     });
@@ -174,7 +174,7 @@ const onSubmit = async (data) => {
       for (const pair of formData.entries()) {
   console.log(pair[0], pair[1]);
 }
-      await axios.post('http://localhost:8080/api/student/register', formData, { headers: {
+      await axios.post('/api/student/register', formData, { headers: {
           'Content-Type': 'multipart/form-data', 
         },
       });

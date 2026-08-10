@@ -79,7 +79,7 @@ export default function RecruiterRegistration() {
     setSendingOtp(true);
     setEmailOtpError('');
     try {
-      await axios.post('http://localhost:8080/api/auth/register/send-otp', { email: watchedEmail });
+      await axios.post('/api/auth/register/send-otp', { email: watchedEmail });
       setOtpSent(true);
       setOtpStatus(null);
       setOtpValue('');
@@ -98,7 +98,7 @@ export default function RecruiterRegistration() {
     if (otpValue.length !== 6) return;
     setVerifyingOtp(true);
     try {
-      await axios.post('http://localhost:8080/api/auth/register/verify-otp', {
+      await axios.post('/api/auth/register/verify-otp', {
         email: watchedEmail,
         otp: otpValue,
       });
@@ -120,7 +120,7 @@ export default function RecruiterRegistration() {
     setServerError('');
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:8080/api/recruiter/register', {
+      await axios.post('/api/recruiter/register', {
         fullName: data.fullName,
         email: data.email,
         password: data.password,

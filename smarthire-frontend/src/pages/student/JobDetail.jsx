@@ -58,7 +58,7 @@ export default function JobDetail() {
         setError("");
 
         const response = await fetch(
-          `http://localhost:8080/api/jobs/${id}`
+          `/api/jobs/${id}`
         );
 
         if (!response.ok) {
@@ -96,7 +96,7 @@ export default function JobDetail() {
         setCheckingApplication(true);
 
         const response = await fetch(
-          `http://localhost:8080/api/applications/check/${id}?email=${encodeURIComponent(
+          `/api/applications/check/${id}?email=${encodeURIComponent(
             loginData.email
           )}`
         );
@@ -141,7 +141,7 @@ export default function JobDetail() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:8080/api/applications/apply/${job.id}?email=${encodeURIComponent(
+        `/api/applications/apply/${job.id}?email=${encodeURIComponent(
           loginData.email
         )}`,
         {
