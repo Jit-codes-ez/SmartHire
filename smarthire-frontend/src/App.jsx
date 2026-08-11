@@ -8,8 +8,6 @@ import SiteFooter from './components/SiteFooter.jsx'
 import FrontPage from './pages/FrontPage.jsx'
 import About from "./pages/About";
 
-
-// import StudentLogin from './pages/auth/Login.jsx'
 import StudentRegistration from './pages/student/Registration.jsx'
 import StudentDashboard from './pages/student/Dashboard.jsx'
 import BrowseJobs from './pages/student/BrowseJobs.jsx'
@@ -33,9 +31,6 @@ import TermsConditions from "./pages/TermsConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import HelpCenter from "./pages/HelpCenter";
 import Contact from "./pages/Contact";
-// import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
-// import VerifyResetOtp from "./pages/auth/VerifyResetOtp.jsx";
-// import ResetPassword from "./pages/auth/ResetPassword.jsx";
 
 import Login from "./pages/auth/Login.jsx"
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx"
