@@ -1,152 +1,76 @@
 package com.smarthire.service.impl;
 
+import com.resend.Resend;
+import com.resend.services.emails.model.CreateEmailOptions;
 import com.smarthire.enums.InterviewType;
 import com.smarthire.service.EmailService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${resend.api.key}")
+    private String resendApiKey;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+    private static final String FROM = "onboarding@resend.dev";
+
+    private void sendEmail(String to, String subject, String html) {
+        Resend resend = new Resend(resendApiKey);
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(FROM)
+                .to(to)
+                .subject(subject)
+                .html(html)
+                .build();
+        try {
+            resend.emails().send(params);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
+        }
+    }
 
     @Override
     public void sendOtpEmail(String toEmail, String otp) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — Your verification code");
-            helper.setText(buildOtpEmailHtml(otp), true);
-
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send OTP email", e);
-        }
+        sendEmail(toEmail, "SmartHire — Your verification code", buildOtpEmailHtml(otp));
     }
+
     @Override
     public void sendRecruiterApprovalEmail(String toEmail, String fullName) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — Recruiter Account Approved");
-            helper.setText(buildRecruiterApprovalEmailHtml(fullName),true);
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send recruiter approval email",e);
-        }
+        sendEmail(toEmail, "SmartHire — Recruiter Account Approved", buildRecruiterApprovalEmailHtml(fullName));
     }
 
     @Override
     public void sendRecruiterRejectionEmail(String toEmail, String fullName, String adminEmail) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — Recruiter Registration Update");
-            helper.setText(buildRecruiterRejectionEmailHtml(fullName, adminEmail), true);
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send recruiter rejection email", e);
-        }
+        sendEmail(toEmail, "SmartHire — Recruiter Registration Update", buildRecruiterRejectionEmailHtml(fullName, adminEmail));
     }
-    
+
     @Override
     public void sendStudentDeletionEmail(String toEmail, String fullName, String reason) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — Student Account Deleted");
-            helper.setText(buildStudentDeletionEmailHtml(fullName, reason), true);
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send student deletion email", e);
-        }
+        sendEmail(toEmail, "SmartHire — Student Account Deleted", buildStudentDeletionEmailHtml(fullName, reason));
     }
-    
-    @Override
-    public void sendRecruiterDeletionEmail(
-            String toEmail,
-            String fullName,
-            String reason) {
 
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — Recruiter Account Deleted");
-            helper.setText(buildRecruiterDeletionEmailHtml(fullName,reason),true);
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send recruiter deletion email",e);
-        }
+    @Override
+    public void sendRecruiterDeletionEmail(String toEmail, String fullName, String reason) {
+        sendEmail(toEmail, "SmartHire — Recruiter Account Deleted", buildRecruiterDeletionEmailHtml(fullName, reason));
     }
-    
+
     @Override
     public void sendStudentShortlistEmail(String toEmail, String fullName, String jobTitle, LocalDate interviewDate, LocalTime interviewTime, InterviewType interviewType, String interviewLocation) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — You have been shortlisted");
-            helper.setText(buildStudentShortlistEmailHtml(fullName, jobTitle, interviewDate, interviewTime, interviewType, interviewLocation), true);
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send student shortlist email", e);
-        }
+        sendEmail(toEmail, "SmartHire — You have been shortlisted", buildStudentShortlistEmailHtml(fullName, jobTitle, interviewDate, interviewTime, interviewType, interviewLocation));
     }
-    
+
     @Override
     public void sendStudentApprovalEmail(String toEmail, String fullName, String jobTitle, LocalDate joiningDate) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — Congratulations! Your application is approved");
-            helper.setText(buildStudentApprovalEmailHtml(fullName, jobTitle, joiningDate), true);
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send student approval email", e);
-        }
+        sendEmail(toEmail, "SmartHire — Congratulations! Your application is approved", buildStudentApprovalEmailHtml(fullName, jobTitle, joiningDate));
     }
-    
+
     @Override
     public void sendStudentRejectionEmail(String toEmail, String fullName, String jobTitle) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(new InternetAddress(fromEmail, "SmartHire"));
-            helper.setTo(toEmail);
-            helper.setSubject("SmartHire — Application Update");
-            helper.setText(buildStudentRejectionEmailHtml(fullName, jobTitle), true);
-            mailSender.send(message);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Failed to send student rejection email", e);
-        }
+        sendEmail(toEmail, "SmartHire — Application Update", buildStudentRejectionEmailHtml(fullName, jobTitle));
     }
 
     private String buildOtpEmailHtml(String otp) {
