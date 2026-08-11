@@ -44,7 +44,7 @@ export default function Login() {
   setServerError('');
   setLoading(true);
   try {
-    const response = await fetch('${API_URL}/api/auth/login', {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -79,7 +79,7 @@ export default function Login() {
     setSendingOtp(true);
     setEmailOtpError('');
     try {
-      const response = await fetch('${API_URL}/api/auth/login/send-otp', {
+      const response = await fetch(`${API_URL}/api/auth/login/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -104,7 +104,7 @@ export default function Login() {
   if (otpValue.length !== 6) return;
   setVerifyingOtp(true);
   try {
-    const response = await fetch('${API_URL}/api/auth/login/verify-otp', {
+    const response = await fetch(`${API_URL}/api/auth/login/verify-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, otp: otpValue }),
