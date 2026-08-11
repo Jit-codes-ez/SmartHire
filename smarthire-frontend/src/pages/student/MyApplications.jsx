@@ -16,6 +16,7 @@ import {
 import Card from "../../components/Card.jsx";
 import Button from "../../components/Button.jsx";
 import EmptyState from "../../components/EmptyState.jsx";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function MyApplications() {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ export default function MyApplications() {
         setLoading(true);
         setError("");
 
-        const url = `/api/applications/my?email=${encodeURIComponent(
+        const url = `${API_URL}/api/applications/my?email=${encodeURIComponent(
           loginData.email
         )}`;
 

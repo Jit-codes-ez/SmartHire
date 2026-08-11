@@ -12,6 +12,7 @@ import Card from "../../components/Card.jsx";
 import Button from "../../components/Button.jsx";
 import StatusPill from "../../components/StatusPill.jsx";
 import EmptyState from "../../components/EmptyState.jsx";
+const API_URL = import.meta.env.VITE_API_URL;
 
 // ─── Company Logo ─────────────────────────────────────────────────────────────
 
@@ -78,7 +79,7 @@ export default function BrowseJobs() {
         setLoading(true);
 
         const response = await fetch(
-          "/api/jobs/open"
+          `${API_URL}/api/jobs/open`
         );
 
         if (!response.ok) {

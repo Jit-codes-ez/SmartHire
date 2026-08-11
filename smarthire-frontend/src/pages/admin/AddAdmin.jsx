@@ -12,6 +12,7 @@ import {
 
 import DashboardLayout from "../../layouts/DashboardLayout.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
+const API_URL = import.meta.env.VITE_API_URL;
 
 /* ─── Primitive UI components (match AdminDashboard) ───────────────────────── */
 
@@ -77,7 +78,7 @@ const handleSubmit = async (e) => {
     const token = localStorage.getItem("token");
 
     const response = await fetch(
-      "/api/admin/addAdmin",
+      `${API_URL}/api/admin/addAdmin`,
       {
         method: "POST",
         headers: {

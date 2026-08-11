@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Reveal from "../../components/Reveal.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ForgotPassword() {
 
@@ -21,7 +22,7 @@ export default function ForgotPassword() {
     try {
 
       const response = await fetch(
-        "/api/auth/forgot-password",
+        `${API_URL}/api/auth/forgot-password`,
         {
           method: "POST",
           headers: {

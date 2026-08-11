@@ -16,6 +16,7 @@ import {
 import Card from "../../components/Card.jsx";
 import Button from "../../components/Button.jsx";
 import StatusPill from "../../components/StatusPill.jsx";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function JobDetail() {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ export default function JobDetail() {
         setError("");
 
         const response = await fetch(
-          `/api/jobs/${id}`
+          `${API_URL}/api/jobs/${id}`
         );
 
         if (!response.ok) {
@@ -96,7 +97,7 @@ export default function JobDetail() {
         setCheckingApplication(true);
 
         const response = await fetch(
-          `/api/applications/check/${id}?email=${encodeURIComponent(
+          `${API_URL}/api/applications/check/${id}?email=${encodeURIComponent(
             loginData.email
           )}`
         );
@@ -141,7 +142,7 @@ export default function JobDetail() {
       setError("");
 
       const response = await fetch(
-        `/api/applications/apply/${job.id}?email=${encodeURIComponent(
+        `${API_URL}/api/applications/apply/${job.id}?email=${encodeURIComponent(
           loginData.email
         )}`,
         {

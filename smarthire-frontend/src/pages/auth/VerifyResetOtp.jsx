@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Reveal from "../../components/Reveal.jsx";
 import { useToast } from "../../context/ToastContext.jsx";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function VerifyResetOtp() {
 
@@ -49,7 +50,7 @@ export default function VerifyResetOtp() {
     try {
 
       const response = await fetch(
-        "/api/auth/verify-reset-otp",
+        `${API_URL}/api/auth/verify-reset-otp`,
         {
           method: "POST",
           headers: {
@@ -111,7 +112,7 @@ export default function VerifyResetOtp() {
     try{
 
       const response = await fetch(
-        "/api/auth/forgot-password",
+        `${API_URL}/api/auth/forgot-password`,
         {
           method:"POST",
           headers:{
