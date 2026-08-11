@@ -1,7 +1,13 @@
 package com.smarthire.service.impl;
 
-import com.resend.Resend;
-import com.resend.services.emails.model.CreateEmailOptions;
+import sendinblue.ApiClient;
+import sendinblue.ApiException;
+import sendinblue.Configuration;
+import sendinblue.auth.ApiKeyAuth;
+import sibApi.TransactionalEmailsApi;
+import sibModel.SendSmtpEmail;
+import sibModel.SendSmtpEmailSender;
+import sibModel.SendSmtpEmailTo;
 import com.smarthire.enums.InterviewType;
 import com.smarthire.service.EmailService;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,26 +15,37 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Value("${resend.api.key}")
-    private String resendApiKey;
-
-    private static final String FROM = "onboarding@resend.dev";
+    @Value("${brevo.api.key}")
+    private String brevoApiKey;
 
     private void sendEmail(String to, String subject, String html) {
-        Resend resend = new Resend(resendApiKey);
-        CreateEmailOptions params = CreateEmailOptions.builder()
-                .from(FROM)
-                .to(to)
-                .subject(subject)
-                .html(html)
-                .build();
         try {
-            resend.emails().send(params);
-        } catch (Exception e) {
+            ApiClient client = Configuration.getDefaultApiClient();
+            ApiKeyAuth apiKey = (ApiKeyAuth) client.getAuthentication("api-key");
+            apiKey.setApiKey(brevoApiKey);
+
+            TransactionalEmailsApi api = new TransactionalEmailsApi();
+
+            SendSmtpEmailSender sender = new SendSmtpEmailSender();
+            sender.setEmail("smarthire.js@gmail.com");
+            sender.setName("SmartHire");
+
+            SendSmtpEmailTo recipient = new SendSmtpEmailTo();
+            recipient.setEmail(to);
+
+            SendSmtpEmail email = new SendSmtpEmail();
+            email.setSender(sender);
+            email.setTo(List.of(recipient));
+            email.setSubject(subject);
+            email.setHtmlContent(html);
+
+            api.sendTransacEmail(email);
+        } catch (ApiException e) {
             throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
         }
     }
