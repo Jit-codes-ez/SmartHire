@@ -308,10 +308,10 @@ export default function FrontPage() {
   `}</style>
 
   <h2 className="font-bold mb-2" style={{ fontSize: "24px", letterSpacing: "-0.01em" }}>
-    One portal, three vantage points.
+    Your role, your experience.
   </h2>
   <p className="text-sm mb-8" style={{ color: "#64748B" }}>
-    Same components, same spacing — the colour tells you where you are.
+    Students apply, Recruiters hire. One platform built for both — SmartHire has you covered.
   </p>
   <div className="grid md:grid-cols-2 gap-5">
     <RoleCard
