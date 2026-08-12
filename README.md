@@ -103,4 +103,16 @@ SmartHire is a web application that streamlines the campus recruitment process. 
 
 </div>
 
-⭐ If you like this project, consider giving it a star!
+---
+
+<div align="center">
+
+### ⭐ Show Your Support
+
+If you found this project useful, consider giving it a star — it helps a lot!
+
+[![GitHub Stars](https://img.shields.io/github/stars/Jit-codes-ez/SmartHire?style=for-the-badge&color=dc2626&logo=github&logoColor=white)](https://github.com/Jit-codes-ez/SmartHire/stargazers)
+
+</div>
+
+---
