@@ -89,7 +89,7 @@ SmartHire is a web application that streamlines the campus recruitment process. 
 | Name | GitHub | Email |
 |---|---|---|
 | Jit Hazra | [@Jit-codes-ez](https://github.com/Jit-codes-ez) | [![Email](https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:jithazraedu@gmail.com) |
-| Saini Paul | [@Saini-Codes](https://github.com/Saini-Codes) | [![Email](https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:sainipaul000js@gmail.com) |
+| Saini Paul | [@Saini-Codes](https://github.com/Saini-Codes) | [![Email](https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:sainipaul000@gmail.com) |
 
 </div>
 
