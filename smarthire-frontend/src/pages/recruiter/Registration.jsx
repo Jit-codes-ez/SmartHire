@@ -6,6 +6,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import Reveal from '../../components/Reveal';
 import Modal from '../../components/Modal';
 
+const API_URL = import.meta.env.VITE_API_URL
+
 const DESIGNATIONS = ['HR', 'Recruiter', 'Talent Acquisition'];
 
 const COUNTRIES = [
@@ -79,7 +81,7 @@ export default function RecruiterRegistration() {
     setSendingOtp(true);
     setEmailOtpError('');
     try {
-      await axios.post('/api/auth/register/send-otp', { email: watchedEmail });
+      await axios.post(`${API_URL}/api/auth/register/send-otp`, { email: watchedEmail });
       setOtpSent(true);
       setOtpStatus(null);
       setOtpValue('');
@@ -98,7 +100,7 @@ export default function RecruiterRegistration() {
     if (otpValue.length !== 6) return;
     setVerifyingOtp(true);
     try {
-      await axios.post('/api/auth/register/verify-otp', {
+      await axios.post(`${API_URL}/api/auth/register/verify-otp`, {
         email: watchedEmail,
         otp: otpValue,
       });
@@ -120,7 +122,7 @@ export default function RecruiterRegistration() {
     setServerError('');
     setSubmitting(true);
     try {
-      await axios.post('/api/recruiter/register', {
+      await axios.post(`${API_URL}/api/recruiter/register`, {
         fullName: data.fullName,
         email: data.email,
         password: data.password,

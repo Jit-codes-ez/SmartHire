@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import Reveal from '../../components/Reveal';
 import Modal from '../../components/Modal'; // adjust path to wherever Modal.jsx actually lives
+const API_URL = import.meta.env.VITE_API_URL
 
 
 const COURSE_BRANCHES = { 
@@ -76,7 +77,7 @@ const handleSendOtp = async () => {
   setSendingOtp(true);
   setEmailOtpError('');
   try {
-    await axios.post('/api/auth/register/send-otp', { email: watchedEmail });
+    await axios.post(`${API_URL}/api/auth/register/send-otp`, { email: watchedEmail });
     setOtpSent(true);
     setOtpStatus(null);
     setOtpValue('');
@@ -95,7 +96,7 @@ const handleVerifyOtp = async () => {
   if (otpValue.length !== 6) return;
   setVerifyingOtp(true);
   try {
-    await axios.post('/api/auth/register/verify-otp', {
+    await axios.post(`${API_URL}/api/auth/register/verify-otp`, {
       email: watchedEmail,
       otp: otpValue,
     });
@@ -174,7 +175,7 @@ const onSubmit = async (data) => {
       for (const pair of formData.entries()) {
   console.log(pair[0], pair[1]);
 }
-      await axios.post('/api/student/register', formData, { headers: {
+      await axios.post(`${API_URL}/api/student/register`, formData, { headers: {
           'Content-Type': 'multipart/form-data', 
         },
       });
