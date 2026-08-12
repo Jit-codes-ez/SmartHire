@@ -1,8 +1,8 @@
-d<p align="center">
+<p align="center">
   <img src="smarthire-frontend/src/assets/SmartHireLogo.png" alt="SmartHire Logo" width="500">
 </p>
 
-<div align="center>
+<div align="center">
 #  AI-Assisted Campus Recruitment Portal 
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-smarthire--x--ai.vercel.app-dc2626?style=for-the-badge&logoColor=white)](https://smarthire-x-ai.vercel.app)
