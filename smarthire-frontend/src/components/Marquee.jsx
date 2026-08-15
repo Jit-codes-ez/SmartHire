@@ -21,8 +21,6 @@ function Marquee() {
         style={{ color: "var(--primary, #2563eb)" }}
       >
         {message}
-        {message}
-        {message}
       </div>
     </div>
   )
