@@ -140,8 +140,7 @@ h1, h2, h3, h4 {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-
 .animate-marquee {
   width: max-content;
-  animation: marquee-scroll 30s linear infinite;
+  animation: marquee-scroll 40s linear infinite;
 }
