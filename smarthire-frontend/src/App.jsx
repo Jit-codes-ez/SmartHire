@@ -4,6 +4,7 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import ScrollToTop from "./components/ScrollToTop";
 import SiteHeader from './components/SiteHeader.jsx'
 import SiteFooter from './components/SiteFooter.jsx'
+import Marquee from './components/Marquee.jsx'
 
 import FrontPage from './pages/FrontPage.jsx'
 import About from "./pages/About";
@@ -55,6 +56,7 @@ export default function App() {
     <>
     <ScrollToTop />
       <SiteHeader />
+      <Marquee />
 
       <Routes>
         <Route path="/" element={<Navigate to="/Home" replace />} />
