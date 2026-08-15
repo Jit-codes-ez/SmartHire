@@ -142,5 +142,5 @@ h1, h2, h3, h4 {
 }
 
 .animate-marquee {
-  animation: marquee-scroll 18s linear infinite;
+  animation: marquee-scroll 40s linear infinite;
 }
