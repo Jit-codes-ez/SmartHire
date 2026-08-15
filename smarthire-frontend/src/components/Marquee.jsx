@@ -1,21 +1,28 @@
 import { Clock } from "lucide-react"
 
 function Marquee() {
+  const message = (
+    <span className="inline-flex items-center gap-2 whitespace-nowrap font-medium text-sm px-10">
+      <Clock className="h-4 w-4 shrink-0" />
+      Please wait a moment for the server to respond — first request may take up to a minute to wake up. Thanks for your patience!
+    </span>
+  )
+
   return (
     <div
-      className="relative w-full h-9 border-b overflow-hidden transition-colors duration-200"
+      className="relative w-full h-10 border-b overflow-hidden flex items-center transition-colors duration-200"
       style={{
         background: "var(--surface, #fff)",
         borderColor: "var(--border, #e2e8f0)",
       }}
     >
-      <span
-        className="absolute top-1/2 -translate-y-1/2 inline-flex items-center gap-2 whitespace-nowrap animate-marquee font-medium text-sm"
+      <div
+        className="flex items-center animate-marquee"
         style={{ color: "var(--primary, #2563eb)" }}
       >
-        <Clock className="h-4 w-4 shrink-0" />
-        Please wait a moment for the server to respond — first request may take up to a minute to wake up. Thanks for your patience!
-      </span>
+        {message}
+        {message}
+      </div>
     </div>
   )
 }

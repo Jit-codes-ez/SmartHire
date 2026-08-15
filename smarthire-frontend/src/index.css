@@ -137,10 +137,11 @@ h1, h2, h3, h4 {
 
 /* Marquee */
 @keyframes marquee-scroll {
-  0% { transform: translateX(100vw); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .animate-marquee {
+  width: max-content;
   animation: marquee-scroll 30s linear infinite;
 }
